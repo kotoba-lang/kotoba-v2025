@@ -104,7 +104,7 @@ Let's start with basic CRUD operations using the KotobaDB CLI.
 
 # In a new terminal, connect and create nodes
 curl -X POST http://localhost:8080/nodes \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/ld+json" \
   -d '{
     "type": "User",
     "properties": {
@@ -116,7 +116,7 @@ curl -X POST http://localhost:8080/nodes \
 
 # Create another user
 curl -X POST http://localhost:8080/nodes \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/ld+json" \
   -d '{
     "type": "User",
     "properties": {
@@ -132,12 +132,12 @@ curl -X POST http://localhost:8080/nodes \
 ```bash
 # Get all users
 curl http://localhost:8080/query \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/ld+json" \
   -d '{"query": "MATCH (u:User) RETURN u"}'
 
 # Find a specific user
 curl http://localhost:8080/query \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/ld+json" \
   -d '{"query": "MATCH (u:User {name: \"Alice Johnson\"}) RETURN u"}'
 
 # Get user by ID (replace with actual ID from creation response)
@@ -149,7 +149,7 @@ curl http://localhost:8080/nodes/{node_id}
 ```bash
 # Create a friendship relationship
 curl -X POST http://localhost:8080/edges \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/ld+json" \
   -d '{
     "from_node": "{alice_node_id}",
     "to_node": "{bob_node_id}",
@@ -165,7 +165,7 @@ curl -X POST http://localhost:8080/edges \
 ```bash
 # Update user properties
 curl -X PUT http://localhost:8080/nodes/{alice_node_id} \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/ld+json" \
   -d '{
     "properties": {
       "age": 29,

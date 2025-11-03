@@ -381,7 +381,7 @@
     // リクエストボディパーサー
     json_parser: {
       type: "body_parser",
-      content_type: "application/json",
+      content_type: "application/ld+json",
       max_size: "10mb",
     },
 

@@ -95,7 +95,7 @@ const query = `
 
 fetch('/graphql', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 'Content-Type': 'application/ld+json' },
   body: JSON.stringify({ query })
 })
 .then(res => res.json())

@@ -21,7 +21,11 @@
       "handler": "health_check",
       "metadata": {
         "description": "Detailed health check",
-        "checks": ["database", "cache", "external_services"]
+        "checks": [
+          "database",
+          "cache",
+          "external_services"
+        ]
       }
     },
     {
@@ -39,7 +43,7 @@
       "handler": "echo_handler",
       "metadata": {
         "description": "Echo back the request body",
-        "content_type": "application/ld+json"
+        "content_type": "application/json"
       }
     },
     {
@@ -83,9 +87,21 @@
       "function": "cors_middleware",
       "metadata": {
         "description": "Handle CORS headers",
-        "allowed_origins": ["*"],
-        "allowed_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allowed_headers": ["Content-Type", "Authorization", "X-Requested-With"]
+        "allowed_origins": [
+          "*"
+        ],
+        "allowed_methods": [
+          "GET",
+          "POST",
+          "PUT",
+          "DELETE",
+          "OPTIONS"
+        ],
+        "allowed_headers": [
+          "Content-Type",
+          "Authorization",
+          "X-Requested-With"
+        ]
       }
     },
     {
@@ -116,7 +132,10 @@
         "description": "Request logging middleware",
         "format": "combined",
         "include_body": false,
-        "exclude_paths": ["/health", "/ping"]
+        "exclude_paths": [
+          "/health",
+          "/ping"
+        ]
       }
     }
   ],
@@ -124,5 +143,7 @@
     "root_dir": "./static",
     "url_prefix": "/static",
     "cache_max_age": 86400
-  }
+  },
+  "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
+  "@type": "kotoba:HttpServerConfig"
 }

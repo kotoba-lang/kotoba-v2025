@@ -56,22 +56,39 @@ pub fn evaluate_with_filename(source: &str, filename: &str) -> Result<JsonnetVal
     evaluator.evaluate_file(source, filename)
 }
 
-/// Evaluate a Jsonnet snippet and format as JSON string
+/// Evaluate a Jsonnet snippet and format as JSON-LD string
 ///
 /// # Arguments
 /// * `source` - Jsonnet source code as a string
 ///
 /// # Returns
-/// Result containing the JSON string representation or an error
+/// Result containing the JSON-LD string representation or an error
 pub fn evaluate_to_json(source: &str) -> Result<String> {
     let value = evaluate(source).map_err(|e| {
         eprintln!("Evaluation error: {:?}", e);
         e
     })?;
     let json_value = value.to_json_value();
-    serde_json::to_string_pretty(&json_value).map_err(|e| {
-        eprintln!("JSON serialization error: {:?}", e);
-        JsonnetError::runtime_error(&format!("JSON serialization failed: {}", e))
+    
+    // Convert to JSON-LD format by adding @context
+    let jsonld_value = if let serde_json::Value::Object(mut obj) = json_value {
+        // Add @context if not present
+        if !obj.contains_key("@context") {
+            obj.insert("@context".to_string(), serde_json::json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+        }
+        serde_json::Value::Object(obj)
+    } else {
+        // Wrap primitive values in JSON-LD structure
+        let mut doc = serde_json::Map::new();
+        doc.insert("@context".to_string(), serde_json::json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+        doc.insert("@type".to_string(), serde_json::json!("kotoba:JsonnetValue"));
+        doc.insert("value".to_string(), json_value);
+        serde_json::Value::Object(doc)
+    };
+    
+    serde_json::to_string_pretty(&jsonld_value).map_err(|e| {
+        eprintln!("JSON-LD serialization error: {:?}", e);
+        JsonnetError::runtime_error(&format!("JSON-LD serialization failed: {}", e))
     })
 }
 

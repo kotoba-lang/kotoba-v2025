@@ -169,7 +169,7 @@
 
     "GET /api": {
       handler_type: "Json",
-      content_type: "application/json",
+      content_type: "application/ld+json",
       status: 200,
       data: {
         name: "Kotoba Pages API",
@@ -278,7 +278,7 @@
 
     "POST /submit-contact": {
       handler_type: "Json",
-      content_type: "application/json",
+      content_type: "application/ld+json",
       status: 200,
       data: {
         success: true,
@@ -289,7 +289,7 @@
 
     "GET /health": {
       handler_type: "Json",
-      content_type: "application/json",
+      content_type: "application/ld+json",
       status: 200,
       data: {
         status: "healthy",

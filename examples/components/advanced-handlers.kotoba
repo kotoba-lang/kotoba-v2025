@@ -428,7 +428,7 @@
 
     "GET /api": {
       handler_type: "Json",
-      content_type: "application/json",
+      content_type: "application/ld+json",
       status: 200,
       data: {
         site: {
@@ -468,7 +468,7 @@
 
     "GET /stats": {
       handler_type: "Json",
-      content_type: "application/json",
+      content_type: "application/ld+json",
       status: 200,
       data: data.stats
     },
@@ -577,7 +577,7 @@
 
     "POST /submit-contact": {
       handler_type: "Json",
-      content_type: "application/json",
+      content_type: "application/ld+json",
       status: 200,
       data: {
         success: true,

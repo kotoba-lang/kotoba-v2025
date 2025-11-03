@@ -1085,7 +1085,7 @@ mod tests {
                     retryCount: 3,
                     headers: {
                         "Authorization": "Bearer sk_test_...",
-                        "Content-Type": "application/json",
+                        "Content-Type": "application/ld+json",
                     }
                 }
             },

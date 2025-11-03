@@ -226,7 +226,7 @@ curl http://localhost:3000/api/people
 
 # Create a new person
 curl -X POST http://localhost:3000/api/people \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/ld+json" \
   -d '{"name": "David", "age": 28}'
 ```
 
