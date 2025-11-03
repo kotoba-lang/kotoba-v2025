@@ -12,7 +12,7 @@ use serde_json::{json, Value};
 
 /// 新しいストーリー（プロセスネットワーク）を作成
 #[hdk_extern]
-pub fn create_story(story_json: Value) -> ExternResult<EntryHash> {
+pub async fn create_story(story_json: Value) -> ExternResult<EntryHash> {
     // Storyエントリを作成
     let author = agent_info()?.agent_latest_pubkey();
     let story_entry = StoryEntry {
@@ -33,7 +33,7 @@ pub fn create_story(story_json: Value) -> ExternResult<EntryHash> {
 
 /// プロセスを実行
 #[hdk_extern]
-pub fn run_process(input: RunProcessInput) -> ExternResult<RunProcessOutput> {
+pub async fn run_process(input: RunProcessInput) -> ExternResult<RunProcessOutput> {
     // Kernelを使用してプロセスを実行
     let mut kernel = HolochainKernel::new()
         .map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
@@ -58,7 +58,7 @@ pub fn run_process(input: RunProcessInput) -> ExternResult<RunProcessOutput> {
 
 /// アクターを登録
 #[hdk_extern]
-pub fn register_actor(input: RegisterActorInput) -> ExternResult<EntryHash> {
+pub async fn register_actor(input: RegisterActorInput) -> ExternResult<EntryHash> {
     let agent = agent_info()?.agent_latest_pubkey();
     
     let actor_entry = ActorEntry {
@@ -79,7 +79,7 @@ pub fn register_actor(input: RegisterActorInput) -> ExternResult<EntryHash> {
 
 /// 実行履歴を取得
 #[hdk_extern]
-pub fn get_provenance(input: GetProvenanceInput) -> ExternResult<Value> {
+pub async fn get_provenance(input: GetProvenanceInput) -> ExternResult<Value> {
     // Provenanceエントリを取得
     let provenance_entry = get_jsonld_entry(&input.provenance_hash)
         .await
@@ -90,7 +90,7 @@ pub fn get_provenance(input: GetProvenanceInput) -> ExternResult<Value> {
 
 /// Evolution Engine実行
 #[hdk_extern]
-pub fn evolve(input: EvolveInput) -> ExternResult<EvolveOutput> {
+pub async fn evolve(input: EvolveInput) -> ExternResult<EvolveOutput> {
     let mut kernel = HolochainKernel::new()
         .map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
 
@@ -108,7 +108,7 @@ pub fn evolve(input: EvolveInput) -> ExternResult<EvolveOutput> {
 
 /// 進化履歴を取得
 #[hdk_extern]
-pub fn get_evolution_history(input: GetEvolutionHistoryInput) -> ExternResult<Value> {
+pub async fn get_evolution_history(input: GetEvolutionHistoryInput) -> ExternResult<Value> {
     let kernel = HolochainKernel::new()
         .map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
 

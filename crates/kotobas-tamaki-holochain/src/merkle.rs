@@ -72,17 +72,54 @@ impl MerkleNode {
 
 /// Merkleノード間のリンクを作成
 pub async fn link_nodes(
-    parent: &MerkleNode,
-    child: &MerkleNode,
+    parent: &mut MerkleNode,
+    child: &mut MerkleNode,
 ) -> Result<()> {
-    // 親ノードの子リンクに追加
-    // 子ノードの親リンクに追加
-    // 実際の実装では、ノードを更新してDHTに保存する必要がある
+    use crate::dht::{create_entry_link, get_jsonld_entry, store_jsonld_entry};
+    use crate::types::MerkleNodeEntry;
 
+    // 親ノードの子リンクに追加
+    if !parent.child_links.contains(&child.id) {
+        parent.child_links.push(child.id.clone());
+    }
+
+    // 子ノードの親リンクに追加
+    if !child.parent_links.contains(&parent.id) {
+        child.parent_links.push(parent.id.clone());
+    }
+
+    // ノードを更新してDHTに保存
+    if let Some(parent_hash) = parent.entry_hash {
+        // 親ノードを更新
+        let parent_entry = MerkleNodeEntry {
+            id: parent.id.clone(),
+            data_hash: parent.data_hash.clone(),
+            parent_links: parent.parent_links.clone(),
+            child_links: parent.child_links.clone(),
+            metadata: parent.metadata.clone(),
+        };
+        let parent_entry_value = serde_json::to_value(&parent_entry)?;
+        let new_parent_hash = store_jsonld_entry("MerkleNode", &parent_entry_value).await?;
+        parent.entry_hash = Some(new_parent_hash);
+    }
+
+    if let Some(child_hash) = child.entry_hash {
+        // 子ノードを更新
+        let child_entry = MerkleNodeEntry {
+            id: child.id.clone(),
+            data_hash: child.data_hash.clone(),
+            parent_links: child.parent_links.clone(),
+            child_links: child.child_links.clone(),
+            metadata: child.metadata.clone(),
+        };
+        let child_entry_value = serde_json::to_value(&child_entry)?;
+        let new_child_hash = store_jsonld_entry("MerkleNode", &child_entry_value).await?;
+        child.entry_hash = Some(new_child_hash);
+    }
+
+    // DHTリンクを作成（検索用）
     if let Some(parent_hash) = parent.entry_hash {
         if let Some(child_hash) = child.entry_hash {
-            // DHTリンクを作成
-            use crate::dht::create_entry_link;
             create_entry_link(&parent_hash, &child_hash, "merkle_child").await?;
             create_entry_link(&child_hash, &parent_hash, "merkle_parent").await?;
         }
@@ -104,15 +141,39 @@ pub async fn verify_merkle_path(
     Ok(true)
 }
 
-/// DAGの走査
+/// DAGの走査（深さ優先探索）
 pub async fn traverse_dag(
     root_cid: &str,
     visitor: &mut dyn FnMut(&MerkleNode) -> Result<bool>,
 ) -> Result<()> {
-    // TODO: DAGの走査ロジックを実装
-    // 実際の実装では、幅優先または深さ優先探索を使用
+    use std::collections::HashSet;
 
-    // プレースホルダー実装
+    let mut visited = HashSet::new();
+    let mut stack = vec![root_cid.to_string()];
+
+    while let Some(cid) = stack.pop() {
+        if visited.contains(&cid) {
+            continue;
+        }
+        visited.insert(cid.clone());
+
+        // ノードを取得
+        let node = get_merkle_node_by_cid(&cid).await?;
+
+        // ビジターを呼び出し
+        let should_continue = visitor(&node)?;
+        if !should_continue {
+            break;
+        }
+
+        // 子ノードをスタックに追加
+        for child_cid in &node.child_links {
+            if !visited.contains(child_cid) {
+                stack.push(child_cid.clone());
+            }
+        }
+    }
+
     Ok(())
 }
 

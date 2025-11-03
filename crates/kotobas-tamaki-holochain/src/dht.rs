@@ -8,10 +8,14 @@ use hdk::prelude::*;
 use serde_json::Value;
 
 /// JSON-LDデータをDHTエントリとして保存
+/// CIDインデックスも自動的に作成します
 pub async fn store_jsonld_entry(
     entry_type: &str,
     data: &Value,
 ) -> Result<EntryHash> {
+    use crate::types::CidIndexEntry;
+    use crate::utils::jsonld_to_cid;
+
     // JSON-LDデータをシリアライズ
     let entry_data = serde_json::to_vec(data)
         .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
@@ -59,6 +63,35 @@ pub async fn store_jsonld_entry(
     let entry_hash = create_entry(entry)
         .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to create entry: {}", e)))?;
 
+    // CIDインデックスを作成
+    let cid = jsonld_to_cid(data)?;
+    let cid_index = CidIndexEntry {
+        cid: cid.clone(),
+        entry_hash,
+        entry_type: entry_type.to_string(),
+        created_at: chrono::Utc::now().timestamp(),
+    };
+    
+    // CIDインデックスエントリを保存
+    let cid_index_value = serde_json::to_value(&cid_index)?;
+    let cid_index_entry = Entry::App(EntryBytes::from(serde_json::to_vec(&cid_index_value)?));
+    let cid_index_hash = create_entry(cid_index_entry)
+        .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to create CID index: {}", e)))?;
+
+    // CIDからEntryHashへのリンクを作成（検索用）
+    // CIDのハッシュをベースとしてリンクを作成
+    let cid_bytes = cid.as_bytes();
+    let cid_entry = Entry::App(EntryBytes::from(cid_bytes));
+    let cid_hash = hdk::hash::hash_entry(cid_entry)?;
+    
+    // CIDハッシュからCIDインデックスエントリへのリンクを作成
+    let _link_hash = create_link(
+        cid_hash,
+        cid_index_hash,
+        LinkTag::new("cid_index".as_bytes().to_vec()),
+    )
+    .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to create CID link: {}", e)))?;
+
     Ok(entry_hash)
 }
 
@@ -89,17 +122,80 @@ pub async fn get_jsonld_entry(entry_hash: &EntryHash) -> Result<Value> {
 
 /// DHTクエリ実行
 pub async fn query_dht(query: &DhtQuery) -> Result<Vec<(EntryHash, Value)>> {
-    // TODO: 実際のDHTクエリ実装
-    // Holochain v0.4ではquery APIを使用
-    // 現在はプレースホルダー実装
-
-    // エントリタイプに基づいてクエリ
+    use crate::types::CidIndexEntry;
+    
     let mut results = Vec::new();
 
-    // 簡易的な実装: すべてのエントリを取得してフィルタリング
-    // 実際の実装では、より効率的なクエリ方法を使用する必要がある
+    // エントリタイプに基づいてクエリ
+    // Holochain v0.4では、リンクとエントリタイプベースのクエリを使用
+    
+    // エントリタイプのルートハッシュを作成（簡易的な方法）
+    // 実際の実装では、より効率的なインデックス構造を使用する必要がある
+    let entry_type_hash = hdk::hash::hash_entry(
+        Entry::App(EntryBytes::from(query.entry_type.as_bytes()))
+    )?;
+
+    // エントリタイプからリンクを取得
+    let links = get_links(
+        entry_type_hash,
+        Some(LinkTypesFilter::single(
+            holochain_zome_types::link::LinkType::new(0)
+        )),
+    )
+    .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to get links: {}", e)))?;
+
+    // リンクされたエントリを取得
+    for link in links.into_inner() {
+        let target_hash = link.target;
+        match get(target_hash, GetOptions::default()) {
+            Ok(Some(element)) => {
+                if let Entry::App(entry_bytes) = element.entry() {
+                    let entry_value: Value = serde_json::from_slice(entry_bytes.as_slice())
+                        .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                    
+                    // フィルタ条件を適用
+                    if apply_filters(&entry_value, &query.filters) {
+                        results.push((target_hash, entry_value));
+                    }
+                }
+            }
+            Ok(None) => continue,
+            Err(e) => {
+                // エラーは無視して続行
+                tracing::warn!("Failed to get entry: {}", e);
+                continue;
+            }
+        }
+    }
+
+    // ページネーションを適用
+    if let Some(pagination) = &query.pagination {
+        let start = pagination.offset;
+        let end = start + pagination.limit;
+        if start < results.len() {
+            results = results[start..end.min(results.len())].to_vec();
+        } else {
+            results.clear();
+        }
+    }
 
     Ok(results)
+}
+
+/// フィルタ条件を適用
+fn apply_filters(entry_value: &Value, filters: &Value) -> bool {
+    if let Some(filter_obj) = filters.as_object() {
+        for (key, filter_value) in filter_obj {
+            if let Some(entry_field) = entry_value.get(key) {
+                if entry_field != filter_value {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+    }
+    true
 }
 
 /// Merkle DAG構造をDHT上に構築
@@ -145,14 +241,57 @@ pub async fn build_merkle_dag(
 
 /// CID（Content ID）からDHTエントリを解決
 pub async fn resolve_cid(cid: &str) -> Result<Value> {
-    // CIDからEntryHashへのマッピングが必要
-    // 実際の実装では、CIDをキーとして使用するインデックスエントリを作成する必要がある
-    // 現在はプレースホルダー
+    use crate::types::CidIndexEntry;
+    
+    // CIDのハッシュを計算
+    let cid_bytes = cid.as_bytes();
+    let cid_entry = Entry::App(EntryBytes::from(cid_bytes));
+    let cid_hash = hdk::hash::hash_entry(cid_entry)?;
 
-    // TODO: CIDインデックスエントリからEntryHashを検索
-    // その後、get_jsonld_entryを使用してデータを取得
+    // CIDインデックスリンクを取得
+    let links = get_links(
+        cid_hash,
+        Some(LinkTypesFilter::single(
+            holochain_zome_types::link::LinkType::new(0)
+        )),
+    )
+    .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to get CID links: {}", e)))?;
 
-    Err(crate::HolochainKotobasosError::Dht("CID resolution not implemented yet".to_string()))
+    // 最初のリンクからCIDインデックスエントリのEntryHashを取得
+    if let Some(link) = links.into_inner().first() {
+        let cid_index_hash = link.target;
+        
+        // CIDインデックスエントリを取得
+        if let Ok(Some(element)) = get(cid_index_hash, GetOptions::default()) {
+            if let Entry::App(entry_bytes) = element.entry() {
+                let cid_index: CidIndexEntry = serde_json::from_slice(entry_bytes.as_slice())
+                    .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                
+                // 実際のエントリを取得
+                return get_jsonld_entry(&cid_index.entry_hash).await;
+            }
+        }
+    }
+
+    // フォールバック: CIDインデックスエントリを直接検索
+    // すべてのCIDインデックスエントリを検索（非効率的だが動作する）
+    let query = DhtQuery {
+        entry_type: "CidIndex".to_string(),
+        filters: serde_json::json!({
+            "cid": cid
+        }),
+        pagination: None,
+    };
+    
+    let results = query_dht(&query).await?;
+    if let Some((_, index_value)) = results.first() {
+        let cid_index: CidIndexEntry = serde_json::from_value(index_value.clone())?;
+        return get_jsonld_entry(&cid_index.entry_hash).await;
+    }
+
+    Err(crate::HolochainKotobasosError::Dht(
+        format!("CID not found: {}", cid)
+    ))
 }
 
 /// エントリにリンクを作成

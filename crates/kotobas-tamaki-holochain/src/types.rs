@@ -22,6 +22,8 @@ pub enum KotobasosEntry {
     MerkleNode(MerkleNodeEntry),
     /// Actor定義
     Actor(ActorEntry),
+    /// CIDインデックス
+    CidIndex(CidIndexEntry),
 }
 
 /// ストーリーエントリ
@@ -139,5 +141,18 @@ pub struct Pagination {
     pub offset: usize,
     /// リミット
     pub limit: usize,
+}
+
+/// CIDインデックスエントリ（CIDからEntryHashへのマッピング）
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CidIndexEntry {
+    /// CID
+    pub cid: String,
+    /// 対応するEntryHash
+    pub entry_hash: EntryHash,
+    /// エントリタイプ
+    pub entry_type: String,
+    /// 作成時刻
+    pub created_at: i64,
 }
 
