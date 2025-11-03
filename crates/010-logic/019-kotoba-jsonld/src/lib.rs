@@ -203,39 +203,67 @@ pub fn serialize_jsonld(doc: &JsonLdDocument) -> Result<String> {
 }
 
 /// Expand JSON-LD document (resolve contexts and expand terms)
-pub async fn expand_jsonld(doc: &JsonLdDocument, resolver: &ContextResolver) -> Result<Value> {
-    // Simple expansion - resolve context and merge
-    let mut expanded = serde_json::Map::new();
+/// Returns the raw JSON structure preserving kotoba: prefixed keys
+pub async fn expand_jsonld(doc: &JsonLdDocument, _resolver: &ContextResolver) -> Result<Value> {
+    // Convert JsonLdDocument back to JSON Value, preserving all fields including kotoba: prefixed keys
+    let mut result = serde_json::Map::new();
 
-    // Resolve context
-    let context_value = match &doc.context {
+    // Add @context
+    match &doc.context {
         JsonLdContext::String(url) => {
-            resolver.resolve(url).await?
+            result.insert("@context".to_string(), json!(url));
         }
-        JsonLdContext::Object(obj) => obj.clone(),
-        JsonLdContext::Array(_) => {
-            // For arrays, resolve first context
-            anyhow::bail!("Array contexts not yet supported");
+        JsonLdContext::Object(obj) => {
+            result.insert("@context".to_string(), obj.clone());
         }
-    };
+        JsonLdContext::Array(arr) => {
+            let arr_value: Vec<Value> = arr.iter().map(|ctx| match ctx {
+                JsonLdContext::String(s) => json!(s),
+                JsonLdContext::Object(o) => o.clone(),
+                JsonLdContext::Array(_) => json!([]),
+            }).collect();
+            result.insert("@context".to_string(), json!(arr_value));
+        }
+    }
 
-    expanded.insert("@context".to_string(), context_value);
-
-    // Add @id and @type
+    // Add @id if present
     if let Some(id) = &doc.id {
-        expanded.insert("@id".to_string(), json!(id));
+        result.insert("@id".to_string(), json!(id));
     }
 
+    // Add @type if present
     if let Some(type_) = &doc.type_ {
-        expanded.insert("@type".to_string(), json!(type_));
+        result.insert("@type".to_string(), json!(type_));
     }
 
-    // Add other fields
+    // Add all other data fields (preserves kotoba: prefixed keys)
     for (key, value) in &doc.data {
-        expanded.insert(key.clone(), value.clone());
+        result.insert(key.clone(), value.clone());
     }
 
-    Ok(Value::Object(expanded))
+    Ok(Value::Object(result))
+}
+
+/// Parse JSON-LD directly from string and return as Value (simpler alternative)
+pub fn parse_jsonld_to_value(input: &str) -> Result<Value> {
+    let value: Value = serde_json::from_str(input)
+        .context("Failed to parse JSON-LD as JSON")?;
+    Ok(value)
+}
+
+/// Extract data from JSON-LD Value, handling both prefixed and unprefixed keys
+pub fn extract_jsonld_value(value: &Value, key: &str) -> Option<&Value> {
+    if let Value::Object(obj) = value {
+        // Try prefixed key first (kotoba:key)
+        let prefixed_key = format!("kotoba:{}", key);
+        if let Some(v) = obj.get(&prefixed_key) {
+            return Some(v);
+        }
+        // Fallback to unprefixed key
+        obj.get(key)
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]

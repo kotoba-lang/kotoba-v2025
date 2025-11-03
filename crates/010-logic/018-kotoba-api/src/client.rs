@@ -42,13 +42,38 @@ impl ApiClient {
         }
     }
 
-    /// Execute a request
+    /// Execute a request (JSON-LD format)
     pub async fn execute(&self, request: ApiRequest) -> Result<ApiResponse, ClientError> {
         let url = format!("{}/api/execute", self.base_url);
 
+        // Convert ApiRequest to JSON-LD format
+        use kotoba_jsonld::{serialize_jsonld, JsonLdDocument, JsonLdContext};
+        use serde_json::Value;
+        use std::collections::HashMap;
+
+        let mut jsonld_doc = JsonLdDocument {
+            context: JsonLdContext::String("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld".to_string()),
+            id: None,
+            type_: Some("kotoba:ApiRequest".to_string()),
+            data: HashMap::new(),
+        };
+
+        let request_json = serde_json::to_value(&request)
+            .map_err(|e| ClientError::SerializationError(e.to_string()))?;
+
+        if let Value::Object(obj) = request_json {
+            for (key, value) in obj {
+                jsonld_doc.data.insert(key, value);
+            }
+        }
+
+        let jsonld_body = serialize_jsonld(&jsonld_doc)
+            .map_err(|e| ClientError::SerializationError(e.to_string()))?;
+
         let mut req = self.http_client
             .post(&url)
-            .json(&request);
+            .header("Content-Type", "application/ld+json")
+            .body(jsonld_body);
 
         // Add authentication if available
         if let Some(token) = &self.auth_token {
@@ -58,7 +83,23 @@ impl ApiClient {
         let response = req.send().await?;
 
         if response.status().is_success() {
-            let api_response = response.json::<ApiResponse>().await?;
+            // Parse JSON-LD response
+            let response_text = response.text().await?;
+            let jsonld_value = kotoba_jsonld::parse_jsonld_to_value(&response_text)
+                .map_err(|e| ClientError::DeserializationError(e.to_string()))?;
+
+            // Extract data from JSON-LD (remove @context, @id, @type)
+            let response_value = if let Value::Object(mut obj) = jsonld_value {
+                obj.remove("@context");
+                obj.remove("@id");
+                obj.remove("@type");
+                Value::Object(obj)
+            } else {
+                jsonld_value
+            };
+
+            let api_response: ApiResponse = serde_json::from_value(response_value)
+                .map_err(|e| ClientError::DeserializationError(e.to_string()))?;
             Ok(api_response)
         } else {
             let error_text = response.text().await.unwrap_or_default();
@@ -103,13 +144,32 @@ impl ApiClient {
             .ok_or(ClientError::InvalidResponse)
     }
 
-    /// Health check
+    /// Health check (JSON-LD format)
     pub async fn health_check(&self) -> Result<HealthResponse, ClientError> {
         let url = format!("{}/health", self.base_url);
-        let response = self.http_client.get(&url).send().await?;
+        let response = self.http_client
+            .get(&url)
+            .header("Accept", "application/ld+json")
+            .send().await?;
 
         if response.status().is_success() {
-            let health = response.json::<HealthResponse>().await?;
+            // Parse JSON-LD response
+            let response_text = response.text().await?;
+            let jsonld_value = kotoba_jsonld::parse_jsonld_to_value(&response_text)
+                .map_err(|e| ClientError::DeserializationError(e.to_string()))?;
+
+            // Extract data from JSON-LD
+            let health_value = if let Value::Object(mut obj) = jsonld_value {
+                obj.remove("@context");
+                obj.remove("@id");
+                obj.remove("@type");
+                Value::Object(obj)
+            } else {
+                jsonld_value
+            };
+
+            let health: HealthResponse = serde_json::from_value(health_value)
+                .map_err(|e| ClientError::DeserializationError(e.to_string()))?;
             Ok(health)
         } else {
             Err(ClientError::HttpError(response.status().as_u16()))
@@ -226,6 +286,10 @@ pub enum ClientError {
     NetworkError(String),
     /// JSON serialization error
     JsonError(String),
+    /// Serialization error
+    SerializationError(String),
+    /// Deserialization error
+    DeserializationError(String),
     /// Invalid response
     InvalidResponse,
     /// Authentication error
@@ -240,6 +304,8 @@ impl std::fmt::Display for ClientError {
             ClientError::Timeout => write!(f, "Request timeout"),
             ClientError::NetworkError(msg) => write!(f, "Network error: {}", msg),
             ClientError::JsonError(msg) => write!(f, "JSON error: {}", msg),
+            ClientError::SerializationError(msg) => write!(f, "Serialization error: {}", msg),
+            ClientError::DeserializationError(msg) => write!(f, "Deserialization error: {}", msg),
             ClientError::InvalidResponse => write!(f, "Invalid response"),
             ClientError::AuthError(msg) => write!(f, "Authentication error: {}", msg),
         }

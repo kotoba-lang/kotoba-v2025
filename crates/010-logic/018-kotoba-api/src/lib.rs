@@ -18,7 +18,9 @@ use kotoba_compose::*;
 use kotoba_rewrite_kernel::*;
 use kotoba_graph_core::*;
 use kotoba_txlog::*;
+use kotoba_jsonld::{parse_jsonld_to_value, serialize_jsonld, JsonLdDocument, JsonLdContext};
 use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
 use std::collections::HashMap;
 
 /// API request for DefRef/patch resolution and execution
@@ -477,38 +479,104 @@ impl PureApiProcessor {
 
     /// Transform HTTP request to pure ApiRequest
     /// This is a pure function: HTTP request data -> pure data structure
+    /// Supports both JSON and JSON-LD formats
     pub fn http_request_to_api_request(&self, method: &str, path: &str, body: &[u8], headers: &HashMap<String, String>) -> Result<ApiRequest, ApiError> {
-        // Parse JSON body to ApiRequest (pure transformation)
-        let request_data: ApiRequest = serde_json::from_slice(body)
-            .map_err(|e| ApiError::JsonError(e.to_string()))?;
+        // Check Content-Type header
+        let content_type = headers.get("Content-Type")
+            .map(|s| s.as_str())
+            .unwrap_or("application/json");
 
-        // Validate and enrich with HTTP context if needed
-        // This could add HTTP-specific metadata to the request
+        // Parse JSON-LD or JSON body to ApiRequest
+        let body_str = std::str::from_utf8(body)
+            .map_err(|e| ApiError::JsonError(format!("Invalid UTF-8: {}", e)))?;
+
+        let json_value = if content_type.contains("json-ld") || content_type.contains("ld+json") {
+            // Parse as JSON-LD
+            parse_jsonld_to_value(body_str)
+                .map_err(|e| ApiError::JsonError(format!("Failed to parse JSON-LD: {}", e)))?
+        } else {
+            // Parse as regular JSON (backward compatibility)
+            serde_json::from_str(body_str)
+                .map_err(|e| ApiError::JsonError(format!("Failed to parse JSON: {}", e)))?
+        };
+
+        // Extract data from JSON-LD if needed (remove @context, @id, @type)
+        let request_value = if let Value::Object(mut obj) = json_value {
+            obj.remove("@context");
+            obj.remove("@id");
+            obj.remove("@type");
+            Value::Object(obj)
+        } else {
+            json_value
+        };
+
+        // Deserialize to ApiRequest
+        let request_data: ApiRequest = serde_json::from_value(request_value)
+            .map_err(|e| ApiError::JsonError(format!("Failed to deserialize ApiRequest: {}", e)))?;
 
         Ok(request_data)
     }
 
     /// Transform pure ApiResponse to HTTP response data
     /// This is a pure function: pure data structure -> HTTP response data
+    /// Returns JSON-LD format
     pub fn api_response_to_http_response(&self, response: &ApiResponse) -> Result<(u16, Vec<u8>, HashMap<String, String>), ApiError> {
         let status_code = if response.success { 200 } else { 400 };
 
-        let body = serde_json::to_vec(response)
-            .map_err(|e| ApiError::JsonError(e.to_string()))?;
+        // Convert ApiResponse to JSON-LD format
+        let mut jsonld_doc = JsonLdDocument {
+            context: JsonLdContext::String("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld".to_string()),
+            id: None,
+            type_: Some("kotoba:ApiResponse".to_string()),
+            data: HashMap::new(),
+        };
+
+        // Serialize ApiResponse to JSON and add to data
+        let response_json = serde_json::to_value(response)
+            .map_err(|e| ApiError::JsonError(format!("Failed to serialize ApiResponse: {}", e)))?;
+
+        if let Value::Object(obj) = response_json {
+            for (key, value) in obj {
+                jsonld_doc.data.insert(key, value);
+            }
+        }
+
+        // Serialize JSON-LD
+        let body = serialize_jsonld(&jsonld_doc)
+            .map_err(|e| ApiError::JsonError(format!("Failed to serialize JSON-LD: {}", e)))?
+            .into_bytes();
 
         let mut headers = HashMap::new();
-        headers.insert("Content-Type".to_string(), "application/json".to_string());
+        headers.insert("Content-Type".to_string(), "application/ld+json".to_string());
 
         Ok((status_code, body, headers))
     }
 
-    /// Transform health data to HTTP response
+    /// Transform health data to HTTP response (JSON-LD format)
     pub fn health_to_http_response(&self, health: &HealthResponse) -> Result<(u16, Vec<u8>, HashMap<String, String>), ApiError> {
-        let body = serde_json::to_vec(health)
-            .map_err(|e| ApiError::JsonError(e.to_string()))?;
+        // Convert HealthResponse to JSON-LD format
+        let mut jsonld_doc = JsonLdDocument {
+            context: JsonLdContext::String("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld".to_string()),
+            id: None,
+            type_: Some("kotoba:HealthResponse".to_string()),
+            data: HashMap::new(),
+        };
+
+        let health_json = serde_json::to_value(health)
+            .map_err(|e| ApiError::JsonError(format!("Failed to serialize HealthResponse: {}", e)))?;
+
+        if let Value::Object(obj) = health_json {
+            for (key, value) in obj {
+                jsonld_doc.data.insert(key, value);
+            }
+        }
+
+        let body = serialize_jsonld(&jsonld_doc)
+            .map_err(|e| ApiError::JsonError(format!("Failed to serialize JSON-LD: {}", e)))?
+            .into_bytes();
 
         let mut headers = HashMap::new();
-        headers.insert("Content-Type".to_string(), "application/json".to_string());
+        headers.insert("Content-Type".to_string(), "application/ld+json".to_string());
 
         Ok((200, body, headers))
     }
