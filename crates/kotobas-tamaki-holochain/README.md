@@ -265,21 +265,40 @@ escalator.escalate(&error);
 
 ### 検証レポート
 
-検証結果は `VERIFICATION.md` に記録されます。
+検証結果は以下のドキュメントに記録されます：
+- `VERIFICATION.md`: 検証レポート
+- `WORKSPACE_FIX.md`: ワークスペース依存関係修正レポート
+- `IMPLEMENTATION_SUMMARY.md`: 実装サマリー
+
+### Holochain環境のセットアップ
+
+統合テストとエージェント間通信テストにはHolochain環境が必要です：
+
+```bash
+# Holochain環境セットアップスクリプトの実行
+./scripts/setup-holochain-env.sh
+```
+
+詳細なセットアップ手順は `HOLOCHAIN_SETUP.md` を参照してください。
 
 ### トラブルシューティング
 
-#### ワークスペースの依存関係エラー
+#### ワークスペースの依存関係エラー ✅ 解決済み
 
-`kotoba-storage`が存在しない`kotoba-core`を参照している場合：
-- `crates/030-storage/031-kotoba-storage/Cargo.toml`の依存関係を確認
-- `kotoba-core`への参照を削除または正しいパスに修正
+`kotoba-storage`が存在しない`kotoba-core`を参照していた問題は解決済みです。
+詳細は `WORKSPACE_FIX.md` を参照してください。
 
 #### Holochain環境のセットアップ
 
 統合テストにはHolochain環境が必要です：
-- Holochain CLIのインストール: https://developer.holochain.org/docs/install/
-- テスト環境のセットアップ: `holochain-sandbox`または`hc`を使用
+- Holochain CLIのインストール: `./scripts/setup-holochain-env.sh`を実行
+- 詳細な手順: `HOLOCHAIN_SETUP.md`を参照
+- 公式ドキュメント: https://developer.holochain.org/docs/install/
+
+#### indexmapバージョン競合
+
+`cargo-tarpaulin`（dev-dependency）と`kotoba-owl-reasoner`の間で`indexmap`のバージョン競合が発生する場合があります。
+これは`kotoba-main`パッケージのdev-dependencyの問題で、`kotobas-tamaki-holochain`のビルドには直接影響しません。
 
 ## ライセンス
 

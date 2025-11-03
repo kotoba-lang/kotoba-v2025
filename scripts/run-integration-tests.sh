@@ -46,7 +46,8 @@ echo "----------------------------------------"
 cd crates/kotobas-tamaki-holochain
 
 # ignoreフラグを外してテストを実行
-cargo test --test integration_tests -- --nocapture 2>&1 | tee /tmp/holochain-integration-tests.log
+# 注意: 統合テストは#[ignore]が付いているため、--ignoredフラグが必要
+cargo test --test integration_tests -- --ignored --nocapture 2>&1 | tee /tmp/holochain-integration-tests.log
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ""

@@ -116,9 +116,11 @@
    - これは`kotoba-main`パッケージのdev-dependencyの問題で、`kotobas-tamaki-holochain`のビルドには直接影響しません
    - `kotobas-tamaki-holochain`を単独でビルドする場合は問題ありません
 
-3. **Holochain環境の未セットアップ**
+3. **Holochain環境の未セットアップ** ⚠️ セットアップガイド作成済み
    - Holochain CLIがインストールされていない
    - 統合テストとエージェント間通信テストにはHolochain環境が必要
+   - セットアップスクリプト: `./scripts/setup-holochain-env.sh`
+   - 詳細ガイド: `HOLOCHAIN_SETUP.md`
    - インストール方法: https://developer.holochain.org/docs/install/
 
 ## 次のステップ
