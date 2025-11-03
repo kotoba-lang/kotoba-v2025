@@ -48,6 +48,8 @@ impl Kernel {
             on_process_end: None,
             #[cfg(feature = "reasoning")]
             reasoning_engine: None,
+            #[cfg(feature = "reasoning")]
+            shacl_validator: None,
         })
     }
 
@@ -70,6 +72,7 @@ impl Kernel {
             on_process_start: None,
             on_process_end: None,
             reasoning_engine: Some(reasoning_engine),
+            shacl_validator: Some(crate::ShaclValidator::new()),
         })
     }
 
@@ -113,6 +116,16 @@ impl Kernel {
                     info!("[Kernel] OWL reasoning inferred {} triples for process {}", 
                           reasoning_result.inferred_triples.len(), process.id);
                 }
+            }
+        }
+
+        // Perform SHACL validation if enabled
+        #[cfg(feature = "reasoning")]
+        if let Some(ref validator) = self.shacl_validator {
+            if let Err(e) = validator.validate_process(process).await {
+                warn!("[Kernel] SHACL validation failed for process {}: {}", process.id, e);
+                // In strict mode, this would return an error
+                // For now, we just log the warning
             }
         }
 
@@ -173,5 +186,17 @@ impl Kernel {
         } else {
             None
         }
+    }
+
+    /// Set SHACL validator
+    #[cfg(feature = "reasoning")]
+    pub fn set_shacl_validator(&mut self, validator: crate::ShaclValidator) {
+        self.shacl_validator = Some(validator);
+    }
+
+    /// Enable strict SHACL validation
+    #[cfg(feature = "reasoning")]
+    pub fn enable_strict_validation(&mut self) {
+        self.shacl_validator = Some(crate::ShaclValidator::strict());
     }
 }

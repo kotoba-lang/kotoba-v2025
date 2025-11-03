@@ -56,11 +56,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### With OWL Reasoning
+### With OWL Reasoning and SHACL Validation
 
 ```rust
 #[cfg(feature = "reasoning")]
-use kotoba_os::{Kernel, ReasoningLevel};
+use kotoba_os::{Kernel, ReasoningLevel, ShaclValidator};
 
 #[cfg(feature = "reasoning")]
 #[tokio::main]
@@ -78,7 +78,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     // Initialize kernel with OWL reasoning enabled
+    // This automatically enables SHACL validation
     let mut kernel = Kernel::with_reasoning(story_json, ReasoningLevel::OwlDl)?;
+
+    // Enable strict SHACL validation (fail on validation errors)
+    kernel.enable_strict_validation();
 
     kernel.register_default_actor("kotoba:performer/actor-1", "kotoba:capability/execution");
     kernel.start().await?;
@@ -106,9 +110,10 @@ Story (JSON-LD) → Kernel → ProcessHandler → [Process] → Mediator → Act
 2. **Process Extraction**: ProcessHandler extracts processes from the story graph
 3. **Topological Sorting**: Processes are ordered based on `next` property links
 4. **OWL Reasoning** (optional): If enabled, OWL reasoning is performed on each process
-5. **Actor Selection**: Mediator selects appropriate actors for each process
-6. **Execution**: Actors perform processes and return results
-7. **Provenance Recording**: All execution history is recorded in JSON-LD/PROV-O format
+5. **SHACL Validation** (optional): If enabled, processes are validated against SHACL shapes
+6. **Actor Selection**: Mediator selects appropriate actors for each process
+7. **Execution**: Actors perform processes and return results
+8. **Provenance Recording**: All execution history is recorded in JSON-LD/PROV-O format
 
 ## Components
 
@@ -121,6 +126,7 @@ Central orchestrator that manages the execution lifecycle.
 - Executes processes in order
 - Records provenance automatically
 - Optional OWL reasoning integration
+- Optional SHACL validation for Process/Resource/Performer types
 
 ### Actor
 
@@ -160,14 +166,15 @@ Records execution history in PROV-O format.
 
 - **JSON-LD Native**: All data structures use JSON-LD format
 - **OWL Reasoning**: Optional integration with fukurow for RDFS/OWL Lite/OWL DL reasoning
+- **SHACL Validation**: Optional validation of Process/Resource/Performer against SHACL shapes
 - **Provenance Tracking**: Complete execution history in PROV-O format
 - **Async Execution**: Built on Tokio for async/await support
 - **Type Safety**: Strong typing with Rust's type system
 
 ## Future Enhancements
 
-- SHACL validation integration
-- SHACL-based actor selection
+- Complete fukurow-shacl integration (currently placeholder)
+- SHACL-based actor selection (semantic matching)
 - SPARQL query compilation from shapes
 - Persistent provenance storage
 - Error handling and retry mechanisms

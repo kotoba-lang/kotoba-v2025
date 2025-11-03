@@ -52,6 +52,7 @@ pub mod kernel;
 pub mod mediator;
 pub mod process_handler;
 pub mod provenance;
+pub mod shacl_validator;
 pub mod types;
 
 pub use actor::{Actor, ActorTrait, DefaultActor};
@@ -59,6 +60,7 @@ pub use kernel::Kernel;
 pub use mediator::Mediator;
 pub use process_handler::ProcessHandler;
 pub use provenance::Provenance;
+pub use shacl_validator::ShaclValidator;
 pub use types::{Process, Resource, Performer, Story, ProvenanceEvent};
 
 #[cfg(feature = "reasoning")]
