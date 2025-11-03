@@ -11,6 +11,8 @@ members = [
     "crates/010-logic/020-kotoba-os",
     "crates/010-logic/021-kotoba-phonosemantic",
     "crates/010-logic/022-kotoba-owl-reasoner",
+    "crates/030-storage/031-kotoba-storage",
+    "crates/030-storage/039-kotoba-storage-fcdb",
     "crates/010-core/015-kotoba-auth",
     "crates/010-core/016-kotoba-graph-core",
     "crates/010-core/017-kotoba-txlog",

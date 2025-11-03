@@ -1,5 +1,5 @@
 [package]
-name = "kotoba-memory"
+name = "kotoba-storage-memory"
 version = "0.1.22"
 edition.workspace = true
 license.workspace = true

@@ -17,6 +17,9 @@ kotoba-jsonld = { path = "../019-kotoba-jsonld" }
 kotoba-types = { path = "../010-kotoba-types" }
 kotoba-owl-reasoner = { path = "../022-kotoba-owl-reasoner", optional = true }
 
+# Storage
+kotoba-storage = { path = "../../030-storage/031-kotoba-storage" }
+
 # fukurow crates for OWL reasoning
 fukurow-core = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
 fukurow-store = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
@@ -51,4 +54,5 @@ tracing = "0.1"
 
 [dev-dependencies]
 tokio-test = "0.4"
+kotoba-storage-memory = { path = "../../030-storage/036-kotoba-memory" }
 

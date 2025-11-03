@@ -8,6 +8,7 @@ use crate::process_handler::ProcessHandler;
 use crate::provenance::Provenance;
 use crate::types::{Process, Story};
 use crate::{Result, KotobaOsError};
+use kotoba_storage::StorageEngine;
 use serde_json::Value;
 use std::sync::Arc;
 use tracing::{info, warn};
@@ -35,14 +36,14 @@ pub struct Kernel {
 }
 
 impl Kernel {
-    /// Create a new kernel with a story
-    pub fn new(story: Value) -> Result<Self> {
+    /// Create a new kernel with a story and storage
+    pub fn new(story: Value, storage: Arc<dyn StorageEngine>) -> Result<Self> {
         let story: Story = Story::from_value(story)
             .map_err(|e| KotobaOsError::StoryValidation(e.to_string()))?;
 
         Ok(Self {
             mediator: Mediator::new(),
-            provenance: Provenance::new(),
+            provenance: Provenance::new(storage),
             story,
             on_process_start: None,
             on_process_end: None,
@@ -59,6 +60,7 @@ impl Kernel {
     #[cfg(feature = "reasoning")]
     pub fn with_reasoning(
         story: Value,
+        storage: Arc<dyn StorageEngine>,
         reasoning_level: kotoba_owl_reasoner::ReasoningLevel,
     ) -> Result<Self> {
         let story: Story = Story::from_value(story)
@@ -69,7 +71,7 @@ impl Kernel {
 
         Ok(Self {
             mediator: Mediator::new(),
-            provenance: Provenance::new(),
+            provenance: Provenance::new(storage),
             story,
             on_process_start: None,
             on_process_end: None,
@@ -155,6 +157,12 @@ impl Kernel {
     /// Start the orchestration of the entire story
     pub async fn start(&mut self) -> Result<()> {
         info!("[Kernel] Booting up...");
+
+        // Load existing provenance from storage
+        if let Err(e) = self.provenance.load_from_storage().await {
+            warn!("[Kernel] Failed to load provenance from storage: {}", e);
+            // Continue anyway - this is not fatal
+        }
 
         // Create process handler
         let handler = ProcessHandler::new(self.story.clone());

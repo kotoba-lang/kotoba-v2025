@@ -16,9 +16,15 @@
 //!
 //! ```rust,no_run
 //! use kotoba_os::{Kernel, DefaultActor};
+//! use kotoba_storage::StorageEngine;
+//! use kotoba_storage_fcdb::FcdbStorageEngine;
 //! use serde_json::json;
+//! use std::sync::Arc;
 //!
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+//! // Create storage engine
+//! let storage = Arc::new(FcdbStorageEngine::new("./data").await?);
+//!
 //! // Create a story (JSON-LD format)
 //! let story_json = json!({
 //!     "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
@@ -32,8 +38,8 @@
 //!     ]
 //! });
 //!
-//! // Initialize kernel with story
-//! let mut kernel = Kernel::new(story_json)?;
+//! // Initialize kernel with story and storage
+//! let mut kernel = Kernel::new(story_json, storage)?;
 //!
 //! // Register an actor
 //! kernel.register_default_actor(
@@ -102,23 +108,33 @@ mod tests {
 
     #[tokio::test]
     async fn test_kernel_creation() {
+        use kotoba_storage::StorageEngine;
+        use kotoba_storage_memory::MemoryStorage;
+        use std::sync::Arc;
+
         let story_json = json!({
             "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
             "@graph": []
         });
 
-        let kernel = Kernel::new(story_json);
+        let storage = Arc::new(MemoryStorage::new());
+        let kernel = Kernel::new(story_json, storage);
         assert!(kernel.is_ok());
     }
 
     #[tokio::test]
     async fn test_actor_registration() {
+        use kotoba_storage::StorageEngine;
+        use kotoba_storage_memory::MemoryStorage;
+        use std::sync::Arc;
+
         let story_json = json!({
             "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
             "@graph": []
         });
 
-        let mut kernel = Kernel::new(story_json).unwrap();
+        let storage = Arc::new(MemoryStorage::new());
+        let mut kernel = Kernel::new(story_json, storage).unwrap();
         kernel.register_default_actor("kotoba:performer/test", "kotoba:capability/test");
         
         assert!(kernel.mediator.has_actor("kotoba:performer/test"));
@@ -126,6 +142,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_process_execution() {
+        use kotoba_storage::StorageEngine;
+        use kotoba_storage_memory::MemoryStorage;
+        use std::sync::Arc;
+
         let story_json = json!({
             "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
             "@graph": [
@@ -138,7 +158,8 @@ mod tests {
             ]
         });
 
-        let mut kernel = Kernel::new(story_json).unwrap();
+        let storage = Arc::new(MemoryStorage::new());
+        let mut kernel = Kernel::new(story_json, storage).unwrap();
         kernel.register_default_actor("kotoba:performer/test-actor", "kotoba:capability/execution");
 
         let processes = kernel.story().extract_processes();
@@ -154,6 +175,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_story_orchestration() {
+        use kotoba_storage::StorageEngine;
+        use kotoba_storage_memory::MemoryStorage;
+        use std::sync::Arc;
+
         let story_json = json!({
             "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
             "@graph": [
@@ -173,7 +198,8 @@ mod tests {
             ]
         });
 
-        let mut kernel = Kernel::new(story_json).unwrap();
+        let storage = Arc::new(MemoryStorage::new());
+        let mut kernel = Kernel::new(story_json, storage).unwrap();
         kernel.register_default_actor("kotoba:performer/actor", "kotoba:capability/execution");
 
         let result = kernel.start().await;
