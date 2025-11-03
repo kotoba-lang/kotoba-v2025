@@ -1,11 +1,11 @@
-//! # Kotoba SemanticOS
+//! # Kotoba KotobaOS
 //!
-//! SemanticOS Kernel + Actor + Mediator pattern implementation for Kotoba.
+//! KotobaOS Kernel + Actor + Mediator pattern implementation for Kotoba.
 //! Provides process network execution orchestration using JSON-LD and semantic reasoning.
 //!
 //! ## Architecture
 //!
-//! This crate implements the semanticos pattern:
+//! This crate implements the kotobaos pattern:
 //! - **Kernel**: Orchestrates process network execution
 //! - **Actor**: Performs actions based on capabilities
 //! - **Mediator**: Selects appropriate actors using SHACL-based reasoning
@@ -15,7 +15,7 @@
 //! ## Example
 //!
 //! ```rust,no_run
-//! use kotoba_semanticos::{Kernel, DefaultActor};
+//! use kotoba_os::{Kernel, DefaultActor};
 //! use serde_json::json;
 //!
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
@@ -61,9 +61,12 @@ pub use process_handler::ProcessHandler;
 pub use provenance::Provenance;
 pub use types::{Process, Resource, Performer, Story, ProvenanceEvent};
 
-/// Error types for SemanticOS operations
+#[cfg(feature = "reasoning")]
+pub use kotoba_owl_reasoner::{ReasoningEngine, ReasoningLevel};
+
+/// Error types for KotobaOS operations
 #[derive(Debug, thiserror::Error)]
-pub enum SemanticOsError {
+pub enum KotobaOsError {
     #[error("JSON-LD parsing error: {0}")]
     JsonLdParse(#[from] serde_json::Error),
 
@@ -86,7 +89,7 @@ pub enum SemanticOsError {
     Other(#[from] anyhow::Error),
 }
 
-pub type Result<T> = std::result::Result<T, SemanticOsError>;
+pub type Result<T> = std::result::Result<T, KotobaOsError>;
 
 #[cfg(test)]
 mod tests {

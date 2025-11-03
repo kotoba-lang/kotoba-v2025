@@ -1,4 +1,4 @@
-//! Provenance implementation for SemanticOS
+//! Provenance implementation for KotobaOS
 //!
 //! Records execution history in JSON-LD/PROV-O format.
 

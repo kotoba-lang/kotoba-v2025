@@ -1,29 +1,29 @@
 [package]
-name = "kotoba-owl-reasoner"
+name = "kotoba-os"
 version = "0.1.22"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "OWL reasoning engine integration for Kotoba using fukurow"
-keywords = ["owl", "reasoning", "rdfs", "semantic-web", "fukurow"]
-categories = ["web-programming", "algorithms", "data-structures"]
+description = "KotobaOS Kernel + Actor + Mediator pattern for Kotoba"
+keywords = ["kotobaos", "kernel", "actor", "mediator", "process-network", "json-ld"]
+categories = ["web-programming", "asynchronous", "algorithms"]
 readme = "README.md"
-documentation = "https://docs.rs/kotoba-owl-reasoner"
+documentation = "https://docs.rs/kotoba-os"
 homepage = "https://github.com/com-junkawasaki/kotoba"
 
 [dependencies]
 # Kotoba ecosystem
 kotoba-jsonld = { path = "../019-kotoba-jsonld" }
+kotoba-types = { path = "../010-kotoba-types" }
+kotoba-owl-reasoner = { path = "../022-kotoba-owl-reasoner", optional = true }
 
-# fukurow crates (git dependencies)
+# fukurow crates for OWL reasoning
 fukurow-core = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
 fukurow-store = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
 fukurow-rdfs = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
 fukurow-lite = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
 fukurow-dl = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
 fukurow-shacl = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
-fukurow-sparql = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
-fukurow-engine = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
 
 # JSON processing
 serde = { version = "1.0", features = ["derive"] }
@@ -37,15 +37,17 @@ anyhow = "1.0"
 tokio = { version = "1.0", features = ["full"] }
 async-trait = "0.1"
 
-# RDF/JSON-LD processing
-sophia = { version = "0.8", features = ["jsonld", "xml"], optional = true }
+# URL parsing
+url = "2.5"
+
+# UUID generation
+uuid = { version = "1.18", features = ["v4", "serde"] }
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
 
 # Logging
 tracing = "0.1"
-
-[features]
-default = []
-sophia = ["dep:sophia"]
 
 [dev-dependencies]
 tokio-test = "0.4"

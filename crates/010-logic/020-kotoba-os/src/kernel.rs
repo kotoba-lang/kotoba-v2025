@@ -1,4 +1,4 @@
-//! Kernel implementation for SemanticOS
+//! Kernel implementation for KotobaOS
 //!
 //! The central orchestrator that manages process execution lifecycle.
 
@@ -7,7 +7,7 @@ use crate::mediator::Mediator;
 use crate::process_handler::ProcessHandler;
 use crate::provenance::Provenance;
 use crate::types::{Process, Story};
-use crate::{Result, SemanticOsError};
+use crate::{Result, KotobaOsError};
 use serde_json::Value;
 use std::sync::Arc;
 use tracing::{info, warn};
@@ -28,13 +28,17 @@ pub struct Kernel {
 
     /// Optional callback when a process ends
     pub on_process_end: Option<Box<dyn Fn(&Process) + Send + Sync>>,
+
+    /// OWL reasoning engine (optional)
+    #[cfg(feature = "reasoning")]
+    reasoning_engine: Option<kotoba_owl_reasoner::ReasoningEngine>,
 }
 
 impl Kernel {
     /// Create a new kernel with a story
     pub fn new(story: Value) -> Result<Self> {
         let story: Story = Story::from_value(story)
-            .map_err(|e| SemanticOsError::StoryValidation(e.to_string()))?;
+            .map_err(|e| KotobaOsError::StoryValidation(e.to_string()))?;
 
         Ok(Self {
             mediator: Mediator::new(),
@@ -42,6 +46,30 @@ impl Kernel {
             story,
             on_process_start: None,
             on_process_end: None,
+            #[cfg(feature = "reasoning")]
+            reasoning_engine: None,
+        })
+    }
+
+    /// Create a new kernel with OWL reasoning enabled
+    #[cfg(feature = "reasoning")]
+    pub fn with_reasoning(
+        story: Value,
+        reasoning_level: kotoba_owl_reasoner::ReasoningLevel,
+    ) -> Result<Self> {
+        let story: Story = Story::from_value(story)
+            .map_err(|e| KotobaOsError::StoryValidation(e.to_string()))?;
+
+        let reasoning_engine = kotoba_owl_reasoner::ReasoningEngine::new(reasoning_level)
+            .map_err(|e| KotobaOsError::Other(anyhow::anyhow!("Failed to create reasoning engine: {}", e)))?;
+
+        Ok(Self {
+            mediator: Mediator::new(),
+            provenance: Provenance::new(),
+            story,
+            on_process_start: None,
+            on_process_end: None,
+            reasoning_engine: Some(reasoning_engine),
         })
     }
 
@@ -67,6 +95,25 @@ impl Kernel {
         // Call on_process_start callback
         if let Some(callback) = &self.on_process_start {
             callback(process);
+        }
+
+        // Perform OWL reasoning if enabled
+        #[cfg(feature = "reasoning")]
+        if let Some(ref mut engine) = self.reasoning_engine {
+            // Convert process to JSON-LD for reasoning
+            let process_jsonld = serde_json::to_value(process)
+                .map_err(|e| KotobaOsError::Other(anyhow::anyhow!("Failed to serialize process: {}", e)))?;
+            
+            // Load process into reasoning engine
+            if let Err(e) = engine.load_ontology_from_jsonld(process_jsonld).await {
+                warn!("[Kernel] OWL reasoning failed for process {}: {}", process.id, e);
+            } else {
+                // Perform reasoning
+                if let Ok(reasoning_result) = engine.reason().await {
+                    info!("[Kernel] OWL reasoning inferred {} triples for process {}", 
+                          reasoning_result.inferred_triples.len(), process.id);
+                }
+            }
         }
 
         // Select actor via mediator
@@ -117,5 +164,14 @@ impl Kernel {
     pub fn provenance_jsonld(&self) -> Value {
         self.provenance.to_jsonld()
     }
-}
 
+    /// Get inferred triples from OWL reasoning (if enabled)
+    #[cfg(feature = "reasoning")]
+    pub async fn get_inferred_triples(&self) -> Option<Value> {
+        if let Some(ref engine) = self.reasoning_engine {
+            engine.inferred_triples_as_jsonld().await.ok()
+        } else {
+            None
+        }
+    }
+}

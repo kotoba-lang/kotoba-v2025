@@ -1,4 +1,4 @@
-//! Actor implementation for SemanticOS
+//! Actor implementation for KotobaOS
 //!
 //! Actors are components that perform actions based on their capabilities.
 //! They resolve I/O from SHACL shapes and execute processes.

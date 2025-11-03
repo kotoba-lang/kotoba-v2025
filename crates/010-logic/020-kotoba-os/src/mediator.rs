@@ -1,4 +1,4 @@
-//! Mediator implementation for SemanticOS
+//! Mediator implementation for KotobaOS
 //!
 //! The Mediator selects appropriate actors for process execution based on
 //! SHACL-based capability matching and semantic similarity.
@@ -85,7 +85,7 @@ impl Mediator {
             return Ok(Arc::clone(first_actor));
         }
 
-        Err(crate::SemanticOsError::ActorSelection(format!(
+        Err(crate::KotobaOsError::ActorSelection(format!(
             "No suitable actor found for process \"{}\" and no fallback available",
             process.label.as_deref().unwrap_or(&process.id)
         )))

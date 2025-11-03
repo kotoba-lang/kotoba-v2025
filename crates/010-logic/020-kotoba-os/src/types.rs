@@ -1,7 +1,7 @@
-//! Type definitions for SemanticOS components
+//! Type definitions for KotobaOS components
 //!
 //! Defines Process, Resource, Performer, Story, and ProvenanceEvent types
-//! based on semanticos ontology in JSON-LD format.
+//! based on kotobaos ontology in JSON-LD format.
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

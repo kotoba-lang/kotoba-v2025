@@ -1,7 +1,7 @@
 //! # Kotoba JSON-LD
 //!
 //! JSON-LD utilities for Kotoba graph processing system.
-//! Provides JSON-LD parsing, serialization, context resolution, and conversion utilities.
+//! Provides JSON-LD parsing, serialization, context resolution, conversion utilities, and OWL reasoning integration.
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -261,6 +261,12 @@ pub fn extract_jsonld_value(value: &Value, key: &str) -> Option<&Value> {
         None
     }
 }
+
+#[cfg(feature = "reasoning")]
+pub mod reasoning;
+
+#[cfg(feature = "reasoning")]
+pub use reasoning::{parse_jsonld_with_reasoning, expand_jsonld_with_owl, validate_jsonld_with_shacl};
 
 #[cfg(test)]
 mod tests {

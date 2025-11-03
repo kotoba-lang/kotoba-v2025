@@ -1,4 +1,4 @@
-//! ProcessHandler implementation for SemanticOS
+//! ProcessHandler implementation for KotobaOS
 //!
 //! Orchestrates the execution of a process network from a story.
 
