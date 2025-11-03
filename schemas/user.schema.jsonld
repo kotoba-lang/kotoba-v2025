@@ -1,0 +1,41 @@
+{
+  "@context": "kotoba-context.jsonld",
+  "@id": "https://kotoba.ai/schemas/user.schema.jsonld",
+  "@type": "kotoba:User",
+  "rdfs:label": "User",
+  "rdfs:comment": "A user of the system",
+  "shacl:property": [
+    {
+      "shacl:path": "kotoba:id",
+      "shacl:datatype": "xsd:string",
+      "rdfs:comment": "The unique identifier for a user",
+      "shacl:minCount": 1
+    },
+    {
+      "shacl:path": "schema:name",
+      "shacl:datatype": "xsd:string",
+      "rdfs:comment": "User's full name",
+      "shacl:minCount": 1,
+      "shacl:minLength": 1
+    },
+    {
+      "shacl:path": "schema:email",
+      "shacl:datatype": "xsd:string",
+      "rdfs:comment": "User's email address",
+      "shacl:minCount": 1
+    },
+    {
+      "shacl:path": "schema:age",
+      "shacl:datatype": "xsd:integer",
+      "rdfs:comment": "User's age in years. Optional.",
+      "shacl:minInclusive": 0
+    },
+    {
+      "shacl:path": "schema:dateCreated",
+      "shacl:datatype": "xsd:dateTime",
+      "rdfs:comment": "The date and time the user was created",
+      "shacl:minCount": 1
+    }
+  ]
+}
+

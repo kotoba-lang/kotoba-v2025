@@ -148,6 +148,10 @@ exclude = ["examples/**/*"]
 name = "kotoba"
 path = "src/main.rs"
 
+[[bin]]
+name = "json-to-jsonld"
+path = "scripts/json-to-jsonld.rs"
+
 
 [profile.bench]
 opt-level = 3

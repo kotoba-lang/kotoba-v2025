@@ -1,0 +1,7 @@
+{
+  "@context": "schemas/kotoba-context.jsonld",
+  "@type": "kotoba:ProcessNetwork",
+  "@id": "file://dag.jsonld",
+  "rdfs:comment": "Process Network DAG definition"
+}
+

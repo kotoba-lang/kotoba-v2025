@@ -1,0 +1,468 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@vocab": "https://kotoba.ai/vocab/",
+    
+    "kotoba": "https://kotoba.ai/vocab/",
+    "schema": "https://schema.org/",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "shacl": "http://www.w3.org/ns/shacl#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "dc": "http://purl.org/dc/elements/1.1/",
+    
+    "id": "@id",
+    "type": "@type",
+    
+    "ProcessNetwork": {
+      "@id": "kotoba:ProcessNetwork",
+      "@type": "@vocab"
+    },
+    
+    "GraphType": {
+      "@id": "kotoba:GraphType",
+      "@type": "@vocab"
+    },
+    
+    "GraphInstance": {
+      "@id": "kotoba:GraphInstance",
+      "@type": "@vocab"
+    },
+    
+    "Node": {
+      "@id": "kotoba:Node",
+      "@type": "@vocab"
+    },
+    
+    "Edge": {
+      "@id": "kotoba:Edge",
+      "@type": "@vocab"
+    },
+    
+    "Port": {
+      "@id": "kotoba:Port",
+      "@type": "@vocab"
+    },
+    
+    "Component": {
+      "@id": "kotoba:Component",
+      "@type": "@vocab"
+    },
+    
+    "RuleDPO": {
+      "@id": "kotoba:RuleDPO",
+      "@type": "@vocab"
+    },
+    
+    "Strategy": {
+      "@id": "kotoba:Strategy",
+      "@type": "@vocab"
+    },
+    
+    "Query": {
+      "@id": "kotoba:Query",
+      "@type": "@vocab"
+    },
+    
+    "CID": {
+      "@id": "kotoba:CID",
+      "@type": "xsd:string"
+    },
+    
+    "cid": {
+      "@id": "kotoba:cid",
+      "@type": "kotoba:CID"
+    },
+    
+    "labels": {
+      "@id": "kotoba:labels",
+      "@container": "@set"
+    },
+    
+    "nodes": {
+      "@id": "kotoba:nodes",
+      "@container": "@set"
+    },
+    
+    "edges": {
+      "@id": "kotoba:edges",
+      "@container": "@set"
+    },
+    
+    "ports": {
+      "@id": "kotoba:ports",
+      "@container": "@set"
+    },
+    
+    "src": {
+      "@id": "kotoba:src"
+    },
+    
+    "tgt": {
+      "@id": "kotoba:tgt"
+    },
+    
+    "componentRef": {
+      "@id": "kotoba:componentRef"
+    },
+    
+    "direction": {
+      "@id": "kotoba:direction",
+      "@type": "xsd:string"
+    },
+    
+    "multiplicity": {
+      "@id": "kotoba:multiplicity",
+      "@type": "xsd:string"
+    },
+    
+    "attrs": {
+      "@id": "kotoba:attrs"
+    },
+    
+    "meta": {
+      "@id": "kotoba:meta"
+    },
+    
+    "model": {
+      "@id": "kotoba:model",
+      "@type": "xsd:string"
+    },
+    
+    "version": {
+      "@id": "kotoba:version",
+      "@type": "xsd:string"
+    },
+    
+    "cidAlgo": {
+      "@id": "kotoba:cidAlgo"
+    },
+    
+    "hash": {
+      "@id": "kotoba:hash",
+      "@type": "xsd:string"
+    },
+    
+    "multicodec": {
+      "@id": "kotoba:multicodec",
+      "@type": "xsd:string"
+    },
+    
+    "canonicalJSON": {
+      "@id": "kotoba:canonicalJSON",
+      "@type": "xsd:string"
+    },
+    
+    "typeGraph": {
+      "@id": "kotoba:typeGraph",
+      "@type": "kotoba:GraphType"
+    },
+    
+    "graphs": {
+      "@id": "kotoba:graphs",
+      "@container": "@set"
+    },
+    
+    "components": {
+      "@id": "kotoba:components",
+      "@container": "@set"
+    },
+    
+    "rules": {
+      "@id": "kotoba:rules",
+      "@container": "@set"
+    },
+    
+    "strategies": {
+      "@id": "kotoba:strategies",
+      "@container": "@set"
+    },
+    
+    "queries": {
+      "@id": "kotoba:queries",
+      "@container": "@set"
+    },
+    
+    "pgView": {
+      "@id": "kotoba:pgView"
+    },
+    
+    "boundary": {
+      "@id": "kotoba:boundary"
+    },
+    
+    "expose": {
+      "@id": "kotoba:expose",
+      "@container": "@set"
+    },
+    
+    "constraints": {
+      "@id": "kotoba:constraints"
+    },
+    
+    "typing": {
+      "@id": "kotoba:typing"
+    },
+    
+    "nodeTypes": {
+      "@id": "kotoba:nodeTypes"
+    },
+    
+    "edgeTypes": {
+      "@id": "kotoba:edgeTypes"
+    },
+    
+    "kind": {
+      "@id": "kotoba:kind",
+      "@type": "xsd:string"
+    },
+    
+    "interface": {
+      "@id": "kotoba:interface"
+    },
+    
+    "in": {
+      "@id": "kotoba:in",
+      "@container": "@set"
+    },
+    
+    "out": {
+      "@id": "kotoba:out",
+      "@container": "@set"
+    },
+    
+    "params": {
+      "@id": "kotoba:params"
+    },
+    
+    "nodeMap": {
+      "@id": "kotoba:nodeMap"
+    },
+    
+    "edgeMap": {
+      "@id": "kotoba:edgeMap"
+    },
+    
+    "portMap": {
+      "@id": "kotoba:portMap"
+    },
+    
+    "morphismFromL": {
+      "@id": "kotoba:morphismFromL"
+    },
+    
+    "nacs": {
+      "@id": "kotoba:nacs",
+      "@container": "@set"
+    },
+    
+    "appCond": {
+      "@id": "kotoba:appCond"
+    },
+    
+    "injective": {
+      "@id": "kotoba:injective",
+      "@type": "xsd:boolean"
+    },
+    
+    "dangling": {
+      "@id": "kotoba:dangling",
+      "@type": "xsd:string"
+    },
+    
+    "attrsGuard": {
+      "@id": "kotoba:attrsGuard"
+    },
+    
+    "effects": {
+      "@id": "kotoba:effects"
+    },
+    
+    "cost": {
+      "@id": "kotoba:cost",
+      "@type": "xsd:double"
+    },
+    
+    "labelsAdd": {
+      "@id": "kotoba:labelsAdd",
+      "@container": "@set"
+    },
+    
+    "labelsRemove": {
+      "@id": "kotoba:labelsRemove",
+      "@container": "@set"
+    },
+    
+    "body": {
+      "@id": "kotoba:body"
+    },
+    
+    "seq": {
+      "@id": "kotoba:seq",
+      "@container": "@set"
+    },
+    
+    "choice": {
+      "@id": "kotoba:choice",
+      "@container": "@set"
+    },
+    
+    "repeat": {
+      "@id": "kotoba:repeat"
+    },
+    
+    "guard": {
+      "@id": "kotoba:guard"
+    },
+    
+    "apply": {
+      "@id": "kotoba:apply",
+      "@type": "xsd:string"
+    },
+    
+    "scope": {
+      "@id": "kotoba:scope",
+      "@type": "xsd:string"
+    },
+    
+    "maxParallel": {
+      "@id": "kotoba:maxParallel",
+      "@type": "xsd:integer"
+    },
+    
+    "pattern": {
+      "@id": "kotoba:pattern"
+    },
+    
+    "objective": {
+      "@id": "kotoba:objective",
+      "@type": "xsd:string"
+    },
+    
+    "expr": {
+      "@id": "kotoba:expr",
+      "@type": "xsd:string"
+    },
+    
+    "limits": {
+      "@id": "kotoba:limits"
+    },
+    
+    "maxSteps": {
+      "@id": "kotoba:maxSteps",
+      "@type": "xsd:integer"
+    },
+    
+    "timeoutMs": {
+      "@id": "kotoba:timeoutMs",
+      "@type": "xsd:integer"
+    },
+    
+    "vertices": {
+      "@id": "kotoba:vertices",
+      "@container": "@set"
+    },
+    
+    "originCID": {
+      "@id": "kotoba:originCID",
+      "@type": "kotoba:CID"
+    },
+    
+    "outV": {
+      "@id": "kotoba:outV",
+      "@type": "xsd:string"
+    },
+    
+    "inV": {
+      "@id": "kotoba:inV",
+      "@type": "xsd:string"
+    },
+    
+    "properties": {
+      "@id": "kotoba:properties"
+    },
+    
+    "mapping": {
+      "@id": "kotoba:mapping"
+    },
+    
+    "nodeToVertex": {
+      "@id": "kotoba:nodeToVertex"
+    },
+    
+    "edgeToEdge": {
+      "@id": "kotoba:edgeToEdge"
+    },
+    
+    "User": {
+      "@id": "kotoba:User",
+      "@type": "@vocab"
+    },
+    
+    "Follows": {
+      "@id": "kotoba:Follows",
+      "@type": "@vocab"
+    },
+    
+    "name": {
+      "@id": "schema:name",
+      "@type": "xsd:string"
+    },
+    
+    "email": {
+      "@id": "schema:email",
+      "@type": "xsd:string"
+    },
+    
+    "age": {
+      "@id": "schema:age",
+      "@type": "xsd:integer"
+    },
+    
+    "createdAt": {
+      "@id": "schema:dateCreated",
+      "@type": "xsd:dateTime"
+    },
+    
+    "since": {
+      "@id": "kotoba:since",
+      "@type": "xsd:dateTime"
+    },
+    
+    "title": {
+      "@id": "rdfs:label",
+      "@type": "xsd:string"
+    },
+    
+    "description": {
+      "@id": "rdfs:comment",
+      "@type": "xsd:string"
+    },
+    
+    "required": {
+      "@id": "shacl:property",
+      "@container": "@set"
+    },
+    
+    "properties": {
+      "@id": "shacl:property",
+      "@container": "@set"
+    },
+    
+    "$schema": {
+      "@id": "kotoba:jsonSchema",
+      "@type": "xsd:anyURI"
+    },
+    
+    "$id": {
+      "@id": "@id"
+    },
+    
+    "$defs": {
+      "@id": "kotoba:definitions"
+    }
+  }
+}
+

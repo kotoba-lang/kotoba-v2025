@@ -1,4 +1,4 @@
-# Kotoba: A Digital Computing System and Language
+# Kotoba: A Phonosematic Digital Computing System and Language
 
 <div align="center">
   <img src="public/hiragana_01_a.png.png" alt="Logo 01" width="80" height="80" />

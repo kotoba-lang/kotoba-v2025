@@ -1,0 +1,13 @@
+{
+  "@context": "schemas/kotoba-context.jsonld",
+  "@type": "kotoba:TopologyGraph",
+  "@id": "file://topology_data.jsonld",
+  "topology_graph": {
+    "@type": "kotoba:GraphInstance",
+    "edges": {
+      "@container": "@set",
+      "@type": "kotoba:Edge"
+    }
+  }
+}
+

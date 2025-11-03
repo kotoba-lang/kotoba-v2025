@@ -1,0 +1,19 @@
+{
+  "@context": "kotoba-context.jsonld",
+  "@id": "https://kotoba.ai/schemas/follows.schema.jsonld",
+  "@type": "kotoba:Follows",
+  "rdfs:label": "Follows",
+  "rdfs:comment": "Represents a User following another User",
+  "kotoba:type": "edge",
+  "kotoba:source": "User",
+  "kotoba:destination": "User",
+  "shacl:property": [
+    {
+      "shacl:path": "kotoba:since",
+      "shacl:datatype": "xsd:dateTime",
+      "rdfs:comment": "The date and time the follow relationship started",
+      "shacl:minCount": 1
+    }
+  ]
+}
+

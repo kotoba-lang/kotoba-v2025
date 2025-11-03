@@ -1,0 +1,14 @@
+{
+  "@context": "../../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Localization",
+  "@id": "file://examples/densha/locales/ja.jsonld",
+  "rdfs:label": "Japanese Localization",
+  "dc:language": "ja",
+  "dc:title": "電車 TODO アプリ",
+  "dc:description": "グラフベースの関係性でタスクを効率的に管理",
+  "kotoba:translations": {
+    "@type": "rdfs:Container",
+    "@container": "@index"
+  }
+}
+

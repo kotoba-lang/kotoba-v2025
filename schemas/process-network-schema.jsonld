@@ -1,0 +1,122 @@
+{
+  "@context": "kotoba-context.jsonld",
+  "@id": "https://example.org/gts-dpo-opengraph-merkle.schema.jsonld",
+  "@type": "kotoba:ProcessNetwork",
+  "rdfs:label": "Process Network as GTS(DPO)+OpenGraph with Merkle DAG & PG view",
+  "shacl:property": [
+    {
+      "shacl:path": "kotoba:meta",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:typeGraph",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 1
+    },
+    {
+      "shacl:path": "kotoba:graphs",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 1
+    },
+    {
+      "shacl:path": "kotoba:components",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:rules",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:strategies",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:queries",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:pgView",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    }
+  ],
+  "kotoba:definitions": {
+    "CID": {
+      "@type": "shacl:Datatype",
+      "shacl:datatype": "xsd:string",
+      "rdfs:comment": "Content ID (CIDv1-like)",
+      "shacl:pattern": "^[A-Za-z0-9_=-]{10,128}$"
+    },
+    "Id": {
+      "@type": "shacl:Datatype",
+      "shacl:datatype": "xsd:string",
+      "shacl:pattern": "^[A-Za-z_][A-Za-z0-9_\\-:.]{0,127}$"
+    },
+    "Attrs": {
+      "@type": "rdfs:Class",
+      "rdfs:comment": "Attributes object"
+    },
+    "Port": {
+      "@type": "rdfs:Class",
+      "shacl:property": [
+        {
+          "shacl:path": "kotoba:name",
+          "shacl:datatype": "xsd:string",
+          "shacl:minCount": 1
+        },
+        {
+          "shacl:path": "kotoba:direction",
+          "shacl:datatype": "xsd:string",
+          "shacl:in": ["in", "out", "bidirectional"],
+          "shacl:minCount": 1
+        }
+      ]
+    },
+    "Node": {
+      "@type": "rdfs:Class",
+      "shacl:property": [
+        {
+          "shacl:path": "kotoba:cid",
+          "shacl:nodeKind": "shacl:IRI",
+          "shacl:minCount": 1
+        },
+        {
+          "shacl:path": "kotoba:type",
+          "shacl:datatype": "xsd:string",
+          "shacl:minCount": 1
+        }
+      ]
+    },
+    "Edge": {
+      "@type": "rdfs:Class",
+      "shacl:property": [
+        {
+          "shacl:path": "kotoba:cid",
+          "shacl:nodeKind": "shacl:IRI",
+          "shacl:minCount": 1
+        },
+        {
+          "shacl:path": "kotoba:type",
+          "shacl:datatype": "xsd:string",
+          "shacl:minCount": 1
+        },
+        {
+          "shacl:path": "kotoba:src",
+          "shacl:datatype": "xsd:string",
+          "shacl:minCount": 1
+        },
+        {
+          "shacl:path": "kotoba:tgt",
+          "shacl:datatype": "xsd:string",
+          "shacl:minCount": 1
+        }
+      ]
+    }
+  }
+}
+
