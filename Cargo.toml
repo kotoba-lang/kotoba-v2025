@@ -9,6 +9,7 @@ members = [
     "crates/010-core/014-kotoba-schema",
     "crates/010-logic/019-kotoba-jsonld",
     "crates/010-logic/020-kotoba-os",
+    "crates/010-logic/021-kotoba-phonosemantic",
     "crates/010-logic/022-kotoba-owl-reasoner",
     "crates/010-core/015-kotoba-auth",
     "crates/010-core/016-kotoba-graph-core",
