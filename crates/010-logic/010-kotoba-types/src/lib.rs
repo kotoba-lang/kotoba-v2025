@@ -52,6 +52,30 @@ impl From<&str> for Cid {
     }
 }
 
+impl From<[u8; 32]> for Cid {
+    fn from(bytes: [u8; 32]) -> Self {
+        Cid(hex::encode(bytes))
+    }
+}
+
+impl From<u64> for Cid {
+    fn from(value: u64) -> Self {
+        Cid(value.to_string())
+    }
+}
+
+impl Ord for Cid {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0.cmp(&other.0)
+    }
+}
+
+impl PartialOrd for Cid {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 /// Vertex ID for graph nodes - Content-addressed and deterministic
 pub type VertexId = Cid;
 

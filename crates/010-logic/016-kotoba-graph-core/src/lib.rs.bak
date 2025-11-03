@@ -22,7 +22,7 @@ pub type Hash = KotobaHash;
 pub use graph::Graph;
 pub use algorithms::GraphStatistics;
 pub use canonical::{GraphCanonicalizer, CanonicalizationAlgorithm, CanonicalizationConfig, CanonicalizationResult};
-pub use merkle::{MerkleTree, MerkleTreeBuilder, MerkleConfig};
+pub use merkle::MerkleTreeBuilder;
 
 /// Graph ID type for content addressing
 pub type GraphId = Hash;
@@ -313,7 +313,7 @@ impl GraphProcessor {
     pub fn new() -> Self {
         Self {
             canonicalizer: canonical::GraphCanonicalizer::new(CanonicalizationAlgorithm::Bliss),
-            merkle_builder: merkle::MerkleTreeBuilder::new(MerkleConfig::default()),
+            merkle_builder: merkle::MerkleTreeBuilder::new(),
         }
     }
 
@@ -345,6 +345,63 @@ impl GraphProcessor {
     }
 }
 
+/// Merkle tree builder
+#[derive(Debug, Clone)]
+pub struct MerkleTreeBuilder {
+    /// Configuration
+    pub config: MerkleConfig,
+}
+
+impl MerkleTreeBuilder {
+    /// Create a new merkle tree builder
+    pub fn new() -> Self {
+        Self {
+            config: MerkleConfig::default(),
+        }
+    }
+
+    /// Build merkle tree from canonical graph
+    pub fn build_tree_from_graph(&self, canonicalization: &CanonicalizationResult) -> MerkleTree {
+        // Split canonical graph into chunks for merkle tree
+        let chunks = self.split_into_chunks(&canonicalization.canonical_graph);
+        MerkleTree::new(chunks)
+    }
+
+    /// Split data into chunks for merkle tree
+    fn split_into_chunks(&self, data: &[u8]) -> Vec<Vec<u8>> {
+        let chunk_size = self.config.chunk_size;
+        data.chunks(chunk_size)
+            .map(|chunk| chunk.to_vec())
+            .collect()
+    }
+}
+
+/// Merkle configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MerkleConfig {
+    /// Chunk size for merkle tree
+    pub chunk_size: usize,
+    /// Hash algorithm
+    pub hash_algorithm: HashAlgorithm,
+}
+
+impl Default for MerkleConfig {
+    fn default() -> Self {
+        Self {
+            chunk_size: 1024,
+            hash_algorithm: HashAlgorithm::Sha256,
+        }
+    }
+}
+
+/// Hash algorithm for merkle tree
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum HashAlgorithm {
+    /// SHA256
+    Sha256,
+    /// Blake3
+    Blake3,
+}
 
 /// Graph processing result
 #[derive(Debug, Clone, Serialize, Deserialize)]

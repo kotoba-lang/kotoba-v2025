@@ -384,6 +384,7 @@ impl Graph {
                     id: edge_id,
                     src: source_id.clone(),
                     dst: target_id.clone(),
+                    label: edge.label.clone(),
                     props: edge.properties.clone(),
                 },
             );
