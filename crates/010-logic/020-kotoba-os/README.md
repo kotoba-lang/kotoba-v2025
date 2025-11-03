@@ -91,12 +91,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Enable SHACL-based semantic actor selection
     kernel.mediator.set_strategy(kotoba_os::SelectionStrategy::ShaclSemantic);
 
+    // Enable self-evolution with hybrid strategy
+    kernel.enable_evolution(kotoba_os::EvolutionStrategy::Hybrid);
+
     kernel.register_default_actor("kotoba:performer/actor-1", "kotoba:capability/execution");
     kernel.start().await?;
 
     // Get inferred triples from OWL reasoning
     if let Some(inferred) = kernel.get_inferred_triples().await {
         println!("Inferred triples: {}", serde_json::to_string_pretty(&inferred)?);
+    }
+
+    // Get evolution history
+    if let Some(history) = kernel.evolution_history_jsonld() {
+        println!("Evolution history: {}", serde_json::to_string_pretty(&history)?);
+    }
+
+    // Get performance metrics
+    if let Some(evolution) = kernel.evolution_engine() {
+        for (process_id, metrics) in evolution.all_metrics() {
+            println!("Process {}: {} executions, {:.2}% success rate",
+                     process_id, metrics.execution_count, metrics.success_rate * 100.0);
+        }
     }
 
     Ok(())
@@ -111,6 +127,10 @@ The execution flow follows the KotobaOS pattern:
 Story (JSON-LD) → Kernel → ProcessHandler → [Process] → Mediator → Actor → Provenance
                                         ↓
                                    OWL Reasoning (optional)
+                                        ↓
+                              SHACL Validation (optional)
+                                        ↓
+                              Evolution Analysis (optional)
 ```
 
 1. **Story Loading**: Story is parsed from JSON-LD format
@@ -121,6 +141,7 @@ Story (JSON-LD) → Kernel → ProcessHandler → [Process] → Mediator → Act
 6. **Actor Selection**: Mediator selects appropriate actors for each process
 7. **Execution**: Actors perform processes and return results
 8. **Provenance Recording**: All execution history is recorded in JSON-LD/PROV-O format
+9. **Evolution Analysis** (optional): If enabled, analyzes provenance to discover optimization patterns
 
 ## Components
 
@@ -175,6 +196,7 @@ Records execution history in PROV-O format.
 - **JSON-LD Native**: All data structures use JSON-LD format
 - **OWL Reasoning**: Optional integration with fukurow for RDFS/OWL Lite/OWL DL reasoning
 - **SHACL Validation**: Optional validation of Process/Resource/Performer against SHACL shapes
+- **Self-Evolution**: Semantic Design Loop for continuous system improvement
 - **Provenance Tracking**: Complete execution history in PROV-O format
 - **Async Execution**: Built on Tokio for async/await support
 - **Type Safety**: Strong typing with Rust's type system

@@ -50,6 +50,8 @@ impl Kernel {
             reasoning_engine: None,
             #[cfg(feature = "reasoning")]
             shacl_validator: None,
+            #[cfg(feature = "reasoning")]
+            evolution_engine: None,
         })
     }
 
@@ -73,6 +75,7 @@ impl Kernel {
             on_process_end: None,
             reasoning_engine: Some(reasoning_engine),
             shacl_validator: Some(crate::ShaclValidator::new()),
+            evolution_engine: Some(crate::evolution::EvolutionEngine::new()),
         })
     }
 
@@ -164,6 +167,14 @@ impl Kernel {
             self.run_process(&process).await?;
         }
 
+        // Perform evolution analysis if enabled
+        #[cfg(feature = "reasoning")]
+        if let Some(ref mut evolution) = self.evolution_engine {
+            if let Err(e) = evolution.analyze_provenance(&self.provenance).await {
+                warn!("[Kernel] Evolution analysis failed: {}", e);
+            }
+        }
+
         info!("[Kernel] Shutdown.");
         Ok(())
     }
@@ -198,5 +209,33 @@ impl Kernel {
     #[cfg(feature = "reasoning")]
     pub fn enable_strict_validation(&mut self) {
         self.shacl_validator = Some(crate::ShaclValidator::strict());
+    }
+
+    /// Get evolution engine
+    #[cfg(feature = "reasoning")]
+    pub fn evolution_engine(&self) -> Option<&crate::evolution::EvolutionEngine> {
+        self.evolution_engine.as_ref()
+    }
+
+    /// Get evolution engine (mutable)
+    #[cfg(feature = "reasoning")]
+    pub fn evolution_engine_mut(&mut self) -> Option<&mut crate::evolution::EvolutionEngine> {
+        self.evolution_engine.as_mut()
+    }
+
+    /// Enable evolution with strategy
+    #[cfg(feature = "reasoning")]
+    pub fn enable_evolution(&mut self, strategy: crate::evolution::EvolutionStrategy) {
+        if let Some(ref mut evolution) = self.evolution_engine {
+            evolution.set_strategy(strategy);
+        } else {
+            self.evolution_engine = Some(crate::evolution::EvolutionEngine::with_strategy(strategy));
+        }
+    }
+
+    /// Get evolution history as JSON-LD
+    #[cfg(feature = "reasoning")]
+    pub fn evolution_history_jsonld(&self) -> Option<Value> {
+        self.evolution_engine.as_ref().map(|e| e.evolution_history_jsonld())
     }
 }

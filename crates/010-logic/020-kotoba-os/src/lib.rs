@@ -48,6 +48,7 @@
 //! ```
 
 pub mod actor;
+pub mod evolution;
 pub mod kernel;
 pub mod mediator;
 pub mod process_handler;
@@ -56,6 +57,7 @@ pub mod shacl_validator;
 pub mod types;
 
 pub use actor::{Actor, ActorTrait, DefaultActor};
+pub use evolution::{EvolutionEngine, EvolutionStrategy, ProcessMetrics};
 pub use kernel::Kernel;
 pub use mediator::{Mediator, SelectionStrategy};
 pub use process_handler::ProcessHandler;
