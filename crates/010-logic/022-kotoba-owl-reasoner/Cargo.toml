@@ -1,0 +1,48 @@
+[package]
+name = "kotoba-owl-reasoner"
+version = "0.1.22"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "OWL reasoning engine integration for Kotoba using fukurow"
+keywords = ["owl", "reasoning", "rdfs", "semantic-web", "fukurow"]
+categories = ["web-programming", "algorithms", "data-structures"]
+readme = "README.md"
+documentation = "https://docs.rs/kotoba-owl-reasoner"
+homepage = "https://github.com/com-junkawasaki/kotoba"
+
+[dependencies]
+# Kotoba ecosystem
+kotoba-jsonld = { path = "../019-kotoba-jsonld" }
+
+# fukurow crates (git dependencies)
+fukurow-core = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
+fukurow-store = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
+fukurow-rdfs = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
+fukurow-lite = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
+fukurow-dl = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
+fukurow-shacl = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
+fukurow-sparql = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
+fukurow-engine = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }
+
+# JSON processing
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+async-trait = "0.1"
+
+# RDF/JSON-LD processing
+sophia = { version = "0.8", features = ["jsonld", "xml"] }
+
+# Logging
+tracing = "0.1"
+
+[dev-dependencies]
+tokio-test = "0.4"
+
