@@ -21,7 +21,7 @@ hdk = "0.4"
 holochain_zome_types = "0.4"
 
 # Kotoba ecosystem
-kotoba-os = { path = "../010-logic/020-kotoba-os", features = ["reasoning"] }
+kotoba-os = { path = "../010-logic/020-kotoba-os" }
 kotoba-jsonld = { path = "../010-logic/019-kotoba-jsonld" }
 kotoba-owl-reasoner = { path = "../010-logic/022-kotoba-owl-reasoner" }
 kotoba-types = { path = "../010-logic/010-kotoba-types" }

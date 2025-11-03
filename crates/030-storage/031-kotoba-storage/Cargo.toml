@@ -9,7 +9,7 @@ keywords = ["storage", "database", "interface", "trait"]
 categories = ["database"]
 
 [dependencies]
-kotoba-core = { path = "../../010-core/012-kotoba-core" }
+# kotoba-core = { path = "../../010-core/012-kotoba-core" } # Removed: not used in source code
 kotoba-jsonld = { path = "../../010-logic/019-kotoba-jsonld" }
 serde = { workspace = true }
 serde_json = { workspace = true }

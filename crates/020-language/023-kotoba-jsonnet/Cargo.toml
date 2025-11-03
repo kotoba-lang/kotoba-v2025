@@ -9,10 +9,10 @@ keywords = ["jsonnet", "template", "configuration", "json", "yaml"]
 
 [dependencies]
 # Kotoba core dependencies
-kotoba-logic = { path = "../../010-core/009-kotoba-logic" }
-kotoba-types = { path = "../../010-core/010-kotoba-types" }
-kotoba-ir = { path = "../../010-core/011-kotoba-ir" }
-kotoba-rewrite-kernel = { path = "../../010-core/012-kotoba-rewrite-kernel" }
+kotoba-logic = { path = "../../010-logic/009-kotoba-logic" }
+kotoba-types = { path = "../../010-logic/010-kotoba-types" }
+kotoba-ir = { path = "../../010-logic/011-kotoba-ir" }
+kotoba-rewrite-kernel = { path = "../../010-logic/012-kotoba-rewrite-kernel" }
 kotoba-jsonld = { path = "../../010-logic/019-kotoba-jsonld" }
 
 # Standard dependencies

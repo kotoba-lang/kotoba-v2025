@@ -105,14 +105,18 @@
 
 ## 既知の問題
 
-1. **ワークスペースの依存関係の問題**
-   - `kotoba-os` → `kotoba-storage` → `kotoba-core` (存在しない)
-   - `kotoba-storage`が`crates/010-core/012-kotoba-core`を参照しているが、実際には存在しない
-   - 解決方法: 
-     - `kotoba-storage`の依存関係を確認し、`kotoba-core`への参照を削除または修正
-     - または、`kotoba-core`に相当するクレートを特定してパスを修正
+1. **ワークスペースの依存関係の問題** ✅ 解決済み
+   - `kotoba-os` → `kotoba-storage` → `kotoba-core` (存在しない) → 修正完了
+   - `kotoba-storage`から`kotoba-core`依存を削除
+   - 依存関係のパスを`010-core`から`010-logic`に修正
+   - 詳細は `WORKSPACE_FIX.md` を参照
 
-2. **Holochain環境の未セットアップ**
+2. **indexmapバージョン競合** ⚠️ 未解決（影響範囲外）
+   - `cargo-tarpaulin`（dev-dependency）と`kotoba-owl-reasoner`の間で`indexmap`のバージョン競合
+   - これは`kotoba-main`パッケージのdev-dependencyの問題で、`kotobas-tamaki-holochain`のビルドには直接影響しません
+   - `kotobas-tamaki-holochain`を単独でビルドする場合は問題ありません
+
+3. **Holochain環境の未セットアップ**
    - Holochain CLIがインストールされていない
    - 統合テストとエージェント間通信テストにはHolochain環境が必要
    - インストール方法: https://developer.holochain.org/docs/install/
