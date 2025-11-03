@@ -62,51 +62,24 @@ impl GraphRewritingTestFixture {
     }
 
     pub async fn setup_simple_graph(&self) -> Result<(), KotobaError> {
-        // Create a simple triangle graph: A -> B -> C -> A
+        use crate::test_helpers::{create_jsonld_vertex, create_jsonld_edge};
+        use serde_json::json;
+        
+        // Create a simple triangle graph: A -> B -> C -> A (JSON-LD format directly)
         let vertices = vec![
-            TestVertex {
-                id: 1,
-                label: "Node".to_string(),
-                properties: serde_json::json!({"name": "A", "value": 10}),
-            },
-            TestVertex {
-                id: 2,
-                label: "Node".to_string(),
-                properties: serde_json::json!({"name": "B", "value": 20}),
-            },
-            TestVertex {
-                id: 3,
-                label: "Node".to_string(),
-                properties: serde_json::json!({"name": "C", "value": 30}),
-            },
+            create_jsonld_vertex(1, "Node", &[("name", json!("A")), ("value", json!(10))]),
+            create_jsonld_vertex(2, "Node", &[("name", json!("B")), ("value", json!(20))]),
+            create_jsonld_vertex(3, "Node", &[("name", json!("C")), ("value", json!(30))]),
         ];
 
         let edges = vec![
-            TestEdge {
-                id: 1,
-                from: 1,
-                to: 2,
-                label: "connects".to_string(),
-                properties: serde_json::json!({"weight": 1.0}),
-            },
-            TestEdge {
-                id: 2,
-                from: 2,
-                to: 3,
-                label: "connects".to_string(),
-                properties: serde_json::json!({"weight": 1.0}),
-            },
-            TestEdge {
-                id: 3,
-                from: 3,
-                to: 1,
-                label: "connects".to_string(),
-                properties: serde_json::json!({"weight": 1.0}),
-            },
+            create_jsonld_edge(1, 1, 2, "connects", &[("weight", json!(1.0))]),
+            create_jsonld_edge(2, 2, 3, "connects", &[("weight", json!(1.0))]),
+            create_jsonld_edge(3, 3, 1, "connects", &[("weight", json!(1.0))]),
         ];
 
         // Store vertices
-        for vertex in &vertices {
+        for (idx, vertex_data) in vertices.iter().enumerate() {
             let key = format!("vertex:{}", vertex.id);
             let data = serde_json::to_vec(vertex)?;
             self.storage.put(key.as_bytes(), &data).await?;
@@ -141,7 +114,12 @@ impl GraphRewritingTestFixture {
             if key.starts_with("edge:") {
                 if let Ok(Some(data)) = self.storage.get(key.as_bytes()).await {
                     if let Ok(edge) = serde_json::from_slice::<serde_json::Value>(&data) {
-                        if let (Some(from), Some(to)) = (edge["from"].as_u64(), edge["to"].as_u64()) {
+                        // JSON-LD format: use kotoba: prefixed keys
+                        let from = edge.get("kotoba:from").and_then(|v| v.as_u64())
+                            .or_else(|| edge.get("from").and_then(|v| v.as_u64()));
+                        let to = edge.get("kotoba:to").and_then(|v| v.as_u64())
+                            .or_else(|| edge.get("to").and_then(|v| v.as_u64()));
+                        if let (Some(from), Some(to)) = (from, to) {
                             edges.push((from, to));
                         }
                     }

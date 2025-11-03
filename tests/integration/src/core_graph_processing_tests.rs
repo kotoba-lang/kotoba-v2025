@@ -201,32 +201,22 @@ mod tests {
 
     #[tokio::test]
     async fn test_core_graph_structure_operations() {
+        use crate::test_helpers::{create_jsonld_vertex, create_jsonld_edge};
+        use serde_json::json;
+        
         let fixture = CoreGraphTestFixture::new();
 
-        // Create a simple graph structure
+        // Create a simple graph structure (JSON-LD format directly)
         // Vertex 1: Person (Alice)
-        let vertex1_data = serde_json::json!({
-            "id": 1,
-            "label": "Person",
-            "properties": {"name": "Alice"}
-        });
+        let vertex1_data = create_jsonld_vertex(1, "Person", &[("name", json!("Alice"))]);
         fixture.storage.put(b"vertex:1", &serde_json::to_vec(&vertex1_data).unwrap()).await.unwrap();
 
         // Vertex 2: Person (Bob)
-        let vertex2_data = serde_json::json!({
-            "id": 2,
-            "label": "Person",
-            "properties": {"name": "Bob"}
-        });
+        let vertex2_data = create_jsonld_vertex(2, "Person", &[("name", json!("Bob"))]);
         fixture.storage.put(b"vertex:2", &serde_json::to_vec(&vertex2_data).unwrap()).await.unwrap();
 
         // Edge: Alice -> Bob (KNOWS)
-        let edge_data = serde_json::json!({
-            "id": 1,
-            "from": 1,
-            "to": 2,
-            "label": "KNOWS"
-        });
+        let edge_data = create_jsonld_edge(1, 1, 2, "KNOWS", &[]);
         fixture.storage.put(b"edge:1", &serde_json::to_vec(&edge_data).unwrap()).await.unwrap();
 
         // Verify graph structure (individual key checks)

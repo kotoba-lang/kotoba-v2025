@@ -37,45 +37,34 @@ impl QueryEngineTestFixture {
     }
 
     pub async fn setup_sample_graph(&self) -> Result<(), KotobaError> {
-        // Create sample vertices
+        use crate::test_helpers::{create_jsonld_vertex, create_jsonld_edge};
+        use serde_json::json;
+        
+        // Create sample vertices (JSON-LD format directly)
         let vertices = vec![
-            (VertexId::new(1), "Person", serde_json::json!({"name": "Alice", "age": 30})),
-            (VertexId::new(2), "Person", serde_json::json!({"name": "Bob", "age": 25})),
-            (VertexId::new(3), "Person", serde_json::json!({"name": "Charlie", "age": 35})),
-            (VertexId::new(4), "Company", serde_json::json!({"name": "TechCorp", "industry": "Technology"})),
+            (VertexId::new(1), create_jsonld_vertex(1, "Person", &[("name", json!("Alice")), ("age", json!(30))])),
+            (VertexId::new(2), create_jsonld_vertex(2, "Person", &[("name", json!("Bob")), ("age", json!(25))])),
+            (VertexId::new(3), create_jsonld_vertex(3, "Person", &[("name", json!("Charlie")), ("age", json!(35))])),
+            (VertexId::new(4), create_jsonld_vertex(4, "Company", &[("name", json!("TechCorp")), ("industry", json!("Technology"))])),
         ];
 
-        // Store vertices
-        for (id, label, props) in vertices {
-            let vertex_data = serde_json::json!({
-                "id": id.value(),
-                "label": label,
-                "properties": props
-            });
-
+        // Store vertices (JSON-LD format)
+        for (id, vertex_data) in vertices {
             let key = format!("vertex:{}", id.value());
             let data = serde_json::to_vec(&vertex_data)?;
             self.storage.put(key.as_bytes(), &data).await?;
         }
 
-        // Create sample edges
+        // Create sample edges (JSON-LD format directly)
         let edges = vec![
-            (EdgeId::new(1), VertexId::new(1), VertexId::new(2), "KNOWS", serde_json::json!({"since": "2020"})),
-            (EdgeId::new(2), VertexId::new(2), VertexId::new(3), "KNOWS", serde_json::json!({"since": "2021"})),
-            (EdgeId::new(3), VertexId::new(1), VertexId::new(4), "WORKS_AT", serde_json::json!({"role": "Engineer"})),
-            (EdgeId::new(4), VertexId::new(2), VertexId::new(4), "WORKS_AT", serde_json::json!({"role": "Manager"})),
+            (EdgeId::new(1), create_jsonld_edge(1, 1, 2, "KNOWS", &[("since", json!("2020"))])),
+            (EdgeId::new(2), create_jsonld_edge(2, 2, 3, "KNOWS", &[("since", json!("2021"))])),
+            (EdgeId::new(3), create_jsonld_edge(3, 1, 4, "WORKS_AT", &[("role", json!("Engineer"))])),
+            (EdgeId::new(4), create_jsonld_edge(4, 2, 4, "WORKS_AT", &[("role", json!("Manager"))])),
         ];
 
-        // Store edges
-        for (id, from, to, label, props) in edges {
-            let edge_data = serde_json::json!({
-                "id": id.value(),
-                "from": from.value(),
-                "to": to.value(),
-                "label": label,
-                "properties": props
-            });
-
+        // Store edges (JSON-LD format)
+        for (id, edge_data) in edges {
             let key = format!("edge:{}", id.value());
             let data = serde_json::to_vec(&edge_data)?;
             self.storage.put(key.as_bytes(), &data).await?;
