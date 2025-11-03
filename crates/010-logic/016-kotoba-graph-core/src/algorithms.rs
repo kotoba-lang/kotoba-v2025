@@ -3,7 +3,7 @@
 //! This module provides graph algorithms for traversal, analysis,
 //! and transformation operations.
 
-use super::{Hash, Graph, *};
+use super::{Hash as GraphHash, Graph, *};
 use std::collections::{HashMap, HashSet, VecDeque};
 
 /// Graph traversal algorithms

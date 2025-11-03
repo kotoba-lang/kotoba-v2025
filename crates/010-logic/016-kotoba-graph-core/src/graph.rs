@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::Arc;
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use crate::GraphStatistics;
 
 // Re-export types from kotoba-types
 // Note: Node, Edge, GraphKind, Typing, Boundary, Port, PortDirection, Attrs are not defined in kotoba-types
@@ -398,7 +399,8 @@ impl Graph {
 
     /// Convert to GraphInstance with computed CID
     pub fn to_graph_instance_with_cid(&self) -> KotobaResult<GraphInstance> {
-        let graph_instance = self.to_graph_instance(generate_cid("temp"));
+        let temp_cid = Cid::from("temp");
+        let graph_instance = self.to_graph_instance(temp_cid);
         Ok(GraphInstance {
             id: "graph".to_string(),
             core: graph_instance.core,

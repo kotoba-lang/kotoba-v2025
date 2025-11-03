@@ -4,7 +4,7 @@
 //! graph integrity and enabling efficient proof generation.
 
 use crate::graph::Graph;
-use crate::Hash;
+use crate::Hash as GraphHash;
 use kotoba_types::KotobaError;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
@@ -12,7 +12,7 @@ use super::{MerkleNode, MerkleTree};
 
 impl MerkleTree {
     /// Create a new merkle tree from leaves
-    pub fn from_leaves(leaves: Vec<Hash>) -> Self {
+    pub fn from_leaves(leaves: Vec<GraphHash>) -> Self {
         let leaf_count = leaves.len();
         let height = if leaf_count == 0 {
             0
@@ -57,7 +57,7 @@ impl MerkleTree {
                     combined.extend_from_slice(left.hash.as_bytes());
                     combined.extend_from_slice(right.hash.as_bytes());
 
-                    let hash = Hash::from_sha256(&combined);
+                    let hash = GraphHash::from_sha256(&combined);
 
                     new_level.push(MerkleNode {
                         hash,
@@ -76,7 +76,7 @@ impl MerkleTree {
 
         nodes.into_iter().next().unwrap_or_else(|| {
             MerkleNode {
-                hash: Hash::from_sha256(&[]),
+                hash: GraphHash::from_sha256(&[]),
                 left: None,
                 right: None,
                 data: None,
@@ -146,7 +146,7 @@ impl MerkleTree {
     }
 
     /// Verify a merkle proof
-    pub fn verify_proof(&self, proof: &MerkleProof, leaf_hash: Hash) -> bool {
+    pub fn verify_proof(&self, proof: &MerkleProof, leaf_hash: GraphHash) -> bool {
         if proof.leaf_index >= self.leaf_count {
             return false;
         }
@@ -156,7 +156,7 @@ impl MerkleTree {
     }
 
     /// Compute root hash from proof
-    fn compute_root_from_proof(&self, proof: &MerkleProof, leaf_hash: Hash) -> Hash {
+    fn compute_root_from_proof(&self, proof: &MerkleProof, leaf_hash: GraphHash) -> GraphHash {
         let mut current_hash = leaf_hash;
         let mut proof_index = 0;
 
