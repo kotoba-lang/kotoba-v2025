@@ -156,7 +156,7 @@ impl GraphCanonicalizer {
             (label, degree)
         });
 
-        let node_ordering: Vec<usize> = vertex_entries.into_iter().map(|(_, i)| i).collect();
+        let node_ordering: Vec<usize> = vertex_entries.iter().map(|(_, i)| *i).collect();
 
         // For edges, sort by source and target indices in the node ordering
         let mut edge_entries: Vec<(EdgeId, usize)> = graph.edges.keys()
@@ -236,7 +236,9 @@ impl GraphCanonicalizer {
         _node_ordering: &[usize],
     ) -> Vec<usize> {
         // Placeholder implementation
-        (0..graph.edge_count()).collect()
+        // Note: Edge count would need to be computed from adjacency matrix
+        // For now, return empty vector as placeholder
+        Vec::new()
     }
 }
 

@@ -502,7 +502,7 @@ impl KotobaError {
 // No need for re-export as they are already public
 
 /// Content hash - SHA-256 hash value
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Hash(pub [u8; 32]);
 
 impl Hash {
@@ -548,6 +548,12 @@ impl From<&str> for Hash {
             hash_bytes.copy_from_slice(&bytes);
         }
         Hash(hash_bytes)
+    }
+}
+
+impl Default for Hash {
+    fn default() -> Self {
+        Hash([0u8; 32])
     }
 }
 

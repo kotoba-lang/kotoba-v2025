@@ -407,6 +407,7 @@ pub struct GraphStatistics {
     pub vertex_count: usize,
     pub edge_count: usize,
     pub average_degree: f64,
+    pub max_degree: usize,
     pub density: f64,
     pub is_connected: bool,
     pub has_cycles: bool,

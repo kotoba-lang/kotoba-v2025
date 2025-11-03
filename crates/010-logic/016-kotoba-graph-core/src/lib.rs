@@ -20,8 +20,10 @@ pub type Hash = KotobaHash;
 
 pub use graph::Graph;
 pub use algorithms::GraphStatistics;
-pub use canonical::{GraphCanonicalizer, CanonicalizationAlgorithm, CanonicalizationConfig, CanonicalizationResult};
-pub use merkle::{MerkleTree, MerkleTreeBuilder, MerkleConfig};
+pub use canonical::GraphCanonicalizer;
+// CanonicalizationAlgorithm, CanonicalizationConfig, CanonicalizationResult are defined in this file (lib.rs)
+// MerkleTree is defined in this file (lib.rs)
+pub use merkle::{MerkleTreeBuilder, MerkleConfig};
 
 /// Graph ID type for content addressing
 pub type GraphId = Hash;
@@ -88,118 +90,7 @@ pub struct MerkleTree {
     pub leaf_count: usize,
 }
 
-impl MerkleTree {
-    /// Create a new merkle tree from data
-    pub fn new(data: Vec<Vec<u8>>) -> Self {
-        let leaf_count = data.len();
-        let height = if leaf_count == 0 { 0 } else { (leaf_count as f64).log2().ceil() as usize + 1 };
-
-        let mut tree = Self {
-            root: None,
-            height,
-            leaf_count,
-        };
-
-        tree.root = Some(tree.build_tree(data, 0, leaf_count, 0));
-        tree
-    }
-
-    /// Build the merkle tree recursively
-    fn build_tree(&self, data: Vec<Vec<u8>>, start: usize, end: usize, level: usize) -> MerkleNode {
-        if start == end {
-            // Leaf node
-            let hash = Hash::from_sha256(&data[start]);
-            MerkleNode {
-                hash,
-                left: None,
-                right: None,
-                data: Some(data[start].clone()),
-            }
-        } else if start + 1 == end {
-            // Single node at this level
-            let hash = Hash::from_sha256(&data[start]);
-            MerkleNode {
-                hash,
-                left: None,
-                right: None,
-                data: Some(data[start].clone()),
-            }
-        } else {
-            // Internal node
-            let mid = (start + end) / 2;
-            let left = self.build_tree(data.clone(), start, mid, level + 1);
-            let right = self.build_tree(data, mid, end, level + 1);
-
-            let mut combined = Vec::new();
-            combined.extend_from_slice(&left.hash.0);
-            combined.extend_from_slice(&right.hash.0);
-
-            let hash = Hash::from_sha256(&combined);
-
-            MerkleNode {
-                hash,
-                left: Some(Box::new(left)),
-                right: Some(Box::new(right)),
-                data: None,
-            }
-        }
-    }
-
-    /// Get root hash
-    pub fn root_hash(&self) -> Option<Hash> {
-        self.root.as_ref().map(|node| node.hash.clone())
-    }
-
-    /// Verify merkle proof
-    pub fn verify_proof(&self, proof: &[Hash], leaf_index: usize, leaf_hash: Hash) -> bool {
-        if let Some(root) = &self.root {
-            self.verify_proof_recursive(root, proof, 0, leaf_index, leaf_hash)
-        } else {
-            false
-        }
-    }
-
-    /// Verify merkle proof recursively
-    fn verify_proof_recursive(
-        &self,
-        node: &MerkleNode,
-        proof: &[Hash],
-        proof_index: usize,
-        leaf_index: usize,
-        leaf_hash: Hash,
-    ) -> bool {
-        if proof_index >= proof.len() {
-            return node.hash == leaf_hash;
-        }
-
-        if let (Some(left), Some(right)) = (&node.left, &node.right) {
-            let mid = self.leaf_count / 2;
-            let (expected_hash, next_proof_index) = if leaf_index < mid {
-                // Left subtree
-                let computed_hash = Hash::from_sha256({
-                    let mut combined = Vec::new();
-                    combined.extend_from_slice(&left.hash.0);
-                    combined.extend_from_slice(&proof[proof_index].0);
-                    combined
-                });
-                (computed_hash, proof_index + 1)
-            } else {
-                // Right subtree
-                let computed_hash = Hash::from_sha256({
-                    let mut combined = Vec::new();
-                    combined.extend_from_slice(&proof[proof_index].0);
-                    combined.extend_from_slice(&right.hash.0);
-                    combined
-                });
-                (computed_hash, proof_index + 1)
-            };
-
-            self.verify_proof_recursive(&expected_hash.to_string(), proof, next_proof_index, leaf_index, leaf_hash)
-        } else {
-            false
-        }
-    }
-}
+// MerkleTree implementation is in merkle.rs
 
 // GraphCanonicalizer is defined in canonical.rs
 

@@ -168,7 +168,7 @@ impl Graph {
 
     /// Add a vertex to the graph
     pub fn add_vertex(&mut self, vertex: VertexData) -> VertexId {
-        let id = vertex.id;
+        let id = vertex.id.clone();
         for label in &vertex.labels {
             self.vertex_labels.entry(label.clone()).or_insert_with(HashSet::new).insert(id);
         }
@@ -178,18 +178,18 @@ impl Graph {
 
     /// Add an edge to the graph
     pub fn add_edge(&mut self, edge: EdgeData) -> EdgeId {
-        let id = edge.id;
-        let src = edge.src;
-        let dst = edge.dst;
+        let id = edge.id.clone();
+        let src = edge.src.clone();
+        let dst = edge.dst.clone();
 
         // Update adjacency lists
-        self.adj_out.entry(src).or_insert_with(HashSet::new).insert(dst);
+        self.adj_out.entry(src.clone()).or_insert_with(HashSet::new).insert(dst.clone());
         self.adj_in.entry(dst).or_insert_with(HashSet::new).insert(src);
 
         // Update label index
-        self.edge_labels.entry(edge.label.clone()).or_insert_with(HashSet::new).insert(id);
+        self.edge_labels.entry(edge.label.clone()).or_insert_with(HashSet::new).insert(id.clone());
 
-        self.edges.insert(id, edge);
+        self.edges.insert(id.clone(), edge);
         id
     }
 
@@ -395,6 +395,36 @@ impl Graph {
         }
 
         Ok(graph)
+    }
+
+    /// Convert to GraphInstance
+    pub fn to_graph_instance(&self, cid: Cid) -> GraphInstance {
+        let vertices: Vec<kotoba_types::VertexData> = self.vertices.values()
+            .map(|v| kotoba_types::VertexData {
+                id: v.id.clone(),
+                label: v.labels.clone(),
+                properties: v.props.clone(),
+            })
+            .collect();
+
+        let edges: Vec<kotoba_types::EdgeData> = self.edges.values()
+            .map(|e| kotoba_types::EdgeData {
+                id: e.id.clone(),
+                source: e.src.clone(),
+                target: e.dst.clone(),
+                label: e.label.clone(),
+                properties: e.props.clone(),
+            })
+            .collect();
+
+        GraphInstance {
+            id: cid.as_str().to_string(),
+            core: GraphCore {
+                vertices,
+                edges,
+            },
+            metadata: HashMap::new(),
+        }
     }
 
     /// Convert to GraphInstance with computed CID
