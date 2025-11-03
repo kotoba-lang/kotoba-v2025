@@ -147,9 +147,76 @@ impl EvolutionEngine {
     /// Extract optimization patterns from inferred triples
     #[cfg(feature = "reasoning")]
     async fn extract_patterns(&self, inferred_jsonld: &Value) -> Option<Vec<Value>> {
-        // TODO: Implement pattern extraction logic
-        // For now, return placeholder
-        Some(Vec::new())
+        use kotoba_owl_reasoner::execute_sparql;
+        
+        // Extract patterns using SPARQL queries
+        // Pattern 1: Frequently co-occurring processes
+        let cooccurrence_query = r#"
+            PREFIX kotoba: <https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld#vocab>
+            SELECT ?process1 ?process2 (COUNT(*) as ?count)
+            WHERE {
+                ?event1 kotoba:wasGeneratedBy ?process1 .
+                ?event2 kotoba:wasGeneratedBy ?process2 .
+                ?event1 kotoba:endedAtTime ?time1 .
+                ?event2 kotoba:endedAtTime ?time2 .
+                FILTER(?process1 != ?process2)
+                FILTER(ABS(?time1 - ?time2) < 3600)  # Within 1 hour
+            }
+            GROUP BY ?process1 ?process2
+            HAVING (COUNT(*) > 3)
+            ORDER BY DESC(?count)
+            LIMIT 10
+        "#;
+        
+        let mut patterns = Vec::new();
+        
+        // Execute pattern queries
+        if let Ok(cooccurrence_result) = execute_sparql(cooccurrence_query, inferred_jsonld).await {
+            if let Some(graph) = cooccurrence_result.get("@graph").and_then(|g| g.as_array()) {
+                for pattern in graph {
+                    patterns.push(json!({
+                        "@type": "kotoba:CooccurrencePattern",
+                        "kotoba:process1": pattern.get("process1"),
+                        "kotoba:process2": pattern.get("process2"),
+                        "kotoba:frequency": pattern.get("count"),
+                    }));
+                }
+            }
+        }
+        
+        // Pattern 2: Actor performance patterns
+        let actor_perf_query = r#"
+            PREFIX kotoba: <https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld#vocab>
+            SELECT ?actor ?process (AVG(?time) as ?avgTime) (COUNT(*) as ?count)
+            WHERE {
+                ?event kotoba:wasGeneratedBy ?process .
+                ?event kotoba:wasAssociatedWith ?actor .
+                ?event kotoba:executionTime ?time .
+            }
+            GROUP BY ?actor ?process
+            HAVING (COUNT(*) > 2)
+            ORDER BY ?avgTime
+        "#;
+        
+        if let Ok(perf_result) = execute_sparql(actor_perf_query, inferred_jsonld).await {
+            if let Some(graph) = perf_result.get("@graph").and_then(|g| g.as_array()) {
+                for pattern in graph {
+                    patterns.push(json!({
+                        "@type": "kotoba:PerformancePattern",
+                        "kotoba:actor": pattern.get("actor"),
+                        "kotoba:process": pattern.get("process"),
+                        "kotoba:avgExecutionTime": pattern.get("avgTime"),
+                        "kotoba:executionCount": pattern.get("count"),
+                    }));
+                }
+            }
+        }
+        
+        if patterns.is_empty() {
+            None
+        } else {
+            Some(patterns)
+        }
     }
 
     /// Analyze performance metrics from provenance
@@ -228,12 +295,128 @@ impl EvolutionEngine {
     /// Refine SHACL shapes based on discovered patterns and metrics
     #[cfg(feature = "reasoning")]
     pub async fn refine_shapes(
-        &self,
+        &mut self,
         story: &Story,
     ) -> Result<Story> {
-        // TODO: Implement shape refinement logic
-        // For now, return original story
-        Ok(story.clone())
+        use kotoba_owl_reasoner::{default_process_shape, validate_process_shape};
+        use serde_json::json;
+        
+        // Convert story to JSON-LD
+        let story_jsonld = serde_json::to_value(story)
+            .map_err(|e| KotobaOsError::Other(anyhow::anyhow!("Failed to serialize story: {}", e)))?;
+        
+        // Get processes from story
+        let processes = if let Some(graph) = story_jsonld.get("@graph").and_then(|g| g.as_array()) {
+            graph.iter()
+                .filter_map(|node| {
+                    if let Some(type_val) = node.get("@type").and_then(|t| t.as_str()) {
+                        if type_val.contains("Process") {
+                            Some(node.clone())
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>()
+        } else {
+            Vec::new()
+        };
+        
+        let mut refined_processes = Vec::new();
+        
+        // Refine each process shape based on metrics
+        for process_jsonld in processes {
+            if let Some(process_id) = process_jsonld.get("@id").and_then(|id| id.as_str()) {
+                if let Some(metrics) = self.metrics.get(process_id) {
+                    // Get current shape
+                    let mut shape = default_process_shape();
+                    
+                    // Refine shape based on metrics
+                    if metrics.success_rate < 0.5 {
+                        // Low success rate - make constraints stricter
+                        if let Some(properties) = shape.get_mut("sh:property").and_then(|p| p.as_array_mut()) {
+                            for prop in properties {
+                                if let Some(path) = prop.get("sh:path").and_then(|p| p.as_str()) {
+                                    if path.contains("performedBy") {
+                                        // Ensure performedBy is required
+                                        prop.as_object_mut().unwrap().insert(
+                                            "sh:minCount".to_string(),
+                                            json!(1)
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // If preferred actor exists, add constraint
+                    if let Some(preferred_actor) = &metrics.preferred_actor {
+                        if let Some(properties) = shape.get_mut("sh:property").and_then(|p| p.as_array_mut()) {
+                            properties.push(json!({
+                                "sh:path": "kotoba:preferredActor",
+                                "sh:hasValue": preferred_actor,
+                                "sh:minCount": 0,
+                                "sh:maxCount": 1
+                            }));
+                        }
+                    }
+                    
+                    // Validate refined shape
+                    let validation_result = validate_process_shape(&process_jsonld, &shape).await
+                        .map_err(|e| KotobaOsError::Other(anyhow::anyhow!("Shape validation failed: {}", e)))?;
+                    
+                    if validation_result.valid {
+                        // Record refinement
+                        self.record_evolution(json!({
+                            "@type": "kotoba:ShapeRefinement",
+                            "kotoba:processId": process_id,
+                            "kotoba:refinedShape": shape,
+                            "kotoba:reason": format!("Success rate: {:.2}%, Preferred actor: {:?}", 
+                                metrics.success_rate * 100.0, metrics.preferred_actor),
+                        }));
+                        
+                        refined_processes.push(process_jsonld);
+                    } else {
+                        // Keep original if refinement invalid
+                        warn!("[EvolutionEngine] Shape refinement failed for process {}, keeping original", process_id);
+                        refined_processes.push(process_jsonld);
+                    }
+                } else {
+                    // No metrics available, keep original
+                    refined_processes.push(process_jsonld);
+                }
+            } else {
+                refined_processes.push(process_jsonld);
+            }
+        }
+        
+        // Reconstruct story with refined processes
+        let mut refined_story_jsonld = story_jsonld.clone();
+        if let Some(graph) = refined_story_jsonld.get_mut("@graph").and_then(|g| g.as_array_mut()) {
+            // Replace processes with refined ones
+            for (i, node) in graph.iter_mut().enumerate() {
+                if let Some(type_val) = node.get("@type").and_then(|t| t.as_str()) {
+                    if type_val.contains("Process") {
+                        if let Some(id) = node.get("@id").and_then(|id| id.as_str()) {
+                            if let Some(refined) = refined_processes.iter().find(|p| {
+                                p.get("@id").and_then(|pid| pid.as_str()) == Some(id)
+                            }) {
+                                graph[i] = refined.clone();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Convert back to Story
+        let refined_story = Story::from_value(refined_story_jsonld)
+            .map_err(|e| KotobaOsError::StoryValidation(e.to_string()))?;
+        
+        info!("[EvolutionEngine] Refined {} processes", refined_processes.len());
+        Ok(refined_story)
     }
 
     /// Get performance metrics for a process

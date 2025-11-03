@@ -1,0 +1,59 @@
+[package]
+name = "kotobas-tamaki-holochain"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Kotobasos Holochain implementation - Agent-centric distributed execution platform"
+keywords = ["holochain", "kotobasos", "distributed", "agent-centric", "dht", "merkle-dag"]
+categories = ["web-programming", "asynchronous", "distributed-computing"]
+readme = "README.md"
+documentation = "https://docs.rs/kotobas-tamaki-holochain"
+homepage = "https://github.com/com-junkawasaki/kotoba"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "kotobas_tamaki_holochain"
+
+[dependencies]
+# Holochain dependencies
+hdk = "0.4"
+holochain_zome_types = "0.4"
+
+# Kotoba ecosystem
+kotoba-os = { path = "../010-logic/020-kotoba-os", features = ["reasoning"] }
+kotoba-jsonld = { path = "../010-logic/019-kotoba-jsonld" }
+kotoba-owl-reasoner = { path = "../010-logic/022-kotoba-owl-reasoner" }
+kotoba-types = { path = "../010-logic/010-kotoba-types" }
+kotoba-cid = { path = "../010-logic/013-kotoba-cid" }
+
+# JSON processing
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID generation
+uuid = { version = "1.18", features = ["v4", "serde"] }
+
+# Logging
+tracing = "0.1"
+
+# Async
+async-trait = "0.1"
+
+# Encoding
+hex = "0.4"
+sha2 = "0.10"
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[features]
+default = []
+

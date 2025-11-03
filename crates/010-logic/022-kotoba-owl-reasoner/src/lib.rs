@@ -67,6 +67,7 @@ pub use shacl::{
     validate_resource_shape, validate_performer_shape,
     default_process_shape, default_resource_shape, default_performer_shape,
 };
+pub use sparql::{execute_sparql, compile_shape_to_sparql};
 
 /// Error types for OWL reasoning operations
 #[derive(Debug, thiserror::Error)]

@@ -56,6 +56,7 @@
 pub mod actor;
 pub mod error;
 pub mod evolution;
+pub mod graph_stream;
 pub mod kernel;
 pub mod mediator;
 pub mod process_handler;
@@ -66,6 +67,7 @@ pub mod types;
 pub use actor::{Actor, ActorTrait, DefaultActor};
 pub use error::{ErrorCategory, ErrorContext, ErrorEscalator, RetryConfig, RetryExecutor};
 pub use evolution::{EvolutionEngine, EvolutionStrategy, ProcessMetrics};
+pub use graph_stream::{GraphStream, PatternDetector, StreamSubscription};
 pub use kernel::Kernel;
 pub use mediator::{Mediator, SelectionStrategy};
 pub use process_handler::ProcessHandler;

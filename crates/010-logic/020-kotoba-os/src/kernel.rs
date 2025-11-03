@@ -35,6 +35,8 @@ pub struct Kernel {
     retry_executor: RetryExecutor,
     /// Error escalator for error management
     error_escalator: ErrorEscalator,
+    /// GraphStream engine for real-time processing (optional)
+    graph_stream: Option<Arc<GraphStream>>,
 
     /// OWL reasoning engine (optional)
     #[cfg(feature = "reasoning")]
@@ -55,6 +57,7 @@ impl Kernel {
             on_process_end: None,
             retry_executor: RetryExecutor::default(),
             error_escalator: ErrorEscalator::default(),
+            graph_stream: None,
             #[cfg(feature = "reasoning")]
             reasoning_engine: None,
             #[cfg(feature = "reasoning")]
@@ -85,6 +88,7 @@ impl Kernel {
             on_process_end: None,
             retry_executor: RetryExecutor::default(),
             error_escalator: ErrorEscalator::default(),
+            graph_stream: None,
             reasoning_engine: Some(reasoning_engine),
             shacl_validator: Some(crate::ShaclValidator::new()),
             evolution_engine: Some(crate::evolution::EvolutionEngine::new()),
@@ -263,6 +267,16 @@ impl Kernel {
             )));
         }
 
+        // Publish to GraphStream if enabled
+        if let Some(ref stream) = self.graph_stream {
+            let events = self.provenance.events();
+            if let Some(event) = events.last() {
+                if let Err(e) = stream.publish(event).await {
+                    warn!("[Kernel] Failed to publish event to GraphStream: {}", e);
+                }
+            }
+        }
+
         // Call on_process_end callback
         if let Some(callback) = &self.on_process_end {
             callback(process);
@@ -298,6 +312,23 @@ impl Kernel {
         if let Some(ref mut evolution) = self.evolution_engine {
             if let Err(e) = evolution.analyze_provenance(&self.provenance).await {
                 warn!("[Kernel] Evolution analysis failed: {}", e);
+            } else {
+                // Refine shapes based on discovered patterns
+                match evolution.refine_shapes(&self.story).await {
+                    Ok(refined_story) => {
+                        let pattern_count = evolution.evolution_history_jsonld()
+                            .get("@graph")
+                            .and_then(|g| g.as_array())
+                            .map(|a| a.len())
+                            .unwrap_or(0);
+                        info!("[Kernel] Shape refinement completed, {} patterns discovered", pattern_count);
+                        // Note: Refined story could be used in next iteration
+                        // For now, we just log the refinement
+                    }
+                    Err(e) => {
+                        warn!("[Kernel] Shape refinement failed: {}", e);
+                    }
+                }
             }
         }
 
@@ -363,5 +394,16 @@ impl Kernel {
     #[cfg(feature = "reasoning")]
     pub fn evolution_history_jsonld(&self) -> Option<Value> {
         self.evolution_engine.as_ref().map(|e| e.evolution_history_jsonld())
+    }
+
+    /// Enable GraphStream for real-time processing
+    pub fn enable_graph_stream(&mut self, stream: GraphStream) {
+        self.graph_stream = Some(Arc::new(stream));
+        info!("[Kernel] GraphStream enabled");
+    }
+
+    /// Get GraphStream instance (if enabled)
+    pub fn graph_stream(&self) -> Option<Arc<GraphStream>> {
+        self.graph_stream.clone()
     }
 }
