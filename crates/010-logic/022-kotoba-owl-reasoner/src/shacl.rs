@@ -4,9 +4,10 @@
 
 use crate::fukurow_binding::FukurowStore;
 use crate::Result;
-use fukurow_shacl::loader::ShapesGraph;
+use fukurow_shacl::loader::{DefaultShaclLoader, ShaclLoader};
 use fukurow_shacl::validator::{DefaultShaclValidator, ShaclValidator, ValidationConfig, ValidationMode};
 use serde_json::{json, Value};
+use tracing::{info, warn};
 
 /// SHACL validation result
 #[derive(Debug, Clone)]
@@ -21,23 +22,48 @@ pub struct ShaclValidationResult {
 
 /// Validate data against SHACL shape
 pub async fn validate_shacl(data: &Value, shape: &Value) -> Result<ShaclValidationResult> {
-    // TODO: Integrate with fukurow-shacl properly
-    // For now, return placeholder validation result
-    // This requires:
     // 1. Convert JSON-LD data to RdfStore
-    // 2. Load SHACL shapes from JSON-LD
+    let mut data_store = FukurowStore::new();
+    data_store.load_from_jsonld(data.clone()).await?;
+    
+    // 2. Convert JSON-LD shape to RdfStore and load ShapesGraph
+    let mut shape_store = FukurowStore::new();
+    shape_store.load_from_jsonld(shape.clone()).await?;
+    
+    let loader = DefaultShaclLoader;
+    let rdf_store = shape_store.store_guard().await;
+    let shapes_graph = loader.load_from_store(&rdf_store)
+        .map_err(|e| crate::OwlReasonerError::Other(anyhow::anyhow!("Failed to load SHACL shapes: {}", e)))?;
+    
+    drop(rdf_store); // Release the guard
+    
     // 3. Run validation
+    let validator = DefaultShaclValidator;
+    let config = ValidationConfig {
+        mode: ValidationMode::Warn, // Warn mode to collect all violations
+        report_jsonld: true,
+    };
+    
+    let data_rdf_store = data_store.store_guard().await;
+    let validation_report = validator.validate_graph(&shapes_graph, &data_rdf_store, &config)
+        .map_err(|e| crate::OwlReasonerError::Other(anyhow::anyhow!("SHACL validation failed: {}", e)))?;
+    
+    drop(data_rdf_store); // Release the guard
+    
+    // Extract errors from validation report
+    let errors: Vec<String> = validation_report.results
+        .iter()
+        .filter_map(|r| r.message.clone())
+        .collect();
+    
+    // Convert report to JSON-LD
+    let report_jsonld = validation_report.to_jsonld()
+        .map_err(|e| crate::OwlReasonerError::Other(anyhow::anyhow!("Failed to serialize validation report: {}", e)))?;
     
     Ok(ShaclValidationResult {
-        valid: true,
-        errors: Vec::new(),
-        report: json!({
-            "@context": {
-                "sh": "http://www.w3.org/ns/shacl#"
-            },
-            "@type": "sh:ValidationReport",
-            "sh:conforms": true
-        }),
+        valid: validation_report.conforms,
+        errors,
+        report: report_jsonld,
     })
 }
 
@@ -46,26 +72,8 @@ pub async fn validate_process_shape(
     process_jsonld: &Value,
     shape_jsonld: &Value,
 ) -> Result<ShaclValidationResult> {
-    // Convert process JSON-LD to RdfStore
-    let mut store = FukurowStore::new();
-    store.load_from_jsonld(process_jsonld.clone()).await?;
-
-    // Load SHACL shapes from JSON-LD
-    // TODO: Implement proper SHACL shape loading from JSON-LD
-    // For now, return placeholder
-    
-    Ok(ShaclValidationResult {
-        valid: true,
-        errors: Vec::new(),
-        report: json!({
-            "@context": {
-                "sh": "http://www.w3.org/ns/shacl#"
-            },
-            "@type": "sh:ValidationReport",
-            "sh:conforms": true,
-            "sh:result": []
-        }),
-    })
+    // Use the general validate_shacl function
+    validate_shacl(process_jsonld, shape_jsonld).await
 }
 
 /// Validate Resource against SHACL shape

@@ -54,6 +54,7 @@
 //! ```
 
 pub mod actor;
+pub mod error;
 pub mod evolution;
 pub mod kernel;
 pub mod mediator;
@@ -63,6 +64,7 @@ pub mod shacl_validator;
 pub mod types;
 
 pub use actor::{Actor, ActorTrait, DefaultActor};
+pub use error::{ErrorCategory, ErrorContext, ErrorEscalator, RetryConfig, RetryExecutor};
 pub use evolution::{EvolutionEngine, EvolutionStrategy, ProcessMetrics};
 pub use kernel::Kernel;
 pub use mediator::{Mediator, SelectionStrategy};

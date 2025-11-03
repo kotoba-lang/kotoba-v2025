@@ -3,6 +3,7 @@
 //! The central orchestrator that manages process execution lifecycle.
 
 use crate::actor::{ActorTrait, DefaultActor};
+use crate::error::{ErrorContext, ErrorEscalator, RetryConfig, RetryExecutor};
 use crate::mediator::Mediator;
 use crate::process_handler::ProcessHandler;
 use crate::provenance::Provenance;
@@ -30,6 +31,11 @@ pub struct Kernel {
     /// Optional callback when a process ends
     pub on_process_end: Option<Box<dyn Fn(&Process) + Send + Sync>>,
 
+    /// Retry executor for error handling
+    retry_executor: RetryExecutor,
+    /// Error escalator for error management
+    error_escalator: ErrorEscalator,
+
     /// OWL reasoning engine (optional)
     #[cfg(feature = "reasoning")]
     reasoning_engine: Option<kotoba_owl_reasoner::ReasoningEngine>,
@@ -47,6 +53,8 @@ impl Kernel {
             story,
             on_process_start: None,
             on_process_end: None,
+            retry_executor: RetryExecutor::default(),
+            error_escalator: ErrorEscalator::default(),
             #[cfg(feature = "reasoning")]
             reasoning_engine: None,
             #[cfg(feature = "reasoning")]
@@ -75,6 +83,8 @@ impl Kernel {
             story,
             on_process_start: None,
             on_process_end: None,
+            retry_executor: RetryExecutor::default(),
+            error_escalator: ErrorEscalator::default(),
             reasoning_engine: Some(reasoning_engine),
             shacl_validator: Some(crate::ShaclValidator::new()),
             evolution_engine: Some(crate::evolution::EvolutionEngine::new()),
@@ -134,16 +144,124 @@ impl Kernel {
             }
         }
 
-        // Select actor via mediator
-        let actor = self.mediator.select_actor(process).await?;
+        // Select actor via mediator (with retry)
+        let mediator = &self.mediator;
+        let retry_executor = &self.retry_executor;
+        let error_escalator = &self.error_escalator;
+        let process_clone = process.clone();
+        let process_id = process.id.clone();
 
-        // Execute action via actor
-        let result = actor.perform(process).await?;
+        let actor = match retry_executor
+            .execute(
+                || {
+                    let process = process_clone.clone();
+                    Box::pin(async move {
+                        mediator.select_actor(&process).await.map_err(|e| {
+                            format!("{}", e)
+                        })
+                    })
+                },
+                &format!("select_actor({})", process_id),
+            )
+            .await
+        {
+            Ok(actor) => actor,
+            Err(e) => {
+                let error_ctx = ErrorContext::from_error(
+                    &KotobaOsError::ActorSelection(e.message.clone()),
+                    Some(process_id.clone()),
+                );
+                let escalation = error_escalator.escalate(&error_ctx);
+                error_escalator.handle_escalation(&error_ctx, escalation);
+                return Err(KotobaOsError::ActorSelection(format!(
+                    "Failed to select actor after retries: {}",
+                    e.message
+                )));
+            }
+        };
 
-        // Record provenance
-        self.provenance
-            .record(process, &actor, &result)
-            .await?;
+        // Execute action via actor (with retry)
+        let process_clone2 = process.clone();
+        let result = match retry_executor
+            .execute(
+                || {
+                    let actor = actor.clone();
+                    let process = process_clone2.clone();
+                    Box::pin(async move {
+                        actor.perform(&process).await.map_err(|e| {
+                            format!("{}", e)
+                        })
+                    })
+                },
+                &format!("perform({})", process_id),
+            )
+            .await
+        {
+            Ok(result) => result,
+            Err(e) => {
+                let error_ctx = ErrorContext::from_error(
+                    &KotobaOsError::ProcessExecution(e.message.clone()),
+                    Some(process_id.clone()),
+                );
+                let escalation = error_escalator.escalate(&error_ctx);
+                error_escalator.handle_escalation(&error_ctx, escalation);
+                return Err(KotobaOsError::ProcessExecution(format!(
+                    "Failed to execute process after retries: {}",
+                    e.message
+                )));
+            }
+        };
+
+        // Record provenance (with retry)
+        // Note: Provenance recording is already resilient (includes storage retry),
+        // so we use a simplified retry approach here
+        let process_clone3 = process.clone();
+        let result_clone = result.clone();
+        let actor_clone = actor.clone();
+        
+        // Retry provenance recording with exponential backoff
+        let mut last_error: Option<KotobaOsError> = None;
+        let config = &retry_executor.config;
+        for attempt in 0..=config.max_retries {
+            match self.provenance.record(&process_clone3, &actor_clone, &result_clone).await {
+                Ok(_) => {
+                    if attempt > 0 {
+                        info!(
+                            "[Kernel] Provenance recording succeeded after {} retries for process {}",
+                            attempt, process_id
+                        );
+                    }
+                    break;
+                }
+                Err(e) => {
+                    last_error = Some(e);
+                    if attempt < config.max_retries {
+                        let delay_secs = (config.initial_delay_secs as f64
+                            * config.backoff_multiplier.powi(attempt as i32))
+                            .min(config.max_delay_secs as f64) as u64;
+                        let delay = Duration::from_secs(delay_secs);
+                        warn!(
+                            "[Kernel] Provenance recording failed (attempt {}/{}), retrying in {:?}: {}",
+                            attempt + 1,
+                            config.max_retries,
+                            delay,
+                            e
+                        );
+                        tokio::time::sleep(delay).await;
+                    }
+                }
+            }
+        }
+
+        if let Some(e) = last_error {
+            let error_ctx = ErrorContext::from_error(&e, Some(process_id.clone()));
+            let escalation = error_escalator.escalate(&error_ctx);
+            error_escalator.handle_escalation(&error_ctx, escalation);
+            return Err(KotobaOsError::ProvenanceError(format!(
+                "Failed to record provenance after {} retries: {}",
+                config.max_retries, e
+            )));
+        }
 
         // Call on_process_end callback
         if let Some(callback) = &self.on_process_end {
