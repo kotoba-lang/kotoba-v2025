@@ -1,12 +1,12 @@
 [workspace]
 members = [
-    "crates/010-core/009-kotoba-logic",
-    "crates/010-core/010-kotoba-codebase",
-    "crates/010-core/010-kotoba-types",
-    "crates/010-core/011-kotoba-ir",
-    "crates/010-core/012-kotoba-rewrite-kernel",
-    "crates/010-core/013-kotoba-cid",
-    "crates/010-core/014-kotoba-schema",
+    "crates/010-logic/009-kotoba-logic",
+    # "crates/010-core/010-kotoba-codebase", # No Cargo.toml
+    "crates/010-logic/010-kotoba-types",
+    "crates/010-logic/011-kotoba-ir",
+    "crates/010-logic/012-kotoba-rewrite-kernel",
+    "crates/010-logic/013-kotoba-cid",
+    "crates/010-logic/014-kotoba-schema",
     "crates/010-logic/019-kotoba-jsonld",
     "crates/010-logic/020-kotoba-os",
     "crates/010-logic/021-kotoba-phonosemantic",
@@ -14,10 +14,10 @@ members = [
     "crates/kotobas-tamaki-holochain",
     "crates/030-storage/031-kotoba-storage",
     "crates/030-storage/039-kotoba-storage-fcdb",
-    "crates/010-core/015-kotoba-auth",
-    "crates/010-core/016-kotoba-graph-core",
-    "crates/010-core/017-kotoba-txlog",
-    "crates/010-core/018-kotoba-api",
+    "crates/010-logic/015-kotoba-auth",
+    "crates/010-logic/016-kotoba-graph-core",
+    "crates/010-logic/017-kotoba-txlog",
+    "crates/010-logic/018-kotoba-api",
     # "crates/020-language/031-kotoba-language", # No Cargo.toml
     "crates/020-language/020-kotoba-syntax",
     "crates/020-language/021-kotoba-parser",
@@ -95,7 +95,7 @@ redis = { version = "0.23", features = ["tokio-comp", "connection-manager"] }
 hyper = { version = "1.0", features = ["full"] }
 
 # Kotoba workspace crates
-kotoba-logic = { path = "crates/010-core/009-kotoba-logic", version = "0.1.22" }
+# kotoba-logic = { path = "crates/010-core/009-kotoba-logic", version = "0.1.22" } # No Cargo.toml
 kotoba-codebase = { path = "crates/010-core/010-kotoba-codebase", version = "0.1.22" }
 kotoba-types = { path = "crates/010-core/010-kotoba-types", version = "0.1.22" }
 kotoba-ir = { path = "crates/010-core/011-kotoba-ir", version = "0.1.22" }

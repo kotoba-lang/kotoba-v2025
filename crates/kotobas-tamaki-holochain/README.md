@@ -246,6 +246,41 @@ let escalator = ErrorEscalator::default();
 escalator.escalate(&error);
 ```
 
+## ローカル動作検証
+
+### 検証スクリプト
+
+検証手順を自動化するスクリプトを用意しています：
+
+```bash
+# 全体的な検証を実行
+./scripts/verify-holochain-local.sh
+
+# WASMビルドのみ
+./scripts/build-wasm.sh
+
+# 統合テスト実行（Holochain環境が必要）
+./scripts/run-integration-tests.sh
+```
+
+### 検証レポート
+
+検証結果は `VERIFICATION.md` に記録されます。
+
+### トラブルシューティング
+
+#### ワークスペースの依存関係エラー
+
+`kotoba-storage`が存在しない`kotoba-core`を参照している場合：
+- `crates/030-storage/031-kotoba-storage/Cargo.toml`の依存関係を確認
+- `kotoba-core`への参照を削除または正しいパスに修正
+
+#### Holochain環境のセットアップ
+
+統合テストにはHolochain環境が必要です：
+- Holochain CLIのインストール: https://developer.holochain.org/docs/install/
+- テスト環境のセットアップ: `holochain-sandbox`または`hc`を使用
+
 ## ライセンス
 
 Apache-2.0
