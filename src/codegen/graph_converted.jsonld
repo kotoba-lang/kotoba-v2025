@@ -1,5 +1,5 @@
 {
-  "@context": "../../schemas/kotoba-context.jsonld",
+  "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
   "@type": "kotoba:CodegenDocument",
   "@id": "file://graph_converted.jsonld",
   "rdfs:comment": "Kotobaグラフ構造定義 - Jsonnet DSL表現",

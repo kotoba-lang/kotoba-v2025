@@ -1,5 +1,5 @@
 {
-  "@context": "kotoba-context.jsonld",
+  "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
   "@id": "https://example.org/gts-dpo-opengraph-merkle.schema.jsonld",
   "@type": "kotoba:ProcessNetwork",
   "rdfs:label": "Process Network as GTS(DPO)+OpenGraph with Merkle DAG & PG view",

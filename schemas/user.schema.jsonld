@@ -1,5 +1,5 @@
 {
-  "@context": "kotoba-context.jsonld",
+  "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
   "@id": "https://kotoba.ai/schemas/user.schema.jsonld",
   "@type": "kotoba:User",
   "rdfs:label": "User",

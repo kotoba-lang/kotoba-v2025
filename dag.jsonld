@@ -1,5 +1,5 @@
 {
-  "@context": "schemas/kotoba-context.jsonld",
+  "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
   "@type": "kotoba:ProcessNetwork",
   "@id": "file://dag.jsonld",
   "rdfs:comment": "Process Network DAG definition"

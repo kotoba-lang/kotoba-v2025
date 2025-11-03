@@ -1,9 +1,9 @@
 {
   "@context": {
     "@version": 1.1,
-    "@vocab": "https://kotoba.ai/vocab/",
+    "@vocab": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld#vocab",
     
-    "kotoba": "https://kotoba.ai/vocab/",
+    "kotoba": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld#vocab",
     "schema": "https://schema.org/",
     "owl": "http://www.w3.org/2002/07/owl#",
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
