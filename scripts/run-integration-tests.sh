@@ -13,10 +13,20 @@ echo "======================================"
 echo ""
 
 # Holochain環境の確認
-if ! command -v holochain &> /dev/null && ! command -v hc &> /dev/null; then
+HOLOCHAIN_AVAILABLE=false
+if command -v holochain &> /dev/null || command -v hc &> /dev/null; then
+    HOLOCHAIN_AVAILABLE=true
+elif command -v nix &> /dev/null; then
+    # Nix経由でHolochain CLIが使用可能か確認
+    if nix run --accept-flake-config "github:holochain/holonix?ref=main-0.5#hc" -- --version &> /dev/null; then
+        HOLOCHAIN_AVAILABLE=true
+    fi
+fi
+
+if [ "$HOLOCHAIN_AVAILABLE" = false ]; then
     echo "❌ Holochain CLIが見つかりません"
     echo "   統合テストにはHolochain環境が必要です"
-    echo "   インストール方法: https://developer.holochain.org/docs/install/"
+    echo "   インストール方法: ./scripts/install-holochain-cli.sh"
     exit 1
 fi
 
@@ -47,6 +57,10 @@ cd crates/kotobas-tamaki-holochain
 
 # ignoreフラグを外してテストを実行
 # 注意: 統合テストは#[ignore]が付いているため、--ignoredフラグが必要
+echo "注意: 統合テストは実際のHolochain環境が必要です"
+echo "現在のテストはプレースホルダーです"
+echo ""
+
 cargo test --test integration_tests -- --ignored --nocapture 2>&1 | tee /tmp/holochain-integration-tests.log
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
