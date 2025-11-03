@@ -10,12 +10,16 @@ pub mod canonical;
 pub mod merkle;
 pub mod graph;
 
-use kotoba_types::*;
+use kotoba_types::{Hash as KotobaHash, *};
 use kotoba_codebase::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+// Use KotobaHash to avoid conflict with std::hash::Hash trait
+pub type Hash = KotobaHash;
+
 pub use graph::Graph;
+pub use algorithms::GraphStatistics;
 
 /// Graph ID type for content addressing
 pub type GraphId = Hash;

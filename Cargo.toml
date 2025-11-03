@@ -265,7 +265,10 @@ js-sys = "0.3"
 
 [dev-dependencies]
 # Coverage and testing tools
-cargo-tarpaulin = "0.29"
+# Note: cargo-tarpaulin is commented out due to indexmap version conflict
+# cargo-tarpaulin requires indexmap ~1.8, but kotoba-owl-reasoner requires ^1.9.3
+# Use: cargo install cargo-tarpaulin (globally) for coverage analysis if needed
+# cargo-tarpaulin = "0.34"
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1.0"
 quickcheck = "1.0"

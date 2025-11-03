@@ -3,9 +3,9 @@
 //! This module provides an implementation of incidence bipartite graphs
 //! for representing attributed graphs in a canonical form.
 
-use super::*;
+use super::{Hash, *};
 use crate::graph::Graph;
-use kotoba_types::*;
+use kotoba_types::{VertexId, EdgeId, Label, Properties, PropertyKey, Value, GraphInstance, GraphCore, VertexData, EdgeData, KotobaError};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet, BTreeMap, BTreeSet};
 

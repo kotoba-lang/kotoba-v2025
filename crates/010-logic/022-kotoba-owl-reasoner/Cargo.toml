@@ -13,7 +13,8 @@ homepage = "https://github.com/com-junkawasaki/kotoba"
 
 [dependencies]
 # Kotoba ecosystem
-kotoba-jsonld = { path = "../019-kotoba-jsonld" }
+# Note: kotoba-jsonld dependency removed to break circular dependency
+# kotoba-owl-reasoner uses serde_json::Value directly for JSON-LD processing
 
 # fukurow crates (git dependencies)
 fukurow-core = { git = "https://github.com/com-junkawasaki/fukurow", default-features = false }

@@ -11,7 +11,9 @@ use std::sync::Arc;
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 // Re-export types from kotoba-types
-pub use kotoba_types::{VertexId, EdgeId, Label, Properties, PropertyKey, Value, GraphInstance, GraphCore, Node, Edge, GraphKind, Typing, Boundary, Port, PortDirection, Attrs};
+// Note: Node, Edge, GraphKind, Typing, Boundary, Port, PortDirection, Attrs are not defined in kotoba-types
+// These may need to be defined locally or removed if not used
+pub use kotoba_types::{VertexId, EdgeId, Label, Properties, PropertyKey, Value, GraphInstance, GraphCore};
 
 /// Generate a deterministic CID from vertex data
 fn generate_vertex_cid(labels: &[Label], props: &Properties) -> VertexId {

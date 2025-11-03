@@ -477,6 +477,56 @@ impl KotobaError {
 // Error types are defined above and can be used directly
 // No need for re-export as they are already public
 
+/// Content hash - SHA-256 hash value
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct Hash(pub [u8; 32]);
+
+impl Hash {
+    /// Create a hash from SHA-256 bytes
+    pub fn from_sha256<T: AsRef<[u8]>>(data: T) -> Self {
+        use sha2::{Sha256, Digest};
+        let mut hasher = Sha256::new();
+        hasher.update(data.as_ref());
+        let hash_bytes = hasher.finalize();
+        let mut bytes = [0u8; 32];
+        bytes.copy_from_slice(&hash_bytes);
+        Hash(bytes)
+    }
+
+    /// Get hash as hex string
+    pub fn to_hex(&self) -> String {
+        hex::encode(self.0)
+    }
+
+    /// Get hash as bytes
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.0
+    }
+}
+
+impl std::fmt::Display for Hash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_hex())
+    }
+}
+
+impl From<[u8; 32]> for Hash {
+    fn from(bytes: [u8; 32]) -> Self {
+        Hash(bytes)
+    }
+}
+
+impl From<&str> for Hash {
+    fn from(s: &str) -> Self {
+        let bytes = hex::decode(s).unwrap_or_default();
+        let mut hash_bytes = [0u8; 32];
+        if bytes.len() == 32 {
+            hash_bytes.copy_from_slice(&bytes);
+        }
+        Hash(hash_bytes)
+    }
+}
+
 /// ハッシュアルゴリズム
 #[derive(Debug, Clone, PartialEq)]
 pub enum HashAlgorithm {

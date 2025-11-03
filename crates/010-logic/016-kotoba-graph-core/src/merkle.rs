@@ -4,7 +4,8 @@
 //! graph integrity and enabling efficient proof generation.
 
 use crate::graph::Graph;
-use kotoba_types::{Hash, KotobaError};
+use crate::Hash;
+use kotoba_types::KotobaError;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use super::{MerkleNode, MerkleTree};

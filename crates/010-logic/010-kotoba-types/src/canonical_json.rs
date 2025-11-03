@@ -1,4 +1,4 @@
-//! JSON-LD正規化の実装
+//! JSON正規化の実装（JCS準拠）
 
 use super::*;
 use serde_json::{Value, Map};
@@ -30,22 +30,16 @@ impl JsonCanonicalizer {
         }
     }
 
-    /// JCS (RFC 8785) に準拠した正規化（JSON-LD対応）
+    /// JCS (RFC 8785) に準拠した正規化（通常のJSONをサポート）
     fn canonicalize_jcs(&self, json_str: &str) -> KotobaResult<String> {
-        // JSON-LDをパース（通常のJSONもサポート）
-        let value: Value = match kotoba_jsonld::parse_jsonld_to_value(json_str) {
-            Ok(v) => v,
-            Err(_) => {
-                // JSON-LDパースに失敗した場合は通常のJSONとして試行
-                serde_json::from_str(json_str)
-                    .map_err(|e| KotobaError::Validation(format!("JSON/JSON-LD parse error: {}", e)))?
-            }
-        };
+        // 通常のJSONとしてパース
+        let value: Value = serde_json::from_str(json_str)
+            .map_err(|e| KotobaError::Validation(format!("JSON parse error: {}", e)))?;
 
         self.canonicalize_value_jcs(&value)
     }
 
-    /// JCSによる値の正規化（JSON-LD対応：@context, @id, @typeを優先）
+    /// JCSによる値の正規化（JSON-LDスタイルのキー順序を考慮：@context, @id, @typeを優先）
     fn canonicalize_value_jcs(&self, value: &Value) -> KotobaResult<String> {
         match value {
             Value::Object(obj) => {
@@ -88,24 +82,14 @@ impl JsonCanonicalizer {
         }
     }
 
-    /// JSON-LDの差分を計算
+    /// JSONの差分を計算
     pub fn compute_diff(&self, json1: &str, json2: &str) -> KotobaResult<JsonDiff> {
-        // JSON-LDをパース（通常のJSONもサポート）
-        let val1: Value = match kotoba_jsonld::parse_jsonld_to_value(json1) {
-            Ok(v) => v,
-            Err(_) => {
-                serde_json::from_str(json1)
-                    .map_err(|e| KotobaError::Validation(format!("JSON1 parse error: {}", e)))?
-            }
-        };
+        // 通常のJSONとしてパース
+        let val1: Value = serde_json::from_str(json1)
+            .map_err(|e| KotobaError::Validation(format!("JSON1 parse error: {}", e)))?;
 
-        let val2: Value = match kotoba_jsonld::parse_jsonld_to_value(json2) {
-            Ok(v) => v,
-            Err(_) => {
-                serde_json::from_str(json2)
-                    .map_err(|e| KotobaError::Validation(format!("JSON2 parse error: {}", e)))?
-            }
-        };
+        let val2: Value = serde_json::from_str(json2)
+            .map_err(|e| KotobaError::Validation(format!("JSON2 parse error: {}", e)))?;
 
         self.compute_value_diff(&val1, &val2)
     }
