@@ -14,26 +14,8 @@ use kotoba_storage::KeyValueStore;
 use kotoba_core::types::{Value, VertexId, EdgeId};
 use kotoba_errors::KotobaError;
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct TestEvent {
-    pub id: String,
-    pub event_type: String,
-    pub aggregate_id: String,
-    pub data: serde_json::Value,
-    pub timestamp: chrono::DateTime<chrono::Utc>,
-}
-
-impl TestEvent {
-    pub fn new(event_type: &str, aggregate_id: &str, data: serde_json::Value) -> Self {
-        Self {
-            id: uuid::Uuid::new_v4().to_string(),
-            event_type: event_type.to_string(),
-            aggregate_id: aggregate_id.to_string(),
-            data,
-            timestamp: chrono::Utc::now(),
-        }
-    }
-}
+// TestEvent struct removed - using JSON-LD format directly via test_helpers::create_jsonld_event
+// All event data is now created as JSON-LD format directly
 
 pub struct EventSourcingTestFixture {
     pub storage: Arc<dyn KeyValueStore + Send + Sync>,
@@ -73,52 +55,57 @@ mod tests {
 
     #[tokio::test]
     async fn test_event_creation_and_serialization() {
-        // Test event creation
-        let event = TestEvent::new(
+        // Test event creation (JSON-LD format)
+        use crate::test_helpers::create_jsonld_event;
+        use serde_json::json;
+        
+        let event = create_jsonld_event(
             "UserCreated",
             "user-123",
-            serde_json::json!({
-                "name": "Alice",
-                "email": "alice@example.com"
-            })
+            &[
+                ("name", json!("Alice")),
+                ("email", json!("alice@example.com"))
+            ]
         );
 
-        // Test serialization
+        // Test serialization (JSON-LD format)
         let serialized = serde_json::to_string(&event).unwrap();
-        let deserialized: TestEvent = serde_json::from_str(&serialized).unwrap();
+        let deserialized: serde_json::Value = serde_json::from_str(&serialized).unwrap();
 
-        assert_eq!(event.id, deserialized.id);
-        assert_eq!(event.event_type, deserialized.event_type);
-        assert_eq!(event.aggregate_id, deserialized.aggregate_id);
-        assert_eq!(event.data, deserialized.data);
+        assert_eq!(deserialized.get("kotoba:eventType").and_then(|v| v.as_str()), Some("UserCreated"));
+        assert_eq!(deserialized.get("kotoba:aggregateId").and_then(|v| v.as_str()), Some("user-123"));
     }
 
     #[tokio::test]
     async fn test_basic_event_storage() {
         let fixture = EventSourcingTestFixture::new().await.unwrap();
 
-        // Create and store an event
-        let event = TestEvent::new(
+        // Create and store an event (JSON-LD format)
+        use crate::test_helpers::create_jsonld_event;
+        use serde_json::json;
+        
+        let aggregate_id = "user-123";
+        let event_id = uuid::Uuid::new_v4().to_string();
+        let event = create_jsonld_event(
             "UserCreated",
-            "user-123",
-            serde_json::json!({
-                "name": "Alice",
-                "email": "alice@example.com"
-            })
+            aggregate_id,
+            &[
+                ("name", json!("Alice")),
+                ("email", json!("alice@example.com"))
+            ]
         );
 
-        let event_key = format!("event:{}:{}", event.aggregate_id, event.id);
+        let event_key = format!("event:{}:{}", aggregate_id, event_id);
         let event_data = serde_json::to_vec(&event).unwrap();
 
         fixture.storage.put(event_key.as_bytes(), &event_data).await.unwrap();
 
-        // Retrieve and verify
+        // Retrieve and verify (JSON-LD format)
         let retrieved = fixture.storage.get(event_key.as_bytes()).await.unwrap().unwrap();
-        let retrieved_event: TestEvent = serde_json::from_slice(&retrieved).unwrap();
+        let retrieved_event: serde_json::Value = serde_json::from_slice(&retrieved).unwrap();
 
-        assert_eq!(retrieved_event.event_type, "UserCreated");
-        assert_eq!(retrieved_event.aggregate_id, "user-123");
-        assert_eq!(retrieved_event.data["name"], "Alice");
+        assert_eq!(retrieved_event.get("kotoba:eventType").and_then(|v| v.as_str()), Some("UserCreated"));
+        assert_eq!(retrieved_event.get("kotoba:aggregateId").and_then(|v| v.as_str()), Some(aggregate_id));
 
         fixture.cleanup().await.unwrap();
     }
@@ -134,22 +121,20 @@ mod tests {
             let stream_id = "user-events";
             stream.create_stream(stream_id).await.unwrap();
 
-            // Add events to stream
-            let event1 = TestEvent::new(
-                "UserCreated",
-                "user-123",
-                serde_json::json!({"name": "Alice"})
-            );
-
-            let event2 = TestEvent::new(
-                "UserUpdated",
-                "user-123",
-                serde_json::json!({"email": "alice@example.com"})
-            );
+            // Add events to stream (JSON-LD format)
+            use crate::test_helpers::create_jsonld_event;
+            use serde_json::json;
+            
+            let aggregate_id = "user-123";
+            let event1_id = uuid::Uuid::new_v4().to_string();
+            let event2_id = uuid::Uuid::new_v4().to_string();
+            
+            let event1 = create_jsonld_event("UserCreated", aggregate_id, &[("name", json!("Alice"))]);
+            let event2 = create_jsonld_event("UserUpdated", aggregate_id, &[("email", json!("alice@example.com"))]);
 
             // Store events in stream
-            let event1_key = format!("stream:{}:event:{}", stream_id, event1.id);
-            let event2_key = format!("stream:{}:event:{}", stream_id, event2.id);
+            let event1_key = format!("stream:{}:event:{}", stream_id, event1_id);
+            let event2_key = format!("stream:{}:event:{}", stream_id, event2_id);
 
             fixture.storage.put(event1_key.as_bytes(), &serde_json::to_vec(&event1).unwrap()).await.unwrap();
             fixture.storage.put(event2_key.as_bytes(), &serde_json::to_vec(&event2).unwrap()).await.unwrap();
@@ -173,35 +158,53 @@ mod tests {
     async fn test_event_aggregation() {
         let fixture = EventSourcingTestFixture::new().await.unwrap();
 
-        // Create multiple events for the same aggregate
+        // Create multiple events for the same aggregate (JSON-LD format)
+        use crate::test_helpers::create_jsonld_event;
+        use serde_json::json;
+        
         let aggregate_id = "user-456";
 
         let events = vec![
-            TestEvent::new("UserCreated", aggregate_id, serde_json::json!({"name": "Bob"})),
-            TestEvent::new("UserEmailUpdated", aggregate_id, serde_json::json!({"email": "bob@example.com"})),
-            TestEvent::new("UserActivated", aggregate_id, serde_json::json!({"active": true})),
+            (uuid::Uuid::new_v4().to_string(), create_jsonld_event("UserCreated", aggregate_id, &[("name", json!("Bob"))])),
+            (uuid::Uuid::new_v4().to_string(), create_jsonld_event("UserEmailUpdated", aggregate_id, &[("email", json!("bob@example.com"))])),
+            (uuid::Uuid::new_v4().to_string(), create_jsonld_event("UserActivated", aggregate_id, &[("active", json!(true))])),
         ];
 
         // Store all events
-        for event in &events {
-            let key = format!("event:{}:{}", aggregate_id, event.id);
+        for (event_id, event) in &events {
+            let key = format!("event:{}:{}", aggregate_id, event_id);
             let data = serde_json::to_vec(event).unwrap();
             fixture.storage.put(key.as_bytes(), &data).await.unwrap();
         }
 
-        // Aggregate current state from events
+        // Aggregate current state from events (JSON-LD format)
         let mut current_state = serde_json::json!({});
-        for event in &events {
-            match event.event_type.as_str() {
+        for (_event_id, event) in &events {
+            let event_type = event.get("kotoba:eventType").and_then(|v| v.as_str()).unwrap_or("");
+            let data_obj = event.get("kotoba:data").and_then(|v| v.as_object());
+            
+            match event_type {
                 "UserCreated" => {
-                    current_state["name"] = event.data["name"].clone();
-                    current_state["created"] = true.into();
+                    if let Some(data) = data_obj {
+                        if let Some(name) = data.get("kotoba:name").and_then(|v| v.as_str()) {
+                            current_state["name"] = json!(name);
+                        }
+                    }
+                    current_state["created"] = json!(true);
                 }
                 "UserEmailUpdated" => {
-                    current_state["email"] = event.data["email"].clone();
+                    if let Some(data) = data_obj {
+                        if let Some(email) = data.get("kotoba:email").and_then(|v| v.as_str()) {
+                            current_state["email"] = json!(email);
+                        }
+                    }
                 }
                 "UserActivated" => {
-                    current_state["active"] = event.data["active"].clone();
+                    if let Some(data) = data_obj {
+                        if let Some(active) = data.get("kotoba:active").and_then(|v| v.as_bool()) {
+                            current_state["active"] = json!(active);
+                        }
+                    }
                 }
                 _ => {}
             }
@@ -225,16 +228,19 @@ mod tests {
         let aggregate_id = "product-789";
         let mut version = 0;
 
-        // Create versioned events
+        // Create versioned events (JSON-LD format)
+        use crate::test_helpers::create_jsonld_event;
+        use serde_json::json;
+        
         let events = vec![
-            ("ProductCreated", serde_json::json!({"name": "Widget", "price": 10.99})),
-            ("ProductPriceUpdated", serde_json::json!({"price": 12.99})),
-            ("ProductDiscontinued", serde_json::json!({"discontinued": true})),
+            ("ProductCreated", vec![("name", json!("Widget")), ("price", json!(10.99))]),
+            ("ProductPriceUpdated", vec![("price", json!(12.99))]),
+            ("ProductDiscontinued", vec![("discontinued", json!(true))]),
         ];
 
-        for (event_type, data) in events {
+        for (event_type, data_fields) in events {
             version += 1;
-            let event = TestEvent::new(event_type, aggregate_id, data);
+            let event = create_jsonld_event(event_type, aggregate_id, &data_fields);
 
             let key = format!("event:{}:v{:03}", aggregate_id, version);
             let event_data = serde_json::to_vec(&event).unwrap();
@@ -256,8 +262,8 @@ mod tests {
         for v in 1..=3 {
             let event_key = format!("event:{}:v{:03}", aggregate_id, v);
             let event_data = fixture.storage.get(event_key.as_bytes()).await.unwrap().unwrap();
-            let event: TestEvent = serde_json::from_slice(&event_data).unwrap();
-            assert_eq!(event.aggregate_id, aggregate_id);
+            let event: serde_json::Value = serde_json::from_slice(&event_data).unwrap();
+            assert_eq!(event.get("kotoba:aggregateId").and_then(|v| v.as_str()), Some(aggregate_id));
         }
 
         fixture.cleanup().await.unwrap();
@@ -274,16 +280,20 @@ mod tests {
             let fixture_clone = Arc::clone(&fixture);
             let handle = tokio::spawn(async move {
                 let aggregate_id = format!("concurrent-user-{}", i);
-                let event = TestEvent::new(
+                use crate::test_helpers::create_jsonld_event;
+                use serde_json::json;
+                
+                let event_id = uuid::Uuid::new_v4().to_string();
+                let event = create_jsonld_event(
                     "UserCreated",
                     &aggregate_id,
-                    serde_json::json!({
-                        "name": format!("User{}", i),
-                        "index": i
-                    })
+                    &[
+                        ("name", json!(format!("User{}", i))),
+                        ("index", json!(i))
+                    ]
                 );
 
-                let key = format!("event:{}:{}", aggregate_id, event.id);
+                let key = format!("event:{}:{}", aggregate_id, event_id);
                 let data = serde_json::to_vec(&event).unwrap();
 
                 fixture_clone.storage.put(key.as_bytes(), &data).await.unwrap();
@@ -313,13 +323,16 @@ mod tests {
     async fn test_event_replay_and_projection() {
         let fixture = EventSourcingTestFixture::new().await.unwrap();
 
-        // Create a sequence of events
+        // Create a sequence of events (JSON-LD format)
+        use crate::test_helpers::create_jsonld_event;
+        use serde_json::json;
+        
         let aggregate_id = "account-101";
         let events = vec![
-            TestEvent::new("AccountCreated", aggregate_id, serde_json::json!({"balance": 0.0})),
-            TestEvent::new("MoneyDeposited", aggregate_id, serde_json::json!({"amount": 100.0})),
-            TestEvent::new("MoneyWithdrawn", aggregate_id, serde_json::json!({"amount": 25.0})),
-            TestEvent::new("MoneyDeposited", aggregate_id, serde_json::json!({"amount": 50.0})),
+            create_jsonld_event("AccountCreated", aggregate_id, &[("balance", json!(0.0))]),
+            create_jsonld_event("MoneyDeposited", aggregate_id, &[("amount", json!(100.0))]),
+            create_jsonld_event("MoneyWithdrawn", aggregate_id, &[("amount", json!(25.0))]),
+            create_jsonld_event("MoneyDeposited", aggregate_id, &[("amount", json!(50.0))]),
         ];
 
         // Store events
@@ -329,20 +342,31 @@ mod tests {
             fixture.storage.put(key.as_bytes(), &data).await.unwrap();
         }
 
-        // Replay events to build current state (projection)
+        // Replay events to build current state (projection) - JSON-LD format
         let mut balance = 0.0;
 
         for i in 0..events.len() {
             let key = format!("event:{}:{:03}", aggregate_id, i + 1);
             let data = fixture.storage.get(key.as_bytes()).await.unwrap().unwrap();
-            let event: TestEvent = serde_json::from_slice(&data).unwrap();
+            let event: serde_json::Value = serde_json::from_slice(&data).unwrap();
 
-            match event.event_type.as_str() {
+            let event_type = event.get("kotoba:eventType").and_then(|v| v.as_str()).unwrap_or("");
+            let data_obj = event.get("kotoba:data").and_then(|v| v.as_object());
+            
+            match event_type {
                 "MoneyDeposited" => {
-                    balance += event.data["amount"].as_f64().unwrap();
+                    if let Some(data) = data_obj {
+                        if let Some(amount) = data.get("kotoba:amount").and_then(|v| v.as_f64()) {
+                            balance += amount;
+                        }
+                    }
                 }
                 "MoneyWithdrawn" => {
-                    balance -= event.data["amount"].as_f64().unwrap();
+                    if let Some(data) = data_obj {
+                        if let Some(amount) = data.get("kotoba:amount").and_then(|v| v.as_f64()) {
+                            balance -= amount;
+                        }
+                    }
                 }
                 _ => {}
             }

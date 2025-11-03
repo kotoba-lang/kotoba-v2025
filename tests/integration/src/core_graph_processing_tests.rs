@@ -140,27 +140,26 @@ mod tests {
     async fn test_core_vertex_operations() {
         let fixture = CoreGraphTestFixture::new();
 
-        // Test vertex creation and storage
+        // Test vertex creation and storage (JSON-LD format)
+        use crate::test_helpers::create_jsonld_vertex;
+        use serde_json::json;
+        
         let vertex_id = 1u64;
-        let vertex_data = serde_json::json!({
-            "id": vertex_id,
-            "label": "Person",
-            "properties": {
-                "name": "Alice",
-                "age": 30
-            }
-        });
+        let vertex_data = create_jsonld_vertex(vertex_id, "Person", &[
+            ("name", json!("Alice")),
+            ("age", json!(30))
+        ]);
 
         let key = format!("vertex:{}", vertex_id);
         let value = serde_json::to_vec(&vertex_data).unwrap();
 
         fixture.storage.put(key.as_bytes(), &value).await.unwrap();
 
-        // Verify vertex retrieval
+        // Verify vertex retrieval (JSON-LD format)
         let retrieved = fixture.storage.get(key.as_bytes()).await.unwrap().unwrap();
         let retrieved_data: serde_json::Value = serde_json::from_slice(&retrieved).unwrap();
-        assert_eq!(retrieved_data["id"], vertex_id);
-        assert_eq!(retrieved_data["label"], "Person");
+        assert_eq!(retrieved_data.get("kotoba:id").and_then(|v| v.as_u64()), Some(vertex_id));
+        assert_eq!(retrieved_data.get("kotoba:label").and_then(|v| v.as_str()), Some("Person"));
 
         fixture.cleanup().await.unwrap();
     }
@@ -169,32 +168,29 @@ mod tests {
     async fn test_core_edge_operations() {
         let fixture = CoreGraphTestFixture::new();
 
-        // Test edge creation and storage
+        // Test edge creation and storage (JSON-LD format)
+        use crate::test_helpers::create_jsonld_edge;
+        use serde_json::json;
+        
         let edge_id = 1u64;
         let from_vertex = 1u64;
         let to_vertex = 2u64;
 
-        let edge_data = serde_json::json!({
-            "id": edge_id,
-            "from": from_vertex,
-            "to": to_vertex,
-            "label": "KNOWS",
-            "properties": {
-                "since": "2023-01-01"
-            }
-        });
+        let edge_data = create_jsonld_edge(edge_id, from_vertex, to_vertex, "KNOWS", &[
+            ("since", json!("2023-01-01"))
+        ]);
 
         let key = format!("edge:{}", edge_id);
         let value = serde_json::to_vec(&edge_data).unwrap();
 
         fixture.storage.put(key.as_bytes(), &value).await.unwrap();
 
-        // Verify edge retrieval
+        // Verify edge retrieval (JSON-LD format)
         let retrieved = fixture.storage.get(key.as_bytes()).await.unwrap().unwrap();
         let retrieved_data: serde_json::Value = serde_json::from_slice(&retrieved).unwrap();
-        assert_eq!(retrieved_data["from"], from_vertex);
-        assert_eq!(retrieved_data["to"], to_vertex);
-        assert_eq!(retrieved_data["label"], "KNOWS");
+        assert_eq!(retrieved_data.get("kotoba:from").and_then(|v| v.as_u64()), Some(from_vertex));
+        assert_eq!(retrieved_data.get("kotoba:to").and_then(|v| v.as_u64()), Some(to_vertex));
+        assert_eq!(retrieved_data.get("kotoba:label").and_then(|v| v.as_str()), Some("KNOWS"));
 
         fixture.cleanup().await.unwrap();
     }

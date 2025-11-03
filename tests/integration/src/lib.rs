@@ -527,6 +527,7 @@ pub mod test_helpers {
 
     /// Create JSON-LD properties object directly
     pub fn create_jsonld_properties(props: &[(&str, Value)]) -> Value {
+        use serde_json::json;
         let mut properties_obj = Map::new();
         properties_obj.insert("@context".to_string(), json!(CONTEXT_URL));
         properties_obj.insert("@type".to_string(), json!("kotoba:Properties"));
@@ -538,6 +539,7 @@ pub mod test_helpers {
 
     /// Create JSON-LD vertex data directly (no conversion)
     pub fn create_jsonld_vertex(id: u64, label: &str, properties: &[(&str, Value)]) -> Value {
+        use serde_json::json;
         let mut vertex = Map::new();
         vertex.insert("@context".to_string(), json!(CONTEXT_URL));
         vertex.insert("@type".to_string(), json!("kotoba:Vertex"));
@@ -549,6 +551,7 @@ pub mod test_helpers {
 
     /// Create JSON-LD edge data directly (no conversion)
     pub fn create_jsonld_edge(id: u64, from: u64, to: u64, label: &str, properties: &[(&str, Value)]) -> Value {
+        use serde_json::json;
         let mut edge = Map::new();
         edge.insert("@context".to_string(), json!(CONTEXT_URL));
         edge.insert("@type".to_string(), json!("kotoba:Edge"));
@@ -562,6 +565,7 @@ pub mod test_helpers {
 
     /// Create JSON-LD object directly from key-value pairs
     pub fn create_jsonld_object(type_name: &str, fields: &[(&str, Value)]) -> Value {
+        use serde_json::json;
         let mut obj = Map::new();
         obj.insert("@context".to_string(), json!(CONTEXT_URL));
         obj.insert("@type".to_string(), json!(format!("kotoba:{}", type_name)));
@@ -569,5 +573,28 @@ pub mod test_helpers {
             obj.insert(format!("kotoba:{}", key), value.clone());
         }
         Value::Object(obj)
+    }
+    
+    /// Create JSON-LD event data directly
+    pub fn create_jsonld_event(event_type: &str, aggregate_id: &str, data: &[(&str, Value)]) -> Value {
+        use serde_json::json;
+        let mut event = Map::new();
+        event.insert("@context".to_string(), json!(CONTEXT_URL));
+        event.insert("@type".to_string(), json!("kotoba:Event"));
+        event.insert("kotoba:eventType".to_string(), json!(event_type));
+        event.insert("kotoba:aggregateId".to_string(), json!(aggregate_id));
+        event.insert("kotoba:data".to_string(), create_jsonld_properties(data));
+        event.insert("kotoba:timestamp".to_string(), json!(chrono::Utc::now().to_rfc3339()));
+        Value::Object(event)
+    }
+    
+    /// Create JSON-LD cache value directly
+    pub fn create_jsonld_cache_value(data: &[(&str, Value)]) -> Value {
+        use serde_json::json;
+        let mut cache_obj = Map::new();
+        cache_obj.insert("@context".to_string(), json!(CONTEXT_URL));
+        cache_obj.insert("@type".to_string(), json!("kotoba:CachedValue"));
+        cache_obj.insert("kotoba:data".to_string(), create_jsonld_properties(data));
+        Value::Object(cache_obj)
     }
 }

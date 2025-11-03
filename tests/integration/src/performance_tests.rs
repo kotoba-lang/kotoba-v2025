@@ -282,10 +282,13 @@ mod performance_integration_tests {
 
             let start_time = Instant::now();
 
-            // Test cache set operations
+            // Test cache set operations (JSON-LD format)
+            use crate::test_helpers::create_jsonld_cache_value;
+            use serde_json::json;
+            
             for i in 0..operation_count {
                 let key = format!("key_{}", i);
-                let value = serde_json::json!({"data": format!("value_{}", i)});
+                let value = create_jsonld_cache_value(&[("data", json!(format!("value_{}", i)))]);
                 let _ = cache.set(&key, value, None).await;
             }
 

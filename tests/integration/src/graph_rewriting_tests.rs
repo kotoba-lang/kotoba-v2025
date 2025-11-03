@@ -13,22 +13,7 @@ use kotoba_storage::KeyValueStore;
 use kotoba_core::types::{Value, VertexId, EdgeId};
 use kotoba_errors::KotobaError;
 
-/// Simple graph structure for testing
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct TestVertex {
-    pub id: u64,
-    pub label: String,
-    pub properties: serde_json::Value,
-}
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct TestEdge {
-    pub id: u64,
-    pub from: u64,
-    pub to: u64,
-    pub label: String,
-    pub properties: serde_json::Value,
-}
+// TestVertex and TestEdge structs removed - using JSON-LD format directly via test_helpers
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct GraphRewriteRule {
@@ -666,8 +651,11 @@ mod tests {
             if key.starts_with("vertex:") {
                 if let Ok(Some(data)) = fixture.storage.get(key.as_bytes()).await {
                     if let Ok(mut vertex) = serde_json::from_slice::<serde_json::Value>(&data) {
-                        let prop_name = format!("parallel_test_{}", index);
-                        vertex["properties"][&prop_name] = serde_json::Value::Bool(true);
+                        // JSON-LD format: update kotoba:properties
+                        let prop_name = format!("kotoba:parallel_test_{}", index);
+                        if let Some(properties) = vertex.get_mut("kotoba:properties").and_then(|v| v.as_object_mut()) {
+                            properties.insert(prop_name, serde_json::Value::Bool(true));
+                        }
 
                         let updated_data = serde_json::to_vec(&vertex).unwrap();
                         fixture.storage.put(key.as_bytes(), &updated_data).await.unwrap();
