@@ -45,6 +45,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "kotoba:capability/execution"
     );
 
+    // Optionally set selection strategy
+    #[cfg(feature = "reasoning")]
+    kernel.mediator.set_strategy(kotoba_os::SelectionStrategy::ShaclSemantic);
+
     // Start orchestration
     kernel.start().await?;
 
@@ -83,6 +87,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Enable strict SHACL validation (fail on validation errors)
     kernel.enable_strict_validation();
+
+    // Enable SHACL-based semantic actor selection
+    kernel.mediator.set_strategy(kotoba_os::SelectionStrategy::ShaclSemantic);
 
     kernel.register_default_actor("kotoba:performer/actor-1", "kotoba:capability/execution");
     kernel.start().await?;
@@ -141,8 +148,9 @@ Components that perform actions based on capabilities.
 
 Selects appropriate actors for process execution.
 
-- Current: Simple mapping based on `performedBy`
-- Future: SHACL-based semantic matching
+- **Direct Strategy**: Simple mapping based on `performedBy` IRI
+- **Capability Strategy**: Match by capability IRI
+- **SHACL Semantic Strategy**: SHACL-based semantic matching with compatibility scoring
 - Fallback strategies for actor selection
 
 ### ProcessHandler

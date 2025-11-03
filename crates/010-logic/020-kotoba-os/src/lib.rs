@@ -57,7 +57,7 @@ pub mod types;
 
 pub use actor::{Actor, ActorTrait, DefaultActor};
 pub use kernel::Kernel;
-pub use mediator::Mediator;
+pub use mediator::{Mediator, SelectionStrategy};
 pub use process_handler::ProcessHandler;
 pub use provenance::Provenance;
 pub use shacl_validator::ShaclValidator;

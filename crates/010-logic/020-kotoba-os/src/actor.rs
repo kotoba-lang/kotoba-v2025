@@ -18,6 +18,10 @@ pub struct Actor {
 
     /// Capability IRI describing what the actor can do
     pub capability: String,
+
+    /// Optional SHACL shape describing the actor's capability constraints
+    #[cfg(feature = "reasoning")]
+    pub shacl_shape: Option<Value>,
 }
 
 impl Actor {
@@ -26,6 +30,22 @@ impl Actor {
         Self {
             id: id.into(),
             capability: capability.into(),
+            #[cfg(feature = "reasoning")]
+            shacl_shape: None,
+        }
+    }
+
+    /// Create an actor with SHACL shape
+    #[cfg(feature = "reasoning")]
+    pub fn with_shape(
+        id: impl Into<String>,
+        capability: impl Into<String>,
+        shape: Value,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            capability: capability.into(),
+            shacl_shape: Some(shape),
         }
     }
 
@@ -85,6 +105,27 @@ pub trait ActorTrait: Send + Sync {
 
     /// Get the actor's capability
     fn capability(&self) -> &str;
+
+    /// Get the actor's SHACL shape (if available)
+    #[cfg(feature = "reasoning")]
+    fn shacl_shape(&self) -> Option<&Value> {
+        None
+    }
+
+    /// Calculate compatibility score with a process (0.0 to 1.0)
+    /// Higher score means better match
+    #[cfg(feature = "reasoning")]
+    async fn compatibility_score(&self, process: &Process) -> f64 {
+        // Default implementation: simple capability matching
+        // Future: SHACL-based semantic matching
+        if self.capability() == process.performed_by {
+            1.0
+        } else if process.performed_by.contains(self.capability()) {
+            0.8
+        } else {
+            0.0
+        }
+    }
 }
 
 /// Default actor implementation
@@ -96,6 +137,18 @@ impl DefaultActor {
     pub fn new(id: impl Into<String>, capability: impl Into<String>) -> Self {
         Self {
             actor: Actor::new(id, capability),
+        }
+    }
+
+    /// Create with SHACL shape
+    #[cfg(feature = "reasoning")]
+    pub fn with_shape(
+        id: impl Into<String>,
+        capability: impl Into<String>,
+        shape: Value,
+    ) -> Self {
+        Self {
+            actor: Actor::with_shape(id, capability, shape),
         }
     }
 }
@@ -129,5 +182,37 @@ impl ActorTrait for DefaultActor {
     fn capability(&self) -> &str {
         &self.actor.capability
     }
+
+    #[cfg(feature = "reasoning")]
+    fn shacl_shape(&self) -> Option<&Value> {
+        self.actor.shacl_shape.as_ref()
+    }
+
+    #[cfg(feature = "reasoning")]
+    async fn compatibility_score(&self, process: &Process) -> f64 {
+        // Check if SHACL shape is available
+        if let Some(shape) = &self.actor.shacl_shape {
+            // TODO: Implement SHACL-based semantic matching
+            // For now, use simple capability matching
+            return self.actor.capability_score(process);
+        }
+
+        // Fallback to simple capability matching
+        self.actor.capability_score(process)
+    }
 }
 
+impl Actor {
+    /// Calculate capability score (simple matching)
+    fn capability_score(&self, process: &Process) -> f64 {
+        if self.capability == process.performed_by {
+            1.0
+        } else if process.performed_by.contains(&self.capability) {
+            0.8
+        } else if self.capability.contains(&process.performed_by) {
+            0.6
+        } else {
+            0.0
+        }
+    }
+}
