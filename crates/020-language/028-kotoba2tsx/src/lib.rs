@@ -251,7 +251,17 @@ mod tests {
         assert!(json.contains("btn"));
 
         // Test deserialization
-        let deserialized: KotobaComponent = serde_json::from_str(&json).unwrap();
+        let jsonld_value = kotoba_jsonld::parse_jsonld_to_value(&json).unwrap();
+        // Extract data from JSON-LD (remove @context, @id, @type)
+        let component_value = if let serde_json::Value::Object(mut obj) = jsonld_value {
+            obj.remove("@context");
+            obj.remove("@id");
+            obj.remove("@type");
+            serde_json::Value::Object(obj)
+        } else {
+            jsonld_value
+        };
+        let deserialized: KotobaComponent = serde_json::from_value(component_value).unwrap();
         assert_eq!(component, deserialized);
     }
 
@@ -285,7 +295,17 @@ mod tests {
         assert!(json.contains("Button"));
 
         // Test deserialization
-        let deserialized: KotobaConfig = serde_json::from_str(&json).unwrap();
+        let jsonld_value = kotoba_jsonld::parse_jsonld_to_value(&json).unwrap();
+        // Extract data from JSON-LD (remove @context, @id, @type)
+        let config_value = if let serde_json::Value::Object(mut obj) = jsonld_value {
+            obj.remove("@context");
+            obj.remove("@id");
+            obj.remove("@type");
+            serde_json::Value::Object(obj)
+        } else {
+            jsonld_value
+        };
+        let deserialized: KotobaConfig = serde_json::from_value(config_value).unwrap();
         assert_eq!(config, deserialized);
     }
 

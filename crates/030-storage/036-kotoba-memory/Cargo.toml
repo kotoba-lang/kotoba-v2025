@@ -9,5 +9,7 @@ description = "Placeholder for kotoba-memory"
 [dependencies]
 kotoba-core = { path = "../../010-core/012-kotoba-core" }
 kotoba-storage = { path = "../031-kotoba-storage" }
+kotoba-jsonld = { path = "../../010-logic/019-kotoba-jsonld" }
 serde = { workspace = true }
+serde_json = { workspace = true }
 anyhow = { workspace = true }

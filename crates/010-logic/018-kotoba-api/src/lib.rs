@@ -479,26 +479,25 @@ impl PureApiProcessor {
 
     /// Transform HTTP request to pure ApiRequest
     /// This is a pure function: HTTP request data -> pure data structure
-    /// Supports both JSON and JSON-LD formats
+    /// Only accepts JSON-LD format
     pub fn http_request_to_api_request(&self, method: &str, path: &str, body: &[u8], headers: &HashMap<String, String>) -> Result<ApiRequest, ApiError> {
-        // Check Content-Type header
+        // Check Content-Type header - must be JSON-LD
         let content_type = headers.get("Content-Type")
             .map(|s| s.as_str())
-            .unwrap_or("application/json");
+            .unwrap_or("application/ld+json");
 
-        // Parse JSON-LD or JSON body to ApiRequest
+        if !content_type.contains("json-ld") && !content_type.contains("ld+json") {
+            return Err(ApiError::JsonError(
+                format!("Content-Type must be application/ld+json, got: {}", content_type)
+            ));
+        }
+
+        // Parse JSON-LD body to ApiRequest
         let body_str = std::str::from_utf8(body)
             .map_err(|e| ApiError::JsonError(format!("Invalid UTF-8: {}", e)))?;
 
-        let json_value = if content_type.contains("json-ld") || content_type.contains("ld+json") {
-            // Parse as JSON-LD
-            parse_jsonld_to_value(body_str)
-                .map_err(|e| ApiError::JsonError(format!("Failed to parse JSON-LD: {}", e)))?
-        } else {
-            // Parse as regular JSON (backward compatibility)
-            serde_json::from_str(body_str)
-                .map_err(|e| ApiError::JsonError(format!("Failed to parse JSON: {}", e)))?
-        };
+        let json_value = parse_jsonld_to_value(body_str)
+            .map_err(|e| ApiError::JsonError(format!("Failed to parse JSON-LD: {}", e)))?;
 
         // Extract data from JSON-LD if needed (remove @context, @id, @type)
         let request_value = if let Value::Object(mut obj) = json_value {

@@ -11,6 +11,7 @@ documentation = "https://docs.rs/kotoba2tsx"
 homepage = "https://github.com/com-junkawasaki/kotoba"
 
 [dependencies]
+kotoba-jsonld = { path = "../../010-logic/019-kotoba-jsonld" }
 # Kotoba core dependencies
 kotoba-logic = { path = "../../010-core/009-kotoba-logic" }
 kotoba-types = { path = "../../010-core/010-kotoba-types" }

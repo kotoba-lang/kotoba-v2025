@@ -41,8 +41,8 @@ impl KotobaParser {
         // First, try to evaluate as Jsonnet
         let json_content = self.evaluate_jsonnet(content)?;
 
-        // Parse the JSON content
-        let parsed: serde_json::Value = serde_json::from_str(&json_content)?;
+        // Parse the JSON-LD content
+        let parsed = kotoba_jsonld::parse_jsonld_to_value(&json_content)?;
 
         // Convert to KotobaConfig
         self.parse_json_value(parsed)
@@ -70,11 +70,11 @@ impl KotobaParser {
                 Ok(result_str.to_string())
             }
             Err(e) => {
-                // If jsonnet evaluation fails, try to parse as plain JSON
-                match serde_json::from_str::<serde_json::Value>(content) {
+                // If jsonnet evaluation fails, try to parse as JSON-LD
+                match kotoba_jsonld::parse_jsonld_to_value(content) {
                     Ok(value) => Ok(serde_json::to_string_pretty(&value)?),
                     Err(_) => {
-                        Err(Kotoba2TSError::Jsonnet(format!("Failed to evaluate as Jsonnet or JSON: {}", e)))
+                        Err(Kotoba2TSError::Jsonnet(format!("Failed to evaluate as Jsonnet or JSON-LD: {}", e)))
                     }
                 }
             }

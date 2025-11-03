@@ -251,16 +251,12 @@ pub fn parse_jsonld_to_value(input: &str) -> Result<Value> {
     Ok(value)
 }
 
-/// Extract data from JSON-LD Value, handling both prefixed and unprefixed keys
+/// Extract data from JSON-LD Value (prefixed keys only - kotoba: prefix required)
 pub fn extract_jsonld_value(value: &Value, key: &str) -> Option<&Value> {
     if let Value::Object(obj) = value {
-        // Try prefixed key first (kotoba:key)
+        // Only accept prefixed keys (kotoba:key)
         let prefixed_key = format!("kotoba:{}", key);
-        if let Some(v) = obj.get(&prefixed_key) {
-            return Some(v);
-        }
-        // Fallback to unprefixed key
-        obj.get(key)
+        obj.get(&prefixed_key)
     } else {
         None
     }

@@ -13,7 +13,9 @@
 //! - **GitHub Pages Deployment**: Direct deployment to GitHub Pages
 
 use crate::{Result, KotobaNetError};
+use kotoba_jsonld;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -313,7 +315,19 @@ impl GitHubPagesGenerator {
     /// Create generator from Jsonnet site definition
     pub fn from_jsonnet(jsonnet_content: &str) -> Result<Self> {
         let parsed = crate::evaluate_kotoba_to_json(jsonnet_content)?;
-        let config: GitHubPagesConfig = serde_json::from_str(&parsed)
+        // Parse JSON-LD
+        let jsonld_value = kotoba_jsonld::parse_jsonld_to_value(&parsed)
+            .map_err(|e| KotobaNetError::Config(format!("Failed to parse JSON-LD: {}", e)))?;
+        // Extract data from JSON-LD
+        let config_value = if let serde_json::Value::Object(mut obj) = jsonld_value {
+            obj.remove("@context");
+            obj.remove("@id");
+            obj.remove("@type");
+            serde_json::Value::Object(obj)
+        } else {
+            jsonld_value
+        };
+        let config: GitHubPagesConfig = serde_json::from_value(config_value)
             .map_err(|_e| KotobaNetError::Jsonnet(kotoba_jsonnet::JsonnetError::RuntimeError {
                 message: "Failed to parse site config".to_string()
             }))?;
