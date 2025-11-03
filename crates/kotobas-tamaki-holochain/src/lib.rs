@@ -13,6 +13,7 @@
 //! - **分散実行**: エージェント間でのプロセス協調実行
 
 pub mod dht;
+pub mod error;
 pub mod evolution;
 pub mod kernel;
 pub mod mediator;
@@ -23,6 +24,7 @@ pub mod utils;
 pub mod zome;
 
 pub use dht::*;
+pub use error::*;
 pub use evolution::*;
 pub use kernel::*;
 pub use mediator::*;

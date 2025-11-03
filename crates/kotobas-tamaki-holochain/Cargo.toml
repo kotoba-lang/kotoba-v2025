@@ -53,6 +53,9 @@ sha2 = "0.10"
 
 [dev-dependencies]
 tokio-test = "0.4"
+tokio = { version = "1.0", features = ["full"] }
+mockall = "0.12"
+proptest = "1.5"
 
 [features]
 default = []

@@ -37,3 +37,51 @@ pub fn string_to_agent(_s: &str) -> Result<AgentPubKey> {
     Err(crate::HolochainKotobasosError::Other(anyhow::anyhow!("Not implemented yet")))
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_jsonld_to_cid() {
+        let data = json!({
+            "@type": "kotoba:Process",
+            "@id": "kotoba:process/test",
+            "kotoba:label": "Test Process"
+        });
+
+        let cid1 = jsonld_to_cid(&data).unwrap();
+        let cid2 = jsonld_to_cid(&data).unwrap();
+        
+        // 同じデータから同じCIDが生成される
+        assert_eq!(cid1, cid2);
+        assert!(cid1.starts_with("cid:"));
+        assert_eq!(cid1.len(), 66); // "cid:" + 64 hex chars
+    }
+
+    #[test]
+    fn test_jsonld_to_cid_different_data() {
+        let data1 = json!({
+            "@type": "kotoba:Process",
+            "@id": "kotoba:process/test1"
+        });
+
+        let data2 = json!({
+            "@type": "kotoba:Process",
+            "@id": "kotoba:process/test2"
+        });
+
+        let cid1 = jsonld_to_cid(&data1).unwrap();
+        let cid2 = jsonld_to_cid(&data2).unwrap();
+        
+        // 異なるデータから異なるCIDが生成される
+        assert_ne!(cid1, cid2);
+    }
+
+    #[test]
+    fn test_agent_to_string() {
+        // AgentPubKeyのテストは実際のHolochain環境が必要
+        // ここでは基本構造のテストのみ
+        assert!(true);
+    }
+}

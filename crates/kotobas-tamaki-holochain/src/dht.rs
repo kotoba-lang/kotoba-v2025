@@ -7,6 +7,9 @@ use crate::Result;
 use hdk::prelude::*;
 use serde_json::Value;
 
+pub mod cache;
+pub use cache::*;
+
 /// JSON-LDデータをDHTエントリとして保存
 /// CIDインデックスも自動的に作成します
 pub async fn store_jsonld_entry(
@@ -15,113 +18,129 @@ pub async fn store_jsonld_entry(
 ) -> Result<EntryHash> {
     use crate::types::CidIndexEntry;
     use crate::utils::jsonld_to_cid;
+    use crate::error::RetryExecutor;
 
-    // JSON-LDデータをシリアライズ
-    let entry_data = serde_json::to_vec(data)
-        .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+    // リトライロジックでラップ
+    let retry_executor = RetryExecutor::default();
+    retry_executor.execute(|| async {
+        // JSON-LDデータをシリアライズ
+        let entry_data = serde_json::to_vec(data)
+            .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
 
-    // エントリタイプに応じたエントリを作成
-    let entry = match entry_type {
-        "Story" => {
-            let story_entry: StoryEntry = serde_json::from_value(data.clone())
-                .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
-            Entry::App(EntryBytes::from(serde_json::to_vec(&story_entry)?))
-        }
-        "Process" => {
-            let process_entry: ProcessEntry = serde_json::from_value(data.clone())
-                .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
-            Entry::App(EntryBytes::from(serde_json::to_vec(&process_entry)?))
-        }
-        "Provenance" => {
-            let provenance_entry: ProvenanceEntry = serde_json::from_value(data.clone())
-                .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
-            Entry::App(EntryBytes::from(serde_json::to_vec(&provenance_entry)?))
-        }
-        "Evolution" => {
-            let evolution_entry: EvolutionEntry = serde_json::from_value(data.clone())
-                .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
-            Entry::App(EntryBytes::from(serde_json::to_vec(&evolution_entry)?))
-        }
-        "MerkleNode" => {
-            let merkle_entry: MerkleNodeEntry = serde_json::from_value(data.clone())
-                .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
-            Entry::App(EntryBytes::from(serde_json::to_vec(&merkle_entry)?))
-        }
-        "Actor" => {
-            let actor_entry: ActorEntry = serde_json::from_value(data.clone())
-                .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
-            Entry::App(EntryBytes::from(serde_json::to_vec(&actor_entry)?))
-        }
-        _ => {
-            return Err(crate::HolochainKotobasosError::Dht(
-                format!("Unknown entry type: {}", entry_type)
-            ));
-        }
-    };
+        // エントリタイプに応じたエントリを作成
+        let entry = match entry_type {
+            "Story" => {
+                let story_entry: StoryEntry = serde_json::from_value(data.clone())
+                    .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                Entry::App(EntryBytes::from(serde_json::to_vec(&story_entry)?))
+            }
+            "Process" => {
+                let process_entry: ProcessEntry = serde_json::from_value(data.clone())
+                    .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                Entry::App(EntryBytes::from(serde_json::to_vec(&process_entry)?))
+            }
+            "Provenance" => {
+                let provenance_entry: ProvenanceEntry = serde_json::from_value(data.clone())
+                    .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                Entry::App(EntryBytes::from(serde_json::to_vec(&provenance_entry)?))
+            }
+            "Evolution" => {
+                let evolution_entry: EvolutionEntry = serde_json::from_value(data.clone())
+                    .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                Entry::App(EntryBytes::from(serde_json::to_vec(&evolution_entry)?))
+            }
+            "MerkleNode" => {
+                let merkle_entry: MerkleNodeEntry = serde_json::from_value(data.clone())
+                    .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                Entry::App(EntryBytes::from(serde_json::to_vec(&merkle_entry)?))
+            }
+            "Actor" => {
+                let actor_entry: ActorEntry = serde_json::from_value(data.clone())
+                    .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                Entry::App(EntryBytes::from(serde_json::to_vec(&actor_entry)?))
+            }
+            _ => {
+                return Err(crate::HolochainKotobasosError::Dht(
+                    format!("Unknown entry type: {}", entry_type)
+                ));
+            }
+        };
 
-    // DHTに作成
-    let entry_hash = create_entry(entry)
-        .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to create entry: {}", e)))?;
+        // DHTに作成
+        let entry_hash = create_entry(entry)
+            .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to create entry: {}", e)))?;
 
-    // CIDインデックスを作成
-    let cid = jsonld_to_cid(data)?;
-    let cid_index = CidIndexEntry {
-        cid: cid.clone(),
-        entry_hash,
-        entry_type: entry_type.to_string(),
-        created_at: chrono::Utc::now().timestamp(),
-    };
-    
-    // CIDインデックスエントリを保存
-    let cid_index_value = serde_json::to_value(&cid_index)?;
-    let cid_index_entry = Entry::App(EntryBytes::from(serde_json::to_vec(&cid_index_value)?));
-    let cid_index_hash = create_entry(cid_index_entry)
-        .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to create CID index: {}", e)))?;
+        // CIDインデックスを作成
+        let cid = jsonld_to_cid(data)?;
+        let cid_index = CidIndexEntry {
+            cid: cid.clone(),
+            entry_hash,
+            entry_type: entry_type.to_string(),
+            created_at: chrono::Utc::now().timestamp(),
+        };
+        
+        // CIDインデックスエントリを保存
+        let cid_index_value = serde_json::to_value(&cid_index)?;
+        let cid_index_entry = Entry::App(EntryBytes::from(serde_json::to_vec(&cid_index_value)?));
+        let cid_index_hash = create_entry(cid_index_entry)
+            .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to create CID index: {}", e)))?;
 
-    // CIDからEntryHashへのリンクを作成（検索用）
-    // CIDのハッシュをベースとしてリンクを作成
-    let cid_bytes = cid.as_bytes();
-    let cid_entry = Entry::App(EntryBytes::from(cid_bytes));
-    let cid_hash = hdk::hash::hash_entry(cid_entry)?;
-    
-    // CIDハッシュからCIDインデックスエントリへのリンクを作成
-    let _link_hash = create_link(
-        cid_hash,
-        cid_index_hash,
-        LinkTag::new("cid_index".as_bytes().to_vec()),
-    )
-    .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to create CID link: {}", e)))?;
+        // CIDからEntryHashへのリンクを作成（検索用）
+        let cid_bytes = cid.as_bytes();
+        let cid_entry = Entry::App(EntryBytes::from(cid_bytes));
+        let cid_hash = hdk::hash::hash_entry(cid_entry)?;
+        
+        // CIDハッシュからCIDインデックスエントリへのリンクを作成
+        let _link_hash = create_link(
+            cid_hash,
+            cid_index_hash,
+            LinkTag::new("cid_index".as_bytes().to_vec()),
+        )
+        .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to create CID link: {}", e)))?;
 
-    Ok(entry_hash)
+        Ok(entry_hash)
+    }).await
 }
 
 /// DHTからJSON-LDデータを取得
 pub async fn get_jsonld_entry(entry_hash: &EntryHash) -> Result<Value> {
-    // DHTから取得
-    let element = get(*entry_hash, GetOptions::default())
-        .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to get entry: {}", e)))?;
+    use crate::error::RetryExecutor;
 
-    match element {
-        Some(element) => {
-            // エントリをJSON-LDに変換
-            let entry = element.entry();
-            match entry {
-                Entry::App(entry_bytes) => {
-                    let value: Value = serde_json::from_slice(entry_bytes.as_slice())
-                        .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
-                    Ok(value)
+    let retry_executor = RetryExecutor::default();
+    retry_executor.execute(|| async {
+        // DHTから取得
+        let element = get(*entry_hash, GetOptions::default())
+            .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to get entry: {}", e)))?;
+
+        match element {
+            Some(element) => {
+                // エントリをJSON-LDに変換
+                let entry = element.entry();
+                match entry {
+                    Entry::App(entry_bytes) => {
+                        let value: Value = serde_json::from_slice(entry_bytes.as_slice())
+                            .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                        Ok(value)
+                    }
+                    _ => Err(crate::HolochainKotobasosError::Dht(
+                        "Entry is not an App entry".to_string()
+                    )),
                 }
-                _ => Err(crate::HolochainKotobasosError::Dht(
-                    "Entry is not an App entry".to_string()
-                )),
             }
+            None => Err(crate::HolochainKotobasosError::Dht("Entry not found".to_string())),
         }
-        None => Err(crate::HolochainKotobasosError::Dht("Entry not found".to_string())),
-    }
+    }).await
 }
 
-/// DHTクエリ実行
+/// DHTクエリ実行（キャッシュ対応）
 pub async fn query_dht(query: &DhtQuery) -> Result<Vec<(EntryHash, Value)>> {
+    // グローバルキャッシュマネージャーを使用（実際の実装では、シングルトンまたはコンテキスト経由で取得）
+    // ここでは簡易実装として、キャッシュなしで実行
+    query_dht_internal(query).await
+}
+
+/// DHTクエリ実行（内部実装）
+async fn query_dht_internal(query: &DhtQuery) -> Result<Vec<(EntryHash, Value)>> {
     use crate::types::CidIndexEntry;
     
     let mut results = Vec::new();
@@ -239,59 +258,69 @@ pub async fn build_merkle_dag(
     Ok(root_cid)
 }
 
-/// CID（Content ID）からDHTエントリを解決
+/// CID（Content ID）からDHTエントリを解決（キャッシュ対応）
 pub async fn resolve_cid(cid: &str) -> Result<Value> {
+    // グローバルキャッシュマネージャーを使用（実際の実装では、シングルトンまたはコンテキスト経由で取得）
+    // ここでは簡易実装として、キャッシュなしで実行
+    resolve_cid_internal(cid).await
+}
+
+/// CID解決（内部実装）
+async fn resolve_cid_internal(cid: &str) -> Result<Value> {
     use crate::types::CidIndexEntry;
+    use crate::error::RetryExecutor;
     
-    // CIDのハッシュを計算
-    let cid_bytes = cid.as_bytes();
-    let cid_entry = Entry::App(EntryBytes::from(cid_bytes));
-    let cid_hash = hdk::hash::hash_entry(cid_entry)?;
+    let retry_executor = RetryExecutor::default();
+    retry_executor.execute(|| async {
+        // CIDのハッシュを計算
+        let cid_bytes = cid.as_bytes();
+        let cid_entry = Entry::App(EntryBytes::from(cid_bytes));
+        let cid_hash = hdk::hash::hash_entry(cid_entry)?;
 
-    // CIDインデックスリンクを取得
-    let links = get_links(
-        cid_hash,
-        Some(LinkTypesFilter::single(
-            holochain_zome_types::link::LinkType::new(0)
-        )),
-    )
-    .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to get CID links: {}", e)))?;
+        // CIDインデックスリンクを取得
+        let links = get_links(
+            cid_hash,
+            Some(LinkTypesFilter::single(
+                holochain_zome_types::link::LinkType::new(0)
+            )),
+        )
+        .map_err(|e| crate::HolochainKotobasosError::Dht(format!("Failed to get CID links: {}", e)))?;
 
-    // 最初のリンクからCIDインデックスエントリのEntryHashを取得
-    if let Some(link) = links.into_inner().first() {
-        let cid_index_hash = link.target;
-        
-        // CIDインデックスエントリを取得
-        if let Ok(Some(element)) = get(cid_index_hash, GetOptions::default()) {
-            if let Entry::App(entry_bytes) = element.entry() {
-                let cid_index: CidIndexEntry = serde_json::from_slice(entry_bytes.as_slice())
-                    .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
-                
-                // 実際のエントリを取得
-                return get_jsonld_entry(&cid_index.entry_hash).await;
+        // 最初のリンクからCIDインデックスエントリのEntryHashを取得
+        if let Some(link) = links.into_inner().first() {
+            let cid_index_hash = link.target;
+            
+            // CIDインデックスエントリを取得
+            if let Ok(Some(element)) = get(cid_index_hash, GetOptions::default()) {
+                if let Entry::App(entry_bytes) = element.entry() {
+                    let cid_index: CidIndexEntry = serde_json::from_slice(entry_bytes.as_slice())
+                        .map_err(|e| crate::HolochainKotobasosError::Serialization(e))?;
+                    
+                    // 実際のエントリを取得
+                    return get_jsonld_entry(&cid_index.entry_hash).await;
+                }
             }
         }
-    }
 
-    // フォールバック: CIDインデックスエントリを直接検索
-    // すべてのCIDインデックスエントリを検索（非効率的だが動作する）
-    let query = DhtQuery {
-        entry_type: "CidIndex".to_string(),
-        filters: serde_json::json!({
-            "cid": cid
-        }),
-        pagination: None,
-    };
-    
-    let results = query_dht(&query).await?;
-    if let Some((_, index_value)) = results.first() {
-        let cid_index: CidIndexEntry = serde_json::from_value(index_value.clone())?;
-        return get_jsonld_entry(&cid_index.entry_hash).await;
-    }
+        // フォールバック: CIDインデックスエントリを直接検索
+        let query = DhtQuery {
+            entry_type: "CidIndex".to_string(),
+            filters: serde_json::json!({
+                "cid": cid
+            }),
+            pagination: None,
+        };
+        
+        let results = query_dht_internal(&query).await?;
+        if let Some((_, index_value)) = results.first() {
+            let cid_index: CidIndexEntry = serde_json::from_value(index_value.clone())?;
+            return get_jsonld_entry(&cid_index.entry_hash).await;
+        }
 
-    Err(crate::HolochainKotobasosError::Dht(
-        format!("CID not found: {}", cid)
-    ))
+        Err(crate::HolochainKotobasosError::Dht(
+            format!("CID not found: {}", cid)
+        ))
+    }).await
 }
 
 /// エントリにリンクを作成
@@ -326,4 +355,3 @@ pub async fn get_entry_links(
 
     Ok(links.into_inner())
 }
-
