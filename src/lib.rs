@@ -1,25 +1,35 @@
-//! # Kotoba: Core Graph Processing System
+//! # Kotoba: Phonosemantic Digital Computing System
 //!
-//! A comprehensive graph processing platform featuring GP2-based graph rewriting,
-//! complete Event Sourcing, ISO GQL-compliant queries, MVCC+Merkle persistence,
-//! and distributed execution using the Port/Adapter (Hexagonal) Architecture.
+//! A phonosemantic digital computing system where all computing, operating system,
+//! datastore, and self-evolution mechanisms are represented, reasoned, and executed
+//! using JSON-LD with OWL inference.
 //!
 //! ## Architecture Overview
 //!
-//! Kotoba is built with the **Port/Adapter (Hexagonal) Architecture**:
+//! Kotoba integrates three foundational concepts:
 //!
-//! - **🎯 Application Layer**: Business logic (Event Sourcing, Graph Queries, Rewriting)
-//! - **🔧 Infrastructure Layer**: Storage adapters (RocksDB, Redis, In-Memory)
-//! - **🏛️ Presentation Layer**: CLI, HTTP APIs, Web interfaces
+//! 1. **Phonosemantic Vocabulary System**: Systematic mapping between phonemes (sound units)
+//!    and semantic meanings, enabling natural language understanding through structured
+//!    vocabulary relationships.
+//!
+//! 2. **OWL Inference Engine**: Complete reasoning capabilities using RDFS, OWL Lite, and
+//!    OWL DL inference engines (powered by [fukurow](https://github.com/com-junkawasaki/fukurow))
+//!    for logical deduction and knowledge discovery.
+//!
+//! 3. **Semantic Execution Pattern**: A Kernel + Actor + Mediator architecture (inspired by
+//!    [semanticos](https://github.com/com-junkawasaki/semanticos)) for executing process networks
+//!    defined in JSON-LD with automatic actor selection and provenance tracking.
 //!
 //! ## Key Features
 //!
-//! - **Complete Event Sourcing**: Immutable events, projections, materialized views
-//! - **ISO GQL-compliant Queries**: Industry-standard graph query language
-//! - **Port/Adapter Pattern**: Clean separation of business logic and infrastructure
-//! - **Multiple Storage Backends**: RocksDB, Redis, In-Memory implementations
-//! - **Graph Rewriting**: GP2-based graph transformations
-//! - **Distributed Execution**: Multi-node coordination and consensus
+//! - **JSON-LD Native**: All computing layers use JSON-LD for representation
+//! - **OWL Inference**: RDFS + OWL Lite + OWL DL complete reasoning
+//! - **Phonosemantic Mapping**: Bidirectional phoneme ↔ meaning conversion
+//! - **Semantic Execution**: Kernel + Actor + Mediator pattern
+//! - **Self-Evolution**: Semantic Design Loop for continuous improvement
+//! - **Provenance Tracking**: Complete execution history in JSON-LD/PROV-O format
+//! - **Process Network Graph**: Declarative configuration with automatic dependency resolution
+//! - **MVCC + Merkle DAG**: Consistent distributed data management
 //!
 //! ## Usage
 //!

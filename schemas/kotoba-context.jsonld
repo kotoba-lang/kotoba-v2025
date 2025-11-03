@@ -462,6 +462,179 @@
     
     "$defs": {
       "@id": "kotoba:definitions"
+    },
+    
+    "Phoneme": {
+      "@id": "kotoba:Phoneme",
+      "@type": "@vocab"
+    },
+    
+    "SemanticMapping": {
+      "@id": "kotoba:SemanticMapping",
+      "@type": "@vocab"
+    },
+    
+    "VocabularySystem": {
+      "@id": "kotoba:VocabularySystem",
+      "@type": "@vocab"
+    },
+    
+    "PhonosemanticRelation": {
+      "@id": "kotoba:PhonosemanticRelation",
+      "@type": "@vocab"
+    },
+    
+    "phoneme": {
+      "@id": "kotoba:phoneme",
+      "@type": "xsd:string"
+    },
+    
+    "semanticMeaning": {
+      "@id": "kotoba:semanticMeaning",
+      "@container": "@set"
+    },
+    
+    "phoneticFeatures": {
+      "@id": "kotoba:phoneticFeatures"
+    },
+    
+    "mappingDirection": {
+      "@id": "kotoba:mappingDirection",
+      "@type": "xsd:string"
+    },
+    
+    "Kernel": {
+      "@id": "kotoba:Kernel",
+      "@type": "@vocab"
+    },
+    
+    "Actor": {
+      "@id": "kotoba:Actor",
+      "@type": "@vocab"
+    },
+    
+    "Mediator": {
+      "@id": "kotoba:Mediator",
+      "@type": "@vocab"
+    },
+    
+    "Performer": {
+      "@id": "kotoba:Performer",
+      "@type": "@vocab"
+    },
+    
+    "Provenance": {
+      "@id": "kotoba:Provenance",
+      "@type": "@vocab"
+    },
+    
+    "capability": {
+      "@id": "kotoba:capability",
+      "@type": "xsd:string"
+    },
+    
+    "performedBy": {
+      "@id": "kotoba:performedBy",
+      "@type": "kotoba:Performer"
+    },
+    
+    "actsOn": {
+      "@id": "kotoba:actsOn",
+      "@type": "kotoba:Resource"
+    },
+    
+    "used": {
+      "@id": "kotoba:used",
+      "@type": "kotoba:Resource"
+    },
+    
+    "generated": {
+      "@id": "kotoba:generated",
+      "@type": "kotoba:Resource"
+    },
+    
+    "next": {
+      "@id": "kotoba:next",
+      "@type": "kotoba:Process"
+    },
+    
+    "wasGeneratedBy": {
+      "@id": "prov:wasGeneratedBy",
+      "@type": "kotoba:Process"
+    },
+    
+    "wasAssociatedWith": {
+      "@id": "prov:wasAssociatedWith",
+      "@type": "kotoba:Actor"
+    },
+    
+    "InferredTriple": {
+      "@id": "kotoba:InferredTriple",
+      "@type": "@vocab"
+    },
+    
+    "ReasoningChain": {
+      "@id": "kotoba:ReasoningChain",
+      "@type": "@vocab"
+    },
+    
+    "InferenceStep": {
+      "@id": "kotoba:InferenceStep",
+      "@type": "@vocab"
+    },
+    
+    "OwlReasoningResult": {
+      "@id": "kotoba:OwlReasoningResult",
+      "@type": "@vocab"
+    },
+    
+    "inferredTriples": {
+      "@id": "kotoba:inferredTriples",
+      "@container": "@set"
+    },
+    
+    "reasoningChain": {
+      "@id": "kotoba:reasoningChain",
+      "@container": "@set"
+    },
+    
+    "inferenceStep": {
+      "@id": "kotoba:inferenceStep"
+    },
+    
+    "reasoningMethod": {
+      "@id": "kotoba:reasoningMethod",
+      "@type": "xsd:string"
+    },
+    
+    "triple": {
+      "@id": "kotoba:triple"
+    },
+    
+    "subject": {
+      "@id": "rdf:subject"
+    },
+    
+    "predicate": {
+      "@id": "rdf:predicate"
+    },
+    
+    "object": {
+      "@id": "rdf:object"
+    },
+    
+    "inferenceRule": {
+      "@id": "kotoba:inferenceRule",
+      "@type": "xsd:string"
+    },
+    
+    "consistencyCheck": {
+      "@id": "kotoba:consistencyCheck",
+      "@type": "xsd:boolean"
+    },
+    
+    "subsumptionResult": {
+      "@id": "kotoba:subsumptionResult"
     }
   }
 }

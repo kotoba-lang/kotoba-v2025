@@ -1,4 +1,4 @@
-# Kotoba: A Phonosematic Digital Computing System and Language
+# Kotoba: A Phonosemantic Digital Computing System
 
 <div align="center">
   <img src="public/hiragana_01_a.png.png" alt="Logo 01" width="80" height="80" />
@@ -8,19 +8,21 @@
   <img src="public/hiragana_05_o.png.png" alt="Logo 05" width="80" height="80" />
 </div>
 
-**Kotoba is a next-generation digital computing system where every aspect of computation—from low-level hardware operations to high-level application logic—is represented, optimized, and executed as a graph.**
+**Kotoba is a phonosemantic digital computing system where all computing, operating system, datastore, and self-evolution mechanisms are represented, reasoned, and executed using JSON-LD with OWL inference.**
 
-This project unifies two powerful concepts:
-1.  **The Kotoba VM - Tamaki Architecture**: A high-performance, modern Von Neumann-style virtual machine featuring a **Graph Neural Network (GNN)-based optimization engine**.
-2.  **The Kotoba Language**: A declarative, functional language based on Jsonnet for defining applications, schemas, and business logic as verifiable, content-addressed graphs.
+This project integrates three foundational concepts:
+1.  **Phonosemantic Vocabulary System**: A systematic mapping between phonemes (sound units) and semantic meanings, enabling natural language understanding through structured vocabulary systems.
+2.  **OWL Inference Engine**: Complete reasoning capabilities using RDFS, OWL Lite, and OWL DL inference engines (powered by [fukurow](https://github.com/com-junkawasaki/fukurow)) for logical deduction and knowledge discovery.
+3.  **Semantic Execution Pattern**: A Kernel + Actor + Mediator architecture (inspired by [semanticos](https://github.com/com-junkawasaki/semanticos)) for executing process networks defined in JSON-LD with automatic actor selection and provenance tracking.
 
-Together, they form a cohesive ecosystem that treats computing as a continuous process of **graph rewriting**.
+Together, they form a cohesive ecosystem where computation is expressed semantically and reasoned automatically.
 
 ```bash
-🧠 GNN-Powered VM for Hardware Optimization
-🔄 Unified Graph Rewriting from Low-Level to High-Level
-📜 Declarative, Content-Addressed Application Definitions
-🏗️ Purely Functional Core with Effects Shell Boundary
+🔤 Phonosemantic Vocabulary Mapping
+🦉 OWL Inference (RDFS + OWL Lite + OWL DL)
+📦 JSON-LD Native (All Computing Layers)
+🔄 Self-Evolution via Semantic Design Loop
+🏗️ Kernel + Actor + Mediator Pattern
 ```
 
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org/)
@@ -28,45 +30,82 @@ Together, they form a cohesive ecosystem that treats computing as a continuous p
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Architecture](https://img.shields.io/badge/Architecture-Pure%20Kernel%20%26%20Effects%20Shell-blue)](#-architecture-pure-kernel--effects-shell)
 
-## 📖 Vision: Computation as Graph Rewriting
+## 📖 Vision: Phonosemantic Digital Computing
 
-Kotoba reimagines the entire computing stack through the lens of graph theory. Instead of separate, disjointed layers of abstraction (hardware, OS, application), Kotoba proposes a unified model:
+Kotoba reimagines computing through the lens of **phonosemantics** (音素意味論) and **semantic reasoning**. Every aspect of computation—from low-level operations to high-level application logic—is expressed, reasoned, and executed using JSON-LD with OWL inference.
 
--   **Low-Level Execution as a Graph**: The **Kotoba VM** represents low-level program instructions and data dependencies as a **Program Interaction Hypergraph (PIH)**. This graph is not just a representation; it is the program itself, ready to be optimized and executed.
--   **High-Level Logic as a Graph**: The **Kotoba Language** uses declarative `.kotoba` files (Jsonnet) to define application logic, data schemas, and UI components as a graph of interconnected objects and functions.
--   **Optimization as Graph Rewriting**: The GNN engine within the VM learns the most effective sequences of graph transformations (DPO rules) to optimize the PIH for specific hardware targets (CPU, GPU, CGRA/FPGA).
--   **Verifiability through Content-Addressing**: Every object in the system, from a low-level operation to a high-level UI component, is assigned a **Content ID (CID)** based on its contents. This creates an immutable, verifiable Merkle-DAG of the entire system state, ensuring reproducibility and enabling powerful caching.
+### Core Principles
 
-This unified approach allows high-level application definitions to be compiled down into an optimizable graph representation that the VM can tailor for maximum performance on heterogeneous hardware.
+1. **Phonosemantic Vocabulary System**
+   - Systematic mapping between phonemes (sound units) and semantic meanings
+   - Natural language understanding through structured vocabulary relationships
+   - Bidirectional conversion: phoneme → meaning and meaning → phoneme
 
-## 🏗️ Architecture: Pure Kernel & Effects Shell
+2. **OWL Inference-Based Reasoning**
+   - **RDFS Inference**: Transitive closure of subClassOf and subPropertyOf
+   - **OWL Lite Inference**: Tableau algorithm for consistency checking and subsumption reasoning
+   - **OWL DL Inference**: Extended tableau algorithm for complete reasoning
+   - Powered by [fukurow](https://github.com/com-junkawasaki/fukurow), a WebAssembly-native OWL reasoning engine
 
-The entire system is built upon a **Purely Functional Architecture**, separating deterministic logic from side effects.
+3. **JSON-LD as Universal Representation**
+   - All computing layers use JSON-LD: hardware operations, OS services, datastore operations, and self-evolution mechanisms
+   - Unified semantic representation eliminates syntactic barriers between layers
+   - Automatic context resolution and vocabulary expansion
+
+4. **Semantic Execution Pattern (semanticos)**
+   - **Kernel**: Orchestrates process network execution
+   - **Actor**: Performs actions based on capabilities
+   - **Mediator**: Selects appropriate actors using SHACL-based reasoning
+   - **Provenance**: Records all execution history in JSON-LD format
+
+5. **Self-Evolution via Semantic Design Loop**
+   - System continuously improves itself by analyzing provenance
+   - OWL inference discovers optimization patterns
+   - Automatic shape refinement and process optimization
+
+This approach enables **semantic interoperability** across all computing layers, where meaning is preserved and reasoned about automatically.
+
+## 🏗️ Architecture: Phonosemantic Computing Stack
+
+The entire system is built upon a **Semantic-Driven Architecture**, where all layers communicate via JSON-LD and reason using OWL inference.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                       Effects Shell                         │
-│ (Handles all I/O, state changes, and non-deterministic ops) │
-│ ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   │
-│ │  HTTP Server  │   │  Database IO  │   │   File System │   │
-│ └───────┬───────┘   └───────┬───────┘   └───────┬───────┘   │
-└─────────┼───────────────────┼───────────────────┼─────────┘
-          │ (Requests as Data)│ (Data as Patches) │
-          ▼                   │                   ▼
+│                    Self-Evolution Layer                      │
+│     (Semantic Design Loop: Shape → Process → Provenance)    │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │  Evolution Engine (OWL-based pattern discovery)         │ │
+│ └─────────────────────────────────────────────────────────┘ │
+└────────────────────────────┬────────────────────────────────┘
+                              │ JSON-LD Provenance
+┌─────────────────────────────┼────────────────────────────────┐
+│              Semantic Execution Layer (semanticos)           │
+│ ┌──────────────┐   ┌──────────────┐   ┌──────────────┐      │
+│ │   Kernel     │   │   Mediator   │   │    Actor    │      │
+│ │ (Orchestrate)│   │ (Select Actor)│   │ (Perform)   │      │
+│ └──────┬───────┘   └──────┬───────┘   └──────┬──────┘      │
+└────────┼───────────────────┼──────────────────┼─────────────┘
+         │ JSON-LD Process   │ SHACL Reason      │ JSON-LD Result
+         ▼                   ▼                   ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                         Pure Kernel                         │
-│      (Deterministic, stateless, purely functional core)     │
-│                                                             │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │  Kotoba Language Engine (Jsonnet to Graph Transformation) │ │
-│ └─────────────────────────────────────────────────────────┘ │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │       GNN Optimization Engine (PIH Graph Rewriting)     │ │
-│ └─────────────────────────────────────────────────────────┘ │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │         Kotoba VM - Tamaki Architecture (Low-Level Graph Execution)           │ │
-│ └─────────────────────────────────────────────────────────┘ │
-│                                                             │
+│                    OWL Inference Layer                       │
+│ ┌──────────────┐   ┌──────────────┐   ┌──────────────┐      │
+│ │ RDFS Reasoner│   │ OWL Lite     │   │ OWL DL      │      │
+│ │ (Transitive) │   │ (Tableau)    │   │ (Extended)  │      │
+│ └──────┬───────┘   └──────┬───────┘   └──────┬───────┘      │
+│        └──────────────────┼──────────────────┘            │
+│                            │ fukurow                          │
+└────────────────────────────┼────────────────────────────────┘
+                             │ JSON-LD Triples
+┌────────────────────────────┼────────────────────────────────┐
+│                   JSON-LD Data Layer                         │
+│ ┌──────────────┐   ┌──────────────┐   ┌──────────────┐      │
+│ │ Phonosemantic│   │  Vocabulary │   │  Process    │      │
+│ │   Mapping    │   │   System    │   │  Network    │      │
+│ └──────────────┘   └──────────────┘   └──────────────┘      │
+│                                                              │
+│              All data structures are JSON-LD                │
+│         with @context, @id, @type, and kotoba: prefixes      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -111,14 +150,33 @@ A high-performance virtual machine that forms the execution layer of Kotoba.
 - **Energy Savings**: **35-45%** reduction compared to traditional systems.
 - **Case Studies**: **2.3x-4.7x** performance improvements across ETL, ML, video analytics, and scientific simulation.
 
-### 2. The Kotoba Language & Framework
+### 2. Phonosemantic Vocabulary System
 
-The high-level, declarative layer for building applications on the Kotoba system.
+The systematic mapping system that connects phonemes to semantic meanings.
 
--   **Declarative `.kotoba` Files**: Uses Jsonnet to define applications, data schemas, API routes, and UI components in a structured, verifiable way.
--   **ISO GQL Compliant**: A powerful graph query engine for interacting with application data.
--   **Hexagonal Architecture**: Pluggable adapters for storage (RocksDB, Redis, In-Memory) and other external services, keeping the core logic pure.
--   **Purely Functional Core**: All business logic is deterministic, transforming immutable graph data structures without side effects.
+-   **Phoneme Structure**: Represents sound units with phonetic features
+-   **Semantic Mapping**: Bidirectional conversion between phonemes and meanings
+-   **Vocabulary Management**: JSON-LD-based vocabulary system with OWL inference
+-   **Natural Language Integration**: Enables natural language understanding through structured relationships
+
+### 3. OWL Inference Engine (fukurow)
+
+Complete OWL reasoning capabilities integrated into Kotoba.
+
+-   **RDFS Inference**: Transitive closure computation for class and property hierarchies
+-   **OWL Lite Reasoning**: Tableau algorithm for consistency checking and subsumption
+-   **OWL DL Reasoning**: Extended tableau algorithm for complete logical reasoning
+-   **JSON-LD Integration**: Native support for JSON-LD input/output
+-   **WebAssembly Support**: Browser-ready inference engine
+
+### 4. Semantic Execution Pattern (semanticos)
+
+Process network execution with automatic actor selection and provenance tracking.
+
+-   **Kernel**: Orchestrates process network graph execution
+-   **Mediator**: Selects actors using SHACL-based capability matching
+-   **Actor**: Performs actions based on process requirements
+-   **Provenance**: Records all execution history in JSON-LD/PROV-O format
 
 ## 🚀 Quick Start
 
