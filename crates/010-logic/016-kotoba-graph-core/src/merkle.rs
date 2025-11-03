@@ -174,8 +174,8 @@ impl MerkleTree {
 
             let combined = if is_left {
                 let mut data = Vec::new();
-                data.extend_from_slice(&current_hash.0);
-                data.extend_from_slice(&sibling_hash.0);
+                data.extend_from_slice(current_hash.as_bytes());
+                data.extend_from_slice(sibling_hash.as_bytes());
                 data
             } else {
                 let mut data = Vec::new();
@@ -360,10 +360,10 @@ impl MerkleTreeBuilder {
         let adj_out_hash = Hash::from_sha256(&serde_json::to_vec(&graph.adj_out).unwrap());
         let adj_in_hash = Hash::from_sha256(&serde_json::to_vec(&graph.adj_in).unwrap());
 
-        key_data.extend_from_slice(&vertex_hash.0);
-        key_data.extend_from_slice(&edge_hash.0);
-        key_data.extend_from_slice(&adj_out_hash.0);
-        key_data.extend_from_slice(&adj_in_hash.0);
+        key_data.extend_from_slice(vertex_hash.as_bytes());
+        key_data.extend_from_slice(edge_hash.as_bytes());
+        key_data.extend_from_slice(adj_out_hash.as_bytes());
+        key_data.extend_from_slice(adj_in_hash.as_bytes());
 
         hex::encode(key_data)
     }

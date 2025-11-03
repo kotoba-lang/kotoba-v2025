@@ -9,6 +9,7 @@ pub mod incidence;
 pub mod canonical;
 pub mod merkle;
 pub mod graph;
+pub mod algorithms;
 
 use kotoba_types::{Hash as KotobaHash, *};
 use kotoba_codebase::*;
@@ -369,7 +370,7 @@ impl GraphProcessor {
     /// Create a new graph processor
     pub fn new() -> Self {
         Self {
-            canonicalizer: GraphCanonicalizer::new(),
+            canonicalizer: GraphCanonicalizer::new(CanonicalizationAlgorithm::Bliss),
             merkle_builder: MerkleTreeBuilder::new(),
         }
     }
@@ -379,6 +380,10 @@ impl GraphProcessor {
         // Canonicalize the graph
         let canonicalization = self.canonicalizer.canonicalize(graph);
 
+        // Clone values before moving
+        let hash = canonicalization.hash.clone();
+        let canonical_graph = canonicalization.canonical_graph.clone();
+
         // Build merkle tree from canonical form
         let merkle_tree = self.merkle_builder.build_tree_from_graph(&canonicalization);
 
@@ -386,8 +391,8 @@ impl GraphProcessor {
             canonicalization,
             merkle_tree,
             graph_ref: GraphRef::new(
-                canonicalization.hash.clone(),
-                canonicalization.canonical_graph.clone(),
+                hash,
+                canonical_graph,
             ),
         }
     }

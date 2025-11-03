@@ -3,7 +3,7 @@
 //! This module provides algorithms for computing canonical forms of graphs
 //! using various canonical labeling techniques.
 
-use super::*;
+use super::{Hash, *};
 use crate::graph::Graph;
 use kotoba_types::*;
 use serde::{Deserialize, Serialize};
