@@ -63,7 +63,7 @@ JSON APIレスポンスを生成：
 handlers: {
   "GET /api/users": {
     handler_type: "Json",
-    content_type: "application/json",
+    content_type: "application/ld+json",
     status: 200,
     data: {
       users: [

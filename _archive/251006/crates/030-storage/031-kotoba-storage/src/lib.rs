@@ -9,7 +9,9 @@
 //! - **Pure Kernel**: `StoragePlan`, `QueryPlan` - pure data structures and planning
 //! - **Effects Shell**: `StorageEngine` - handles actual I/O operations
 
+use kotoba_jsonld::{JsonLdDocument, JsonLdContext, serialize_jsonld, parse_jsonld_to_value};
 use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
 use std::collections::HashMap;
 
 /// Pure representation of a storage key
@@ -55,10 +57,10 @@ impl StorageKey {
     }
 }
 
-/// Pure representation of a storage value
+/// Pure representation of a storage value (JSON-LD format)
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct StorageValue {
-    /// Actual data content
+    /// Actual data content (stored as JSON-LD)
     pub data: serde_json::Value,
     /// Optional metadata
     pub metadata: HashMap<String, serde_json::Value>,
@@ -67,21 +69,73 @@ pub struct StorageValue {
 }
 
 impl StorageValue {
-    /// Create a simple value
+    /// Create a simple value (ensures JSON-LD format)
     pub fn new(data: serde_json::Value) -> Self {
         Self {
-            data,
+            data: Self::ensure_jsonld_format(data),
             metadata: HashMap::new(),
             version: None,
         }
     }
 
-    /// Create a value with metadata
+    /// Create a value with metadata (ensures JSON-LD format)
     pub fn with_metadata(data: serde_json::Value, metadata: HashMap<String, serde_json::Value>) -> Self {
         Self {
-            data,
+            data: Self::ensure_jsonld_format(data),
             metadata,
             version: None,
+        }
+    }
+
+    /// Create from JSON-LD document
+    pub fn from_jsonld(jsonld_doc: &JsonLdDocument) -> Result<Self, anyhow::Error> {
+        let jsonld_str = serialize_jsonld(jsonld_doc)?;
+        let value = parse_jsonld_to_value(&jsonld_str)?;
+        Ok(Self::new(value))
+    }
+
+    /// Convert to JSON-LD document
+    pub fn to_jsonld(&self) -> Result<JsonLdDocument, anyhow::Error> {
+        parse_jsonld_to_value(&serde_json::to_string(&self.data)?)
+            .and_then(|v| {
+                serde_json::from_value(v.clone())
+                    .map_err(|_| anyhow::anyhow!("Failed to parse as JsonLdDocument"))
+            })
+            .or_else(|_| {
+                // Fallback: wrap in JSON-LD structure
+                let mut doc = JsonLdDocument {
+                    context: JsonLdContext::String("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld".to_string()),
+                    id: None,
+                    type_: Some("kotoba:StorageValue".to_string()),
+                    data: HashMap::new(),
+                };
+                if let Value::Object(obj) = &self.data {
+                    for (key, val) in obj {
+                        doc.data.insert(key.clone(), val.clone());
+                    }
+                } else {
+                    doc.data.insert("value".to_string(), self.data.clone());
+                }
+                Ok(doc)
+            })
+    }
+
+    /// Ensure value is in JSON-LD format (requires @context)
+    fn ensure_jsonld_format(value: Value) -> Value {
+        if let Value::Object(mut obj) = value {
+            // Require @context - JSON-LD must have @context
+            if !obj.contains_key("@context") {
+                // Add @context as required by JSON-LD spec
+                obj.insert("@context".to_string(), json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+            }
+            Value::Object(obj)
+        } else {
+            // Wrap primitive values in JSON-LD structure (required by JSON-LD spec)
+            let mut doc = HashMap::new();
+            doc.insert("@context".to_string(), json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+            doc.insert("@type".to_string(), json!("kotoba:StorageValue"));
+            doc.insert("value".to_string(), value);
+            Value::Object(doc)
         }
     }
 }

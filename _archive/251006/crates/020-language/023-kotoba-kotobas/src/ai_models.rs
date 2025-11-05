@@ -103,8 +103,25 @@ impl AiModels {
             .await
             .map_err(|e| KotobaNetError::Network(format!("OpenAI API request failed: {}", e)))?;
 
-        let response_json: serde_json::Value = response.json().await
+        // External API returns JSON, convert to JSON-LD format internally
+        let response_json_value: serde_json::Value = response.json().await
             .map_err(|e| KotobaNetError::Parse(format!("Failed to parse OpenAI response: {}", e)))?;
+        
+        // Convert external JSON response to JSON-LD format for internal use
+        let response_json = if let serde_json::Value::Object(mut obj) = response_json_value {
+            // Add @context if not present
+            if !obj.contains_key("@context") {
+                obj.insert("@context".to_string(), serde_json::json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+            }
+            serde_json::Value::Object(obj)
+        } else {
+            // Wrap primitive values in JSON-LD structure
+            let mut doc = serde_json::Map::new();
+            doc.insert("@context".to_string(), serde_json::json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+            doc.insert("@type".to_string(), serde_json::json!("kotoba:OpenAIResponse"));
+            doc.insert("value".to_string(), response_json_value);
+            serde_json::Value::Object(doc)
+        };
 
         if let Some(error) = response_json.get("error") {
             return Err(KotobaNetError::Api(format!("OpenAI API error: {}", error)));

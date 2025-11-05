@@ -1,0 +1,134 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "kotoba": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld#vocab",
+    "sh": "http://www.w3.org/ns/shacl#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "owl": "http://www.w3.org/2002/07/owl#"
+  },
+  "@id": "https://kotoba.ai/shapes/capability",
+  "@type": "sh:NodeShape",
+  "rdfs:comment": "SHACL shapes for validating Capability structures",
+  
+  "@graph": [
+    {
+      "@id": "kotoba:CapabilityShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:Capability",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:capabilityId",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:pattern": "^[A-Za-z0-9_\\-:.]{1,128}$"
+        },
+        {
+          "sh:path": "rdf:type",
+          "sh:nodeKind": "sh:IRI",
+          "sh:minCount": 1
+        },
+        {
+          "sh:path": "kotoba:capabilityConstraints",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:hasCapabilityLevel",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "kotoba:ProcessCapabilityRequirementShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:Process",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:requiresCapability",
+          "sh:node": "kotoba:CapabilityShape",
+          "sh:minCount": 0
+        }
+      ]
+    },
+    {
+      "@id": "kotoba:ActorCapabilityShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:Actor",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:providesCapability",
+          "sh:node": "kotoba:CapabilityShape",
+          "sh:minCount": 0
+        },
+        {
+          "sh:path": "kotoba:capability",
+          "sh:nodeKind": "sh:IRI",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "kotoba:ComputeCapabilityShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:ComputeCapability",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:hasComputePower",
+          "sh:datatype": "xsd:double",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:supportsParallelism",
+          "sh:datatype": "xsd:boolean",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "kotoba:StorageCapabilityShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:StorageCapability",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:hasStorageCapacity",
+          "sh:datatype": "xsd:double",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:supportsTransactions",
+          "sh:datatype": "xsd:boolean",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "kotoba:NetworkCapabilityShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:NetworkCapability",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:hasBandwidth",
+          "sh:datatype": "xsd:double",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:supportsEncryption",
+          "sh:datatype": "xsd:boolean",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        }
+      ]
+    }
+  ]
+}
+

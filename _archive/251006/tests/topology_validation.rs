@@ -5,6 +5,7 @@
 
 use kotoba_main::topology::{TopologyValidator, TopologyGraph, Node, Edge};
 use kotoba_main::KotobaError;
+use kotoba_jsonld;
 use std::process::Command;
 use std::path::Path;
 
@@ -27,17 +28,42 @@ fn generate_topology_data() -> Result<TopologyGraph, KotobaError> {
         ));
     }
 
-    // JSONデータをパース
+    // JSON-LDデータをパース（Jsonnet出力をJSON-LD形式に変換）
     let json_str = String::from_utf8(output.stdout)
         .map_err(|e| KotobaError::Validation(
             format!("Invalid UTF-8 output from jsonnet: {}", e)
         ))?;
 
-    // JSONからTopologyGraphを構築
-    let data: serde_json::Value = serde_json::from_str(&json_str)
-        .map_err(|e| KotobaError::Validation(
-            format!("Failed to parse jsonnet output as JSON: {}", e)
-        ))?;
+    // Parse as JSON-LD (fallback to JSON if JSON-LD parsing fails)
+    let json_value = match kotoba_jsonld::parse_jsonld_to_value(&json_str) {
+        Ok(v) => v,
+        Err(_) => {
+            // Fallback: wrap Jsonnet output in JSON-LD structure
+            let mut wrapped = serde_json::Map::new();
+            wrapped.insert("@context".to_string(), serde_json::json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+            wrapped.insert("@type".to_string(), serde_json::json!("kotoba:TopologyGraph"));
+            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&json_str) {
+                if let serde_json::Value::Object(obj) = parsed {
+                    for (k, v) in obj {
+                        wrapped.insert(k, v);
+                    }
+                } else {
+                    wrapped.insert("data".to_string(), parsed);
+                }
+            }
+            serde_json::Value::Object(wrapped)
+        }
+    };
+    
+    // Extract data from JSON-LD (remove @context, @id, @type)
+    let data = if let serde_json::Value::Object(mut obj) = json_value {
+        obj.remove("@context");
+        obj.remove("@id");
+        obj.remove("@type");
+        serde_json::Value::Object(obj)
+    } else {
+        json_value
+    };
 
     let topology_graph = &data["topology_graph"];
 
@@ -283,9 +309,35 @@ fn test_jsonnet_output_format() {
     let json_str = String::from_utf8(output.stdout)
         .expect("Invalid UTF-8 output");
 
-    // JSONとしてパースできることを確認
-    let data: serde_json::Value = serde_json::from_str(&json_str)
-        .expect("Output is not valid JSON");
+    // JSON-LDとしてパースできることを確認
+    let json_value = match kotoba_jsonld::parse_jsonld_to_value(&json_str) {
+        Ok(v) => v,
+        Err(_) => {
+            // Fallback: wrap in JSON-LD structure
+            let mut wrapped = serde_json::Map::new();
+            wrapped.insert("@context".to_string(), serde_json::json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&json_str) {
+                if let serde_json::Value::Object(obj) = parsed {
+                    for (k, v) in obj {
+                        wrapped.insert(k, v);
+                    }
+                } else {
+                    wrapped.insert("data".to_string(), parsed);
+                }
+            }
+            serde_json::Value::Object(wrapped)
+        }
+    };
+    
+    // Extract data from JSON-LD
+    let data = if let serde_json::Value::Object(mut obj) = json_value {
+        obj.remove("@context");
+        obj.remove("@id");
+        obj.remove("@type");
+        serde_json::Value::Object(obj)
+    } else {
+        json_value
+    };
 
     // 必要なフィールドが存在することを確認
     assert!(data["topology_graph"].is_object(), "topology_graph field missing");

@@ -1,0 +1,86 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-types",
+  "name": "kotoba-types",
+  "version": "0.1.22",
+  "path": "crates/010-logic/010-kotoba-types",
+  "status": "active",
+  "edition": "2021",
+  "license": "Apache-2.0",
+  "description": "Core type definitions for the Kotoba ecosystem including CID, graph types, and error handling.",
+  "layer": "kotoba:layer/005-foundation",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../009-kotoba-logic",
+        "name": "kotoba-logic"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "serde_json"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "features": [
+          "v4",
+          "serde"
+        ],
+        "name": "uuid"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "hex"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "sha2"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "blake3"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "features": [
+          "uuid1"
+        ],
+        "name": "schemars"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "thiserror"
+      }
+    ],
+    "external": [],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/calculator.rs",
+    "src/canonical_json.rs",
+    "src/lib.rs",
+    "src/manager.rs",
+    "src/merkle.rs"
+  ]
+}

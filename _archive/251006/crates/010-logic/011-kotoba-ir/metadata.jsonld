@@ -1,0 +1,102 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-ir",
+  "name": "kotoba-ir",
+  "version": "0.1.22",
+  "path": "crates/010-logic/011-kotoba-ir",
+  "status": "active",
+  "edition": "2021",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/com-junkawasaki/kotoba",
+  "description": "Intermediate Representation (IR) system for Kotoba - catalog-IR, rule-IR, query-IR, patch-IR, strategy-IR",
+  "keywords": [
+    "ir",
+    "intermediate",
+    "representation",
+    "graph",
+    "rewrite"
+  ],
+  "categories": [
+    "data-structures",
+    "algorithms"
+  ],
+  "layer": "kotoba:layer/010-logic",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "path": "../019-kotoba-jsonld",
+        "name": "kotoba-jsonld"
+      },
+      {
+        "type": "workspace",
+        "path": "../022-kotoba-owl-reasoner",
+        "optional": true,
+        "name": "kotoba-owl-reasoner"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "serde_json"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "thiserror"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "optional": true,
+        "name": "tokio"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "optional": true,
+        "name": "wasmtime"
+      }
+    ],
+    "external": [
+      {
+        "name": "anyhow",
+        "type": "external",
+        "version": "1.0"
+      }
+    ],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": [
+      "reasoning",
+      "wasm"
+    ]
+  },
+  "sourceFiles": [
+    "src/catalog_jsonld.rs",
+    "src/jsonld_tests.rs",
+    "src/lib.rs",
+    "src/patch_jsonld.rs",
+    "src/query_jsonld.rs",
+    "src/rule_jsonld.rs",
+    "src/shacl.rs",
+    "src/strategy_jsonld.rs",
+    "src/wasm.rs"
+  ]
+}

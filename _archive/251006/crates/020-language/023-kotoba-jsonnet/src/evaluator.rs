@@ -54,9 +54,28 @@ impl Evaluator {
         let content = fs::read_to_string(path)
             .map_err(|e| JsonnetError::io_error(format!("Failed to read ext vars file: {}", e)))?;
 
-        // Parse as JSON (simplified - real implementation would handle Jsonnet format)
-        let vars: HashMap<String, String> = serde_json::from_str(&content)
-            .map_err(|e| JsonnetError::parse_error(0, 0, format!("Invalid ext vars JSON: {}", e)))?;
+        // Parse as JSON-LD (fallback to JSON if JSON-LD parsing fails)
+        let json_value = match kotoba_jsonld::parse_jsonld_to_value(&content) {
+            Ok(v) => v,
+            Err(_) => {
+                // Fallback to regular JSON parsing
+                serde_json::from_str(&content)
+                    .map_err(|e| JsonnetError::parse_error(0, 0, format!("Invalid ext vars JSON/JSON-LD: {}", e)))?
+            }
+        };
+        
+        // Extract data from JSON-LD (remove @context, @id, @type)
+        let data_value = if let serde_json::Value::Object(mut obj) = json_value {
+            obj.remove("@context");
+            obj.remove("@id");
+            obj.remove("@type");
+            serde_json::Value::Object(obj)
+        } else {
+            json_value
+        };
+        
+        let vars: HashMap<String, String> = serde_json::from_value(data_value)
+            .map_err(|e| JsonnetError::parse_error(0, 0, format!("Invalid ext vars format: {}", e)))?;
 
         self.ext_vars.extend(vars);
         self.update_pure_evaluator();

@@ -1,0 +1,93 @@
+{
+  "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
+  "@id": "https://kotoba.ai/schemas/pih.min.v1.jsonld",
+  "@type": "kotoba:PIH",
+  "rdfs:label": "Program Interaction Hypergraph (PIH) - Node/Edge/Incidence",
+  "rdfs:comment": "A unified tripartite hypergraph representation for programs using node/edge/incidence structure",
+  "kotoba:version": "1.0.0",
+  "shacl:property": [
+    {
+      "shacl:path": "kotoba:meta",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:nodes",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 1
+    },
+    {
+      "shacl:path": "kotoba:edges",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 1
+    },
+    {
+      "shacl:path": "kotoba:incidences",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 1
+    },
+    {
+      "shacl:path": "kotoba:node_embeddings",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:graph_cid",
+      "shacl:datatype": "xsd:string",
+      "shacl:pattern": "^[uUbB][A-Za-z0-9]+$",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:subgraphs",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:embedding_cache",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    },
+    {
+      "shacl:path": "kotoba:cid_metadata",
+      "shacl:nodeKind": "shacl:BlankNodeOrIRI",
+      "shacl:minCount": 0
+    }
+  ],
+  "kotoba:definitions": {
+    "cid": {
+      "@type": "shacl:Datatype",
+      "shacl:datatype": "xsd:string",
+      "rdfs:comment": "Content ID (CID) in multibase format (e.g., uABC123... for Base64URL + Blake3)",
+      "shacl:pattern": "^[uUbB][A-Za-z0-9]+$"
+    },
+    "gcid": {
+      "@type": "shacl:Datatype",
+      "shacl:datatype": "xsd:string",
+      "rdfs:comment": "Graph Content ID (GCID) - Merkle root over subgraph members",
+      "shacl:pattern": "^[uUbB][A-Za-z0-9]+$"
+    },
+    "node_id": {
+      "@type": "shacl:Datatype",
+      "shacl:datatype": "xsd:string",
+      "rdfs:comment": "Unique identifier for a node"
+    },
+    "edge_id": {
+      "@type": "shacl:Datatype",
+      "shacl:datatype": "xsd:string",
+      "rdfs:comment": "Unique identifier for an edge"
+    },
+    "role": {
+      "@type": "shacl:Datatype",
+      "shacl:datatype": "xsd:string",
+      "rdfs:comment": "Role name defining the relationship type",
+      "shacl:pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+    },
+    "index": {
+      "@type": "shacl:Datatype",
+      "shacl:datatype": "xsd:integer",
+      "rdfs:comment": "Index for ordering multiple incidences with same edge and role",
+      "shacl:minInclusive": 0
+    }
+  }
+}
+

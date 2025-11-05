@@ -1,0 +1,70 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-codebase",
+  "name": "kotoba-codebase",
+  "version": "0.1.22",
+  "path": "crates/010-logic/010-kotoba-codebase",
+  "status": "active",
+  "description": "DefRef: Function/type/rule/strategy/schema definitions with content addressing",
+  "layer": "kotoba:layer/010-logic",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../009-kotoba-logic",
+        "name": "kotoba-logic"
+      },
+      {
+        "type": "workspace",
+        "path": "../010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      }
+    ],
+    "external": [
+      {
+        "type": "unknown",
+        "name": "serde_json.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "thiserror.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "sha2.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "hex.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "blake3.workspace"
+      }
+    ],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/def_ref.rs",
+    "src/function_def.rs",
+    "src/lib.rs",
+    "src/rule_def.rs",
+    "src/schema_def.rs",
+    "src/strategy_def.rs",
+    "src/type_def.rs"
+  ]
+}

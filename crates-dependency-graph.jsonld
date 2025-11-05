@@ -1,0 +1,1071 @@
+{
+  "@context": "schemas/kotoba-context.jsonld",
+  "@type": "kotoba:DependencyGraph",
+  "@id": "kotoba:dependency-graph",
+  "nodes": [
+    {
+      "@id": "kotoba:crate/kotobas-tamaki-holochain",
+      "@type": "kotoba:CrateNode",
+      "name": "kotobas-tamaki-holochain",
+      "layer": "",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-owl-reasoner",
+        "kotoba-cid",
+        "kotoba-os",
+        "kotoba-jsonld"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/005-vm",
+      "@type": "kotoba:CrateNode",
+      "name": "005-vm",
+      "layer": "012-vm",
+      "status": "unimplemented",
+      "dependencies": [],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-lsp",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-lsp",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-kotobas",
+        "kotoba-types",
+        "kotoba-linter",
+        "kotoba-jsonnet",
+        "kotoba-formatter",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba-logic",
+        "kotoba-syntax",
+        "kotoba-ir",
+        "kotoba-rewrite-kernel"
+      ],
+      "dependents": [
+        "kotoba-language"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotobas-wasm",
+      "@type": "kotoba:CrateNode",
+      "name": "kotobas-wasm",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-jsonnet"
+      ],
+      "dependents": [
+        "kotoba-language"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba2tsx",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba2tsx",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-kotobas",
+        "kotoba-types",
+        "hex",
+        "uuid",
+        "kotoba-jsonnet",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba-logic",
+        "kotoba-syntax",
+        "sha2",
+        "kotoba-ir",
+        "kotoba-rewrite-kernel",
+        "kotoba-jsonld"
+      ],
+      "dependents": [
+        "kotoba-language"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-jsonnet",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-jsonnet",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-logic",
+        "kotoba-ir",
+        "kotoba-rewrite-kernel",
+        "kotoba-jsonld"
+      ],
+      "dependents": [
+        "kotoba-kotobas",
+        "kotoba-formatter",
+        "kotobas-wasm",
+        "kotoba2tsx",
+        "kotoba-language",
+        "kotoba-lsp",
+        "kotoba-repl"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-kotobas",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-kotobas",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-jsonnet",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba-logic",
+        "kotoba-syntax",
+        "kotoba-ir",
+        "kotoba-rewrite-kernel",
+        "kotoba-jsonld"
+      ],
+      "dependents": [
+        "kotoba-formatter",
+        "kotoba-language",
+        "kotoba2tsx",
+        "kotoba-lsp",
+        "kotoba-repl"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-syntax",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-syntax",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-logic",
+        "serde_json",
+        "serde"
+      ],
+      "dependents": [
+        "kotoba-kotobas",
+        "kotoba-formatter",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba2tsx",
+        "kotoba-language",
+        "kotoba-linter",
+        "kotoba-lsp",
+        "kotoba-repl"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-formatter",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-formatter",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-kotobas",
+        "kotoba-types",
+        "serde_json",
+        "kotoba-jsonnet",
+        "serde",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba-ir",
+        "dirs",
+        "tokio",
+        "kotoba-logic",
+        "kotoba-syntax",
+        "anyhow",
+        "regex",
+        "thiserror"
+      ],
+      "dependents": [
+        "kotoba-linter",
+        "kotoba-lsp",
+        "kotoba-language",
+        "kotoba-repl"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-repl",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-repl",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-kotobas",
+        "kotoba-types",
+        "serde_json",
+        "uuid",
+        "kotoba-jsonnet",
+        "kotoba-formatter",
+        "kotoba-linter",
+        "serde",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba-ir",
+        "tokio",
+        "chrono",
+        "kotoba-logic",
+        "kotoba-syntax",
+        "regex",
+        "dirs"
+      ],
+      "dependents": [
+        "kotoba-language"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-analyzer",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-analyzer",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "serde_json",
+        "serde",
+        "kotoba-parser",
+        "kotoba-logic",
+        "kotoba-syntax",
+        "anyhow",
+        "kotoba-ir",
+        "thiserror"
+      ],
+      "dependents": [
+        "kotoba-kotobas",
+        "kotoba-formatter",
+        "kotoba2tsx",
+        "kotoba-language",
+        "kotoba-linter",
+        "kotoba-lsp",
+        "kotoba-repl"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-language",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-language",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-kotobas",
+        "kotoba-types",
+        "kotoba-linter",
+        "kotoba-jsonnet",
+        "kotoba-formatter",
+        "kotobas-wasm",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba2tsx",
+        "kotoba-logic",
+        "kotoba-syntax",
+        "kotoba-ir",
+        "kotoba-rewrite-kernel",
+        "kotoba-lsp",
+        "kotoba-repl"
+      ],
+      "dependents": [
+        "kotoba-cli"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-parser",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-parser",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-ir",
+        "kotoba-types",
+        "kotoba-logic",
+        "kotoba-syntax"
+      ],
+      "dependents": [
+        "kotoba-kotobas",
+        "kotoba-formatter",
+        "kotoba-analyzer",
+        "kotoba2tsx",
+        "kotoba-language",
+        "kotoba-linter",
+        "kotoba-lsp",
+        "kotoba-repl"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-linter",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-linter",
+      "layer": "020-language",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-formatter",
+        "serde",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba-logic",
+        "kotoba-syntax",
+        "kotoba-ir",
+        "thiserror"
+      ],
+      "dependents": [
+        "kotoba-lsp",
+        "kotoba-language",
+        "kotoba-repl"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/source_code",
+      "@type": "kotoba:CrateNode",
+      "name": "source_code",
+      "layer": "012-vm",
+      "status": "unimplemented",
+      "dependencies": [],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/vm_memory",
+      "@type": "kotoba:CrateNode",
+      "name": "vm_memory",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "vm_types"
+      ],
+      "dependents": [
+        "vm-benchmarks",
+        "vm_core",
+        "vm-cli",
+        "vm_cpu"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/vm_types",
+      "@type": "kotoba:CrateNode",
+      "name": "vm_types",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [],
+      "dependents": [
+        "vm_memory",
+        "vm_core",
+        "vm_hardware",
+        "vm_scheduler",
+        "vm-cli",
+        "vm-benchmarks",
+        "vm_cpu"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/vm_hardware",
+      "@type": "kotoba:CrateNode",
+      "name": "vm_hardware",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "vm_types"
+      ],
+      "dependents": [
+        "vm_core"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/vm-benchmarks",
+      "@type": "kotoba:CrateNode",
+      "name": "vm-benchmarks",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "vm_memory",
+        "vm_scheduler",
+        "vm_types",
+        "vm_cpu"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/vm_cpu",
+      "@type": "kotoba:CrateNode",
+      "name": "vm_cpu",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "vm_memory",
+        "vm_types"
+      ],
+      "dependents": [
+        "vm-benchmarks",
+        "vm_core",
+        "vm-cli"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/vm_core",
+      "@type": "kotoba:CrateNode",
+      "name": "vm_core",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "vm_memory",
+        "vm_types",
+        "vm_scheduler",
+        "vm_hardware",
+        "tokio",
+        "vm_cpu"
+      ],
+      "dependents": [
+        "vm-cli"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/vm_scheduler",
+      "@type": "kotoba:CrateNode",
+      "name": "vm_scheduler",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "twox-hash",
+        "vm_types",
+        "rayon"
+      ],
+      "dependents": [
+        "vm-benchmarks",
+        "vm_core",
+        "vm-cli"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/vm-cli",
+      "@type": "kotoba:CrateNode",
+      "name": "vm-cli",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "vm_memory",
+        "vm_types",
+        "vm_core",
+        "vm_scheduler",
+        "vm_cpu"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-vm-core",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-vm-core",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "kotoba-vm-memory",
+        "kotoba-vm-types",
+        "kotoba-vm-scheduler",
+        "kotoba-vm-hardware",
+        "tokio",
+        "kotoba-vm-gnn",
+        "kotoba-vm-cpu"
+      ],
+      "dependents": [
+        "kotoba-vm-cli"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-vm-gnn",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-vm-gnn",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [],
+      "dependents": [
+        "kotoba-vm-core"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-vm-scheduler",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-vm-scheduler",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "twox-hash",
+        "rayon",
+        "kotoba-vm-types"
+      ],
+      "dependents": [
+        "kotoba-vm-benchmarks",
+        "kotoba-vm-core",
+        "kotoba-vm-cli"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-vm-memory",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-vm-memory",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "kotoba-vm-types"
+      ],
+      "dependents": [
+        "kotoba-vm-benchmarks",
+        "kotoba-vm-cli",
+        "kotoba-vm-core",
+        "kotoba-vm-cpu"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-vm-types",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-vm-types",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [],
+      "dependents": [
+        "kotoba-vm-memory",
+        "kotoba-vm-core",
+        "kotoba-vm-scheduler",
+        "kotoba-vm-cli",
+        "kotoba-vm-hardware",
+        "kotoba-vm-benchmarks",
+        "kotoba-vm-cpu"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-vm-benchmarks",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-vm-benchmarks",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "kotoba-vm-memory",
+        "kotoba-vm-cpu",
+        "kotoba-vm-types",
+        "kotoba-vm-scheduler"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-vm-cpu",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-vm-cpu",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "kotoba-vm-memory",
+        "kotoba-vm-types"
+      ],
+      "dependents": [
+        "kotoba-vm-benchmarks",
+        "kotoba-vm-core",
+        "kotoba-vm-cli"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-vm-hardware",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-vm-hardware",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "kotoba-vm-types"
+      ],
+      "dependents": [
+        "kotoba-vm-core"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-vm-cli",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-vm-cli",
+      "layer": "012-vm",
+      "status": "active",
+      "dependencies": [
+        "kotoba-vm-memory",
+        "kotoba-vm-core",
+        "kotoba-vm-types",
+        "kotoba-jsonld",
+        "kotoba-vm-cpu",
+        "kotoba-vm-scheduler"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-rewrite-kernel",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-rewrite-kernel",
+      "layer": "010-logic",
+      "status": "active",
+      "dependencies": [
+        "kotoba-ir",
+        "kotoba-types",
+        "kotoba-codebase",
+        "serde"
+      ],
+      "dependents": [
+        "kotoba-kotobas",
+        "kotoba-jsonnet",
+        "kotoba-api",
+        "kotoba-language",
+        "kotoba2tsx",
+        "kotoba-lsp"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-txlog",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-txlog",
+      "layer": "010-logic",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "serde",
+        "kotoba-codebase",
+        "kotoba-graph-core",
+        "chrono",
+        "kotoba-ir"
+      ],
+      "dependents": [
+        "kotoba-api"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-logic",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-logic",
+      "layer": "005-foundation",
+      "status": "active",
+      "dependencies": [
+        "thiserror",
+        "serde_json",
+        "anyhow",
+        "serde"
+      ],
+      "dependents": [
+        "kotoba-kotobas",
+        "kotoba-types",
+        "kotoba-auth",
+        "kotoba-jsonnet",
+        "kotoba-formatter",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba-codebase",
+        "kotoba2tsx",
+        "kotoba-language",
+        "kotoba-graph-core",
+        "kotoba-syntax",
+        "kotoba-linter",
+        "kotoba-lsp",
+        "kotoba-repl"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-types",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-types",
+      "layer": "005-foundation",
+      "status": "active",
+      "dependencies": [
+        "hex",
+        "serde_json",
+        "uuid",
+        "serde",
+        "schemars",
+        "kotoba-logic",
+        "sha2",
+        "blake3",
+        "thiserror"
+      ],
+      "dependents": [
+        "kotoba-jsonnet",
+        "kotoba-cid",
+        "kotoba-analyzer",
+        "kotoba-codebase",
+        "kotoba-os",
+        "kotoba-ir",
+        "kotoba-rewrite-kernel",
+        "kotoba-auth",
+        "kotoba-kotobas",
+        "kotobas-tamaki-holochain",
+        "kotoba-api",
+        "kotoba-parser",
+        "kotoba-language",
+        "kotoba-graph-core",
+        "kotoba-lsp",
+        "kotoba-txlog",
+        "kotoba-linter",
+        "kotoba-repl",
+        "kotoba-formatter",
+        "kotoba-schema",
+        "kotoba2tsx",
+        "kotoba-syntax",
+        "kotoba-jsonld"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-owl-reasoner",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-owl-reasoner",
+      "layer": "014-reasoner",
+      "status": "active",
+      "dependencies": [],
+      "dependents": [
+        "kotoba-phonosemantic",
+        "kotobas-tamaki-holochain",
+        "kotoba-os",
+        "kotoba-ir",
+        "kotoba-jsonld"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-cid",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-cid",
+      "layer": "005-foundation",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-graph-core"
+      ],
+      "dependents": [
+        "kotoba-jsonld",
+        "kotobas-tamaki-holochain"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-api",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-api",
+      "layer": "010-logic",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-txlog",
+        "serde",
+        "kotoba-codebase",
+        "kotoba-graph-core",
+        "tokio",
+        "kotoba-ir",
+        "kotoba-rewrite-kernel",
+        "kotoba-jsonld"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-ir",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-ir",
+      "layer": "010-logic",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "serde_json",
+        "kotoba-owl-reasoner",
+        "serde",
+        "tokio",
+        "wasmtime",
+        "kotoba-jsonld",
+        "thiserror"
+      ],
+      "dependents": [
+        "kotoba-kotobas",
+        "kotoba-txlog",
+        "kotoba-formatter",
+        "kotoba-jsonnet",
+        "kotoba-schema",
+        "kotoba-api",
+        "kotoba-parser",
+        "kotoba-analyzer",
+        "kotoba2tsx",
+        "kotoba-language",
+        "kotoba-linter",
+        "kotoba-rewrite-kernel",
+        "kotoba-lsp",
+        "kotoba-repl"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-os",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-os",
+      "layer": "015-os",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-storage",
+        "kotoba-jsonld",
+        "kotoba-owl-reasoner"
+      ],
+      "dependents": [
+        "kotobas-tamaki-holochain"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-schema",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-schema",
+      "layer": "005-foundation",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "schemars",
+        "kotoba-graph-core",
+        "regex",
+        "kotoba-ir"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-codebase",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-codebase",
+      "layer": "010-logic",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-logic",
+        "serde"
+      ],
+      "dependents": [
+        "kotoba-api",
+        "kotoba-rewrite-kernel",
+        "kotoba-txlog",
+        "kotoba-graph-core"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-jsonld",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-jsonld",
+      "layer": "010-logic",
+      "status": "active",
+      "dependencies": [
+        "kotoba-owl-reasoner",
+        "kotoba-types",
+        "kotoba-cid"
+      ],
+      "dependents": [
+        "kotoba-kotobas",
+        "kotoba-storage-fcdb",
+        "kotoba-phonosemantic",
+        "kotoba-jsonnet",
+        "kotobas-tamaki-holochain",
+        "kotoba-vm-cli",
+        "kotoba-api",
+        "kotoba-cache",
+        "kotoba-storage",
+        "kotoba2tsx",
+        "kotoba-os",
+        "kotoba-storage-memory",
+        "kotoba-ir"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-graph-core",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-graph-core",
+      "layer": "005-foundation",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "kotoba-logic",
+        "kotoba-codebase",
+        "serde"
+      ],
+      "dependents": [
+        "kotoba-api",
+        "kotoba-cid",
+        "kotoba-txlog",
+        "kotoba-schema"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-auth",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-auth",
+      "layer": "005-foundation",
+      "status": "active",
+      "dependencies": [
+        "kotoba-types",
+        "serde_json",
+        "hex",
+        "serde",
+        "kotoba-logic",
+        "sha2",
+        "thiserror"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-phonosemantic",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-phonosemantic",
+      "layer": "010-logic",
+      "status": "active",
+      "dependencies": [
+        "kotoba-jsonld",
+        "kotoba-owl-reasoner"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-cli",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-cli",
+      "layer": "090-tools",
+      "status": "active",
+      "dependencies": [
+        "tokio",
+        "kotoba-language",
+        "anyhow"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-cache",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-cache",
+      "layer": "030-storage",
+      "status": "active",
+      "dependencies": [
+        "serde_json",
+        "serde",
+        "kotoba-storage",
+        "kotoba-core",
+        "anyhow",
+        "kotoba-jsonld"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-storage-redis",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-storage-redis",
+      "layer": "030-storage",
+      "status": "active",
+      "dependencies": [
+        "kotoba-storage",
+        "kotoba-core",
+        "anyhow",
+        "serde"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-db-cluster",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-db-cluster",
+      "layer": "030-storage",
+      "status": "active",
+      "dependencies": [
+        "kotoba-storage",
+        "kotoba-core",
+        "anyhow",
+        "serde"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-distributed",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-distributed",
+      "layer": "030-storage",
+      "status": "active",
+      "dependencies": [
+        "kotoba-storage",
+        "kotoba-core",
+        "anyhow",
+        "serde"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-graphdb",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-graphdb",
+      "layer": "030-storage",
+      "status": "active",
+      "dependencies": [
+        "kotoba-storage",
+        "kotoba-core",
+        "anyhow",
+        "serde"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-storage-memory",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-storage-memory",
+      "layer": "030-storage",
+      "status": "active",
+      "dependencies": [
+        "serde_json",
+        "serde",
+        "kotoba-storage",
+        "anyhow",
+        "kotoba-jsonld"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-storage",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-storage",
+      "layer": "030-storage",
+      "status": "active",
+      "dependencies": [
+        "serde_json",
+        "serde",
+        "tokio",
+        "anyhow",
+        "kotoba-jsonld",
+        "thiserror"
+      ],
+      "dependents": [
+        "kotoba-storage-fcdb",
+        "kotoba-distributed",
+        "kotoba-db-cluster",
+        "kotoba-cache",
+        "kotoba-storage-rocksdb",
+        "kotoba-storage-redis",
+        "kotoba-os",
+        "kotoba-storage-memory",
+        "kotoba-graphdb"
+      ]
+    },
+    {
+      "@id": "kotoba:crate/kotoba-storage-fcdb",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-storage-fcdb",
+      "layer": "030-storage",
+      "status": "active",
+      "dependencies": [
+        "kotoba-storage",
+        "kotoba-jsonld"
+      ],
+      "dependents": []
+    },
+    {
+      "@id": "kotoba:crate/kotoba-storage-rocksdb",
+      "@type": "kotoba:CrateNode",
+      "name": "kotoba-storage-rocksdb",
+      "layer": "030-storage",
+      "status": "active",
+      "dependencies": [
+        "serde",
+        "kotoba-storage",
+        "kotoba-core",
+        "rocksdb",
+        "anyhow"
+      ],
+      "dependents": []
+    }
+  ],
+  "topologicalOrder": [],
+  "totalCrates": 57,
+  "totalDependencies": 276
+}

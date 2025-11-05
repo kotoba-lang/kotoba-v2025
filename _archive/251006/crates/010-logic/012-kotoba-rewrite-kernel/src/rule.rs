@@ -6,7 +6,7 @@
 
 use super::*;
 use kotoba_codebase::*;
-use kotoba_ir::{RuleIR, GraphPattern, GraphElement, EdgeDef, RuleNac, Match, Matches};
+// JSON-LD direct manipulation API is now used instead of Rust types
 use kotoba_types::RuleDPO;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -416,7 +416,7 @@ pub struct RuleApplicationResult {
 
 /// Rule match result
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RuleMatch<GraphElementId = kotoba_ir::GraphElement> {
+pub struct RuleMatch<GraphElementId = String> {
     /// Variable to graph element mapping
     pub variable_mapping: HashMap<String, GraphElementId>,
     /// Match score/priority
@@ -472,14 +472,14 @@ impl RuleMatcher {
     }
 
     /// Find all matches for the rule in the graph
-    pub fn find_matches(&self, graph: &GraphKind) -> Result<Vec<RuleMatch<kotoba_ir::GraphElement>>, MatcherError> {
+    pub fn find_matches(&self, graph: &GraphKind) -> Result<Vec<RuleMatch<String>>, MatcherError> {
         // Pattern matching implementation
         // This would traverse the graph and find subgraphs that match the rule pattern
         Ok(Vec::new()) // Placeholder
     }
 
     /// Check if a match satisfies all conditions
-    pub fn validate_match(&self, match_result: &RuleMatch<kotoba_ir::GraphElement>, graph: &GraphKind) -> bool {
+    pub fn validate_match(&self, match_result: &RuleMatch<String>, graph: &GraphKind) -> bool {
         // Validate negative application conditions
         // Validate guard conditions
         true // Placeholder
@@ -529,7 +529,7 @@ impl RuleApplicator {
     pub fn apply(
         &self,
         graph: &mut GraphKind,
-        match_result: &RuleMatch<kotoba_ir::GraphElement>,
+        match_result: &RuleMatch<String>,
     ) -> Result<RuleApplication, ApplicatorError> {
         // Apply the rule transformation
         // This would modify the graph according to the rule's RHS pattern
@@ -544,7 +544,7 @@ impl RuleApplicator {
     pub fn validate_application(
         &self,
         graph: &GraphKind,
-        match_result: &RuleMatch<kotoba_ir::GraphElement>,
+        match_result: &RuleMatch<String>,
     ) -> Result<(), ValidationError> {
         // Validate that the application is valid
         // Check for conflicts, type constraints, etc.

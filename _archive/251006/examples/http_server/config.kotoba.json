@@ -39,7 +39,7 @@
       "handler": "echo_handler",
       "metadata": {
         "description": "Echo back the request body",
-        "content_type": "application/json"
+        "content_type": "application/ld+json"
       }
     },
     {

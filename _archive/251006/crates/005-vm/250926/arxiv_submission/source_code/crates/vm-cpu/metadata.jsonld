@@ -1,0 +1,37 @@
+{
+  "@context": "../../../../../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/vm_cpu",
+  "name": "vm_cpu",
+  "version": "0.1.0",
+  "path": "crates/005-vm/250926/arxiv_submission/source_code/crates/vm-cpu",
+  "status": "active",
+  "edition": "2021",
+  "license": "Apache-2.0",
+  "description": "Von Neumann CPU core implementation for the Digital Computing System VM",
+  "layer": "kotoba:layer/012-vm",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../vm-types",
+        "name": "vm_types"
+      },
+      {
+        "type": "workspace",
+        "path": "../vm-memory",
+        "name": "vm_memory"
+      }
+    ],
+    "external": [],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/lib.rs"
+  ]
+}

@@ -3,7 +3,7 @@
 //! This module provides graph algorithms for traversal, analysis,
 //! and transformation operations.
 
-use super::*;
+use super::{Hash as GraphHash, Graph, *};
 use std::collections::{HashMap, HashSet, VecDeque};
 
 /// Graph traversal algorithms
@@ -407,6 +407,7 @@ pub struct GraphStatistics {
     pub vertex_count: usize,
     pub edge_count: usize,
     pub average_degree: f64,
+    pub max_degree: usize,
     pub density: f64,
     pub is_connected: bool,
     pub has_cycles: bool,

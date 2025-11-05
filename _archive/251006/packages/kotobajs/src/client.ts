@@ -20,7 +20,8 @@ export class KotobaClient {
     this.axiosInstance = axios.create({
       baseURL: options.serverUrl,
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/ld+json',
+        'Accept': 'application/ld+json',
         ...(options.authToken && { 'Authorization': `Bearer ${options.authToken}` }),
       },
     });
@@ -35,16 +36,31 @@ export class KotobaClient {
   public async query<T = any>(query: string, variables?: Record<string, any>): Promise<T> {
     try {
       console.log(`[KotobaClient] Sending query:`, { query, variables });
-      const response = await this.axiosInstance.post('', {
+      // Convert to JSON-LD format
+      const jsonldBody = {
+        '@context': 'https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld',
+        '@type': 'kotoba:GraphQLQuery',
         query,
-        variables,
-      });
+        variables: variables || {},
+      };
+      const response = await this.axiosInstance.post('', jsonldBody);
 
       if (response.data.errors) {
         throw new Error(`GraphQL Error: ${JSON.stringify(response.data.errors)}`);
       }
 
-      return response.data.data;
+      // Extract data from JSON-LD response
+      const responseData = response.data.data || response.data;
+      if (responseData['@context']) {
+        delete responseData['@context'];
+      }
+      if (responseData['@id']) {
+        delete responseData['@id'];
+      }
+      if (responseData['@type']) {
+        delete responseData['@type'];
+      }
+      return responseData as T;
     } catch (error) {
       console.error('[KotobaClient] Query failed:', error);
       // Re-throw the error to be handled by the caller

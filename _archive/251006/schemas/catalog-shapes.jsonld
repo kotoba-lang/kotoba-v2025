@@ -1,0 +1,153 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "kotoba": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld#vocab",
+    "sh": "http://www.w3.org/ns/shacl#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@id": "https://kotoba.ai/shapes/catalog",
+  "@type": "sh:NodeShape",
+  "rdfs:comment": "SHACL shapes for validating Catalog Intermediate Representation (IR) structures",
+  
+  "@graph": [
+    {
+      "@id": "kotoba:CatalogIRShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:CatalogIR",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:hasLabels",
+          "sh:node": "kotoba:LabelDefShape",
+          "sh:minCount": 0
+        },
+        {
+          "sh:path": "kotoba:hasIndexes",
+          "sh:node": "kotoba:IndexDefShape",
+          "sh:minCount": 0
+        },
+        {
+          "sh:path": "kotoba:hasInvariants",
+          "sh:node": "kotoba:InvariantShape",
+          "sh:minCount": 0
+        }
+      ]
+    },
+    {
+      "@id": "kotoba:LabelDefShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:LabelDef",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:labelName",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:hasProperties",
+          "sh:node": "kotoba:PropertyDefShape",
+          "sh:minCount": 0
+        },
+        {
+          "sh:path": "kotoba:hasSuperLabels",
+          "sh:minCount": 0
+        }
+      ]
+    },
+    {
+      "@id": "kotoba:PropertyDefShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:PropertyDef",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:propertyName",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:propertyType",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": [
+            {"@value": "null"},
+            {"@value": "bool"},
+            {"@value": "int"},
+            {"@value": "float"},
+            {"@value": "string"},
+            {"@value": "list"},
+            {"@value": "map"}
+          ]
+        },
+        {
+          "sh:path": "kotoba:isNullable",
+          "sh:datatype": "xsd:boolean",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:defaultValue",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "kotoba:IndexDefShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:IndexDef",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:indexName",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:indexLabel",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:indexProperties",
+          "sh:minCount": 0
+        },
+        {
+          "sh:path": "kotoba:isUnique",
+          "sh:datatype": "xsd:boolean",
+          "sh:minCount": 0,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "kotoba:InvariantShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": "kotoba:Invariant",
+      "sh:property": [
+        {
+          "sh:path": "kotoba:invariantName",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:invariantExpr",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "sh:path": "kotoba:invariantMessage",
+          "sh:datatype": "xsd:string",
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,4 +1,4 @@
-//! JSON正規化の実装
+//! JSON正規化の実装（JCS準拠）
 
 use super::*;
 use serde_json::{Value, Map};
@@ -30,25 +30,37 @@ impl JsonCanonicalizer {
         }
     }
 
-    /// JCS (RFC 8785) に準拠した正規化
+    /// JCS (RFC 8785) に準拠した正規化（通常のJSONをサポート）
     fn canonicalize_jcs(&self, json_str: &str) -> KotobaResult<String> {
-        // JSONをパース
+        // 通常のJSONとしてパース
         let value: Value = serde_json::from_str(json_str)
             .map_err(|e| KotobaError::Validation(format!("JSON parse error: {}", e)))?;
 
         self.canonicalize_value_jcs(&value)
     }
 
-    /// JCSによる値の正規化
+    /// JCSによる値の正規化（JSON-LDスタイルのキー順序を考慮：@context, @id, @typeを優先）
     fn canonicalize_value_jcs(&self, value: &Value) -> KotobaResult<String> {
         match value {
             Value::Object(obj) => {
-                // オブジェクトのキーをソート
+                // JSON-LDの特殊キーを優先的に処理
+                let jsonld_keys = ["@context", "@id", "@type"];
                 let mut sorted_obj = Map::new();
-                let mut keys: Vec<&String> = obj.keys().collect();
-                keys.sort();
+                
+                // まずJSON-LDの特殊キーを追加
+                for key in &jsonld_keys {
+                    if let Some(val) = obj.get(*key) {
+                        sorted_obj.insert(key.to_string(), val.clone());
+                    }
+                }
+                
+                // 残りのキーをソートして追加
+                let mut other_keys: Vec<&String> = obj.keys()
+                    .filter(|k| !jsonld_keys.contains(&k.as_str()))
+                    .collect();
+                other_keys.sort();
 
-                for key in keys {
+                for key in other_keys {
                     if let Some(val) = obj.get(key) {
                         sorted_obj.insert(key.clone(), val.clone());
                     }
@@ -72,6 +84,7 @@ impl JsonCanonicalizer {
 
     /// JSONの差分を計算
     pub fn compute_diff(&self, json1: &str, json2: &str) -> KotobaResult<JsonDiff> {
+        // 通常のJSONとしてパース
         let val1: Value = serde_json::from_str(json1)
             .map_err(|e| KotobaError::Validation(format!("JSON1 parse error: {}", e)))?;
 

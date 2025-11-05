@@ -1,0 +1,136 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-owl-reasoner",
+  "name": "kotoba-owl-reasoner",
+  "version": "0.1.22",
+  "path": "crates/010-logic/022-kotoba-owl-reasoner",
+  "status": "active",
+  "description": "OWL reasoning engine integration for Kotoba using fukurow",
+  "keywords": [
+    "owl",
+    "reasoning",
+    "rdfs",
+    "semantic-web",
+    "fukurow"
+  ],
+  "categories": [
+    "web-programming",
+    "algorithms",
+    "data-structures"
+  ],
+  "layer": "kotoba:layer/014-reasoner",
+  "dependencies": {
+    "workspace": [],
+    "external": [
+      {
+        "type": "external",
+        "name": "fukurow-core"
+      },
+      {
+        "type": "external",
+        "name": "fukurow-store"
+      },
+      {
+        "type": "external",
+        "name": "fukurow-rdfs"
+      },
+      {
+        "type": "external",
+        "name": "fukurow-lite"
+      },
+      {
+        "type": "external",
+        "name": "fukurow-dl"
+      },
+      {
+        "type": "external",
+        "name": "fukurow-shacl"
+      },
+      {
+        "type": "external",
+        "name": "fukurow-sparql"
+      },
+      {
+        "type": "external",
+        "name": "fukurow-engine"
+      },
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      },
+      {
+        "name": "serde_json",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "name": "thiserror",
+        "type": "external",
+        "version": "2.0"
+      },
+      {
+        "name": "anyhow",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "full"
+        ],
+        "name": "tokio"
+      },
+      {
+        "name": "async-trait",
+        "type": "external",
+        "version": "0.1"
+      },
+      {
+        "name": "tracing",
+        "type": "external",
+        "version": "0.1"
+      }
+    ],
+    "optional": [
+      {
+        "type": "external",
+        "version": "0.8",
+        "optional": true,
+        "features": [
+          "jsonld",
+          "xml"
+        ],
+        "name": "sophia"
+      }
+    ],
+    "dev": [
+      {
+        "name": "tokio-test",
+        "type": "external",
+        "version": "0.4"
+      }
+    ]
+  },
+  "features": {
+    "default": [],
+    "optional": [
+      "sophia"
+    ]
+  },
+  "sourceFiles": [
+    "src/fukurow_binding.rs",
+    "src/lib.rs",
+    "src/owl_dl.rs",
+    "src/owl_lite.rs",
+    "src/rdfs.rs",
+    "src/reasoner.rs",
+    "src/shacl.rs",
+    "src/sparql.rs"
+  ]
+}

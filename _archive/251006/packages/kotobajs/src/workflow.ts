@@ -16,7 +16,8 @@ export class KotobaWorkflowClient {
     
     const response = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/ld+json',
+        'Accept': 'application/ld+json',
         ...options.headers,
       },
       ...options,
@@ -32,7 +33,20 @@ export class KotobaWorkflowClient {
       return null as T;
     }
 
-    return response.json() as Promise<T>;
+    // Parse JSON-LD response
+    const jsonldText = await response.text();
+    // Extract data from JSON-LD (remove @context, @id, @type)
+    const jsonldData = JSON.parse(jsonldText);
+    if (jsonldData['@context']) {
+      delete jsonldData['@context'];
+    }
+    if (jsonldData['@id']) {
+      delete jsonldData['@id'];
+    }
+    if (jsonldData['@type']) {
+      delete jsonldData['@type'];
+    }
+    return jsonldData as T;
   }
 
   /**
@@ -41,9 +55,15 @@ export class KotobaWorkflowClient {
    * @returns An object containing the execution ID of the started workflow.
    */
   async start(workflowIr: WorkflowIR): Promise<{ execution_id: string }> {
+    // Convert to JSON-LD format
+    const jsonldBody = {
+      '@context': 'https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld',
+      '@type': 'kotoba:WorkflowIR',
+      ...workflowIr,
+    };
     return this.request<{ execution_id: string }>('/', {
       method: 'POST',
-      body: JSON.stringify(workflowIr),
+      body: JSON.stringify(jsonldBody),
     });
   }
 

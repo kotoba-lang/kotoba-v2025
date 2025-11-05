@@ -1405,10 +1405,26 @@ impl StdLib {
     fn parse_json(args: Vec<JsonnetValue>) -> Result<JsonnetValue> {
         Self::check_args(&args, 1, "parseJson")?;
         let s = args[0].as_string()?;
-        match serde_json::from_str::<serde_json::Value>(s) {
-            Ok(value) => Ok(JsonnetValue::from_json_value(value)),
-            Err(_) => Err(JsonnetError::runtime_error("Invalid JSON")),
-        }
+        // Try JSON-LD parsing first, fallback to regular JSON
+        let value = match kotoba_jsonld::parse_jsonld_to_value(s) {
+            Ok(v) => {
+                // Extract data from JSON-LD (remove @context, @id, @type)
+                if let serde_json::Value::Object(mut obj) = v {
+                    obj.remove("@context");
+                    obj.remove("@id");
+                    obj.remove("@type");
+                    serde_json::Value::Object(obj)
+                } else {
+                    v
+                }
+            }
+            Err(_) => {
+                // Fallback to regular JSON parsing
+                serde_json::from_str::<serde_json::Value>(s)
+                    .map_err(|_| JsonnetError::runtime_error("Invalid JSON or JSON-LD"))?
+            }
+        };
+        Ok(JsonnetValue::from_json_value(value))
     }
 
     /// std.encodeUTF8(str) - encodes string as UTF-8 bytes

@@ -1,0 +1,79 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-graph-core",
+  "name": "kotoba-graph-core",
+  "version": "0.1.22",
+  "path": "crates/010-logic/016-kotoba-graph-core",
+  "status": "active",
+  "description": "Incidence bipartite graph + canonicalization + merkle for content-addressed graphs",
+  "layer": "kotoba:layer/005-foundation",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../009-kotoba-logic",
+        "name": "kotoba-logic"
+      },
+      {
+        "type": "workspace",
+        "path": "../010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "path": "../010-kotoba-codebase",
+        "name": "kotoba-codebase"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      }
+    ],
+    "external": [
+      {
+        "type": "unknown",
+        "name": "serde_json.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "thiserror.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "sha2.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "hex.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "blake3.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "parking_lot.workspace"
+      }
+    ],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/algorithms.rs",
+    "src/builders.rs",
+    "src/canonical.rs",
+    "src/graph.rs",
+    "src/incidence.rs",
+    "src/lib.rs",
+    "src/merkle.rs"
+  ]
+}

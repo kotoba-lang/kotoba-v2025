@@ -1,0 +1,187 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-jsonnet",
+  "name": "kotoba-jsonnet",
+  "version": "0.1.22",
+  "path": "crates/020-language/023-kotoba-jsonnet",
+  "status": "active",
+  "edition": "2021",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/com-junkawasaki/kotoba",
+  "description": "Kotoba-specific Jsonnet implementation compatible with Jsonnet 0.21.0",
+  "keywords": [
+    "jsonnet",
+    "template",
+    "configuration",
+    "json",
+    "yaml"
+  ],
+  "layer": "kotoba:layer/020-language",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../../010-logic/009-kotoba-logic",
+        "name": "kotoba-logic"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/011-kotoba-ir",
+        "name": "kotoba-ir"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/012-kotoba-rewrite-kernel",
+        "name": "kotoba-rewrite-kernel"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/019-kotoba-jsonld",
+        "name": "kotoba-jsonld"
+      }
+    ],
+    "external": [
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      },
+      {
+        "name": "serde_json",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "name": "thiserror",
+        "type": "external",
+        "version": "2.0"
+      },
+      {
+        "name": "anyhow",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "name": "regex",
+        "type": "external",
+        "version": "1.10"
+      },
+      {
+        "type": "external",
+        "version": "1.18",
+        "features": [
+          "v4"
+        ],
+        "name": "uuid"
+      },
+      {
+        "name": "parking_lot",
+        "type": "external",
+        "version": "0.12"
+      },
+      {
+        "name": "hex",
+        "type": "external",
+        "version": "0.4"
+      },
+      {
+        "name": "sha1",
+        "type": "external",
+        "version": "0.10"
+      },
+      {
+        "name": "sha2",
+        "type": "external",
+        "version": "0.10"
+      },
+      {
+        "name": "sha3",
+        "type": "external",
+        "version": "0.10"
+      },
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "full"
+        ],
+        "name": "tokio"
+      },
+      {
+        "name": "async-trait",
+        "type": "external",
+        "version": "0.1"
+      },
+      {
+        "type": "external",
+        "version": "0.11",
+        "features": [
+          "json",
+          "rustls-tls"
+        ],
+        "name": "reqwest"
+      },
+      {
+        "name": "base64",
+        "type": "external",
+        "version": "0.22"
+      },
+      {
+        "name": "md-5",
+        "type": "external",
+        "version": "0.10"
+      }
+    ],
+    "optional": [
+      {
+        "type": "external",
+        "version": "0.9",
+        "optional": true,
+        "name": "serde_yaml"
+      }
+    ],
+    "dev": [
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "full"
+        ],
+        "name": "tokio"
+      }
+    ]
+  },
+  "features": {
+    "default": [],
+    "optional": [
+      "yaml"
+    ]
+  },
+  "sourceFiles": [
+    "src/ast.rs",
+    "src/error.rs",
+    "src/eval/context.rs",
+    "src/eval/handlers.rs",
+    "src/eval/mod.rs",
+    "src/evaluator.rs",
+    "src/lexer.rs",
+    "src/lib.rs",
+    "src/parser.rs",
+    "src/pure_evaluator.rs",
+    "src/runtime/db.rs",
+    "src/runtime/external.rs",
+    "src/runtime/manager.rs",
+    "src/runtime/mod.rs",
+    "src/stdlib.rs",
+    "src/value.rs"
+  ]
+}

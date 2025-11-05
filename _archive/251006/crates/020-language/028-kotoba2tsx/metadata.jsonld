@@ -1,0 +1,202 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba2tsx",
+  "name": "kotoba2tsx",
+  "version": "0.1.22",
+  "path": "crates/020-language/028-kotoba2tsx",
+  "status": "active",
+  "edition": "2021",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/com-junkawasaki/kotoba",
+  "description": "Complete toolchain for converting Kotoba configuration files to React TypeScript components",
+  "keywords": [
+    "react",
+    "tsx",
+    "converter",
+    "jsonnet",
+    "frontend"
+  ],
+  "categories": [
+    "command-line-utilities",
+    "web-programming",
+    "development-tools"
+  ],
+  "layer": "kotoba:layer/020-language",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../../010-logic/019-kotoba-jsonld",
+        "name": "kotoba-jsonld"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/009-kotoba-logic",
+        "name": "kotoba-logic"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/011-kotoba-ir",
+        "name": "kotoba-ir"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/012-kotoba-rewrite-kernel",
+        "name": "kotoba-rewrite-kernel"
+      },
+      {
+        "type": "workspace",
+        "path": "../020-kotoba-syntax",
+        "name": "kotoba-syntax"
+      },
+      {
+        "type": "workspace",
+        "path": "../021-kotoba-parser",
+        "name": "kotoba-parser"
+      },
+      {
+        "type": "workspace",
+        "path": "../022-kotoba-analyzer",
+        "name": "kotoba-analyzer"
+      },
+      {
+        "type": "workspace",
+        "path": "../023-kotoba-kotobas",
+        "name": "kotoba-kotobas"
+      },
+      {
+        "type": "workspace",
+        "path": "../023-kotoba-jsonnet",
+        "name": "kotoba-jsonnet"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "features": [
+          "v4"
+        ],
+        "name": "uuid"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "hex"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "sha2"
+      }
+    ],
+    "external": [
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      },
+      {
+        "name": "serde_json",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "name": "thiserror",
+        "type": "external",
+        "version": "2.0"
+      },
+      {
+        "name": "anyhow",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "full"
+        ],
+        "name": "tokio"
+      },
+      {
+        "name": "regex",
+        "type": "external",
+        "version": "1.10"
+      },
+      {
+        "name": "jsonnet-rs",
+        "type": "external",
+        "version": "0.17"
+      },
+      {
+        "name": "parking_lot",
+        "type": "external",
+        "version": "0.12"
+      },
+      {
+        "name": "indexmap",
+        "type": "external",
+        "version": "2.0"
+      }
+    ],
+    "optional": [
+      {
+        "type": "external",
+        "version": "4.0",
+        "optional": true,
+        "features": [
+          "derive"
+        ],
+        "name": "clap"
+      }
+    ],
+    "dev": [
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "full"
+        ],
+        "name": "tokio"
+      }
+    ]
+  },
+  "features": {
+    "default": [
+      "std",
+      "cli"
+    ],
+    "optional": [
+      "std",
+      "cli",
+      "wasm"
+    ]
+  },
+  "sourceFiles": [
+    "src/api_ir.rs",
+    "src/build_ir.rs",
+    "src/cli.rs",
+    "src/component_ir.rs",
+    "src/css_processor.rs",
+    "src/error.rs",
+    "src/framework.rs",
+    "src/generator.rs",
+    "src/lib.rs",
+    "src/main.rs",
+    "src/mod.rs",
+    "src/parser.rs",
+    "src/render_ir.rs",
+    "src/route_ir.rs",
+    "src/styled_components.rs",
+    "src/swc_integration.rs",
+    "src/types.rs"
+  ]
+}

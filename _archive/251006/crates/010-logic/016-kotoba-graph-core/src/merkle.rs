@@ -4,12 +4,47 @@
 //! graph integrity and enabling efficient proof generation.
 
 use crate::graph::Graph;
-use kotoba_types::{Hash, KotobaError};
+use crate::{Hash, MerkleNode, MerkleTree, GraphRef, CanonicalizationResult};
+use kotoba_types::KotobaError;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
-use super::{MerkleNode, MerkleTree};
+
+/// Hash algorithm for merkle tree
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum HashAlgorithm {
+    /// SHA256
+    Sha256,
+    /// Blake3
+    Blake3,
+}
+
+/// Merkle tree configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MerkleConfig {
+    /// Chunk size for merkle tree
+    pub chunk_size: usize,
+    /// Hash algorithm
+    pub hash_algorithm: HashAlgorithm,
+}
+
+impl Default for MerkleConfig {
+    fn default() -> Self {
+        Self {
+            chunk_size: 1024,
+            hash_algorithm: HashAlgorithm::Sha256,
+        }
+    }
+}
 
 impl MerkleTree {
+    /// Create a new merkle tree from data chunks
+    pub fn new(data: Vec<Vec<u8>>) -> Self {
+        let leaves: Vec<Hash> = data.into_iter()
+            .map(|chunk| Hash::from_sha256(&chunk))
+            .collect();
+        Self::from_leaves(leaves)
+    }
+
     /// Create a new merkle tree from leaves
     pub fn from_leaves(leaves: Vec<Hash>) -> Self {
         let leaf_count = leaves.len();
@@ -173,13 +208,13 @@ impl MerkleTree {
 
             let combined = if is_left {
                 let mut data = Vec::new();
-                data.extend_from_slice(&current_hash.0);
-                data.extend_from_slice(&sibling_hash.0);
+                data.extend_from_slice(current_hash.as_bytes());
+                data.extend_from_slice(sibling_hash.as_bytes());
                 data
             } else {
                 let mut data = Vec::new();
-                data.extend_from_slice(&sibling_hash.0);
-                data.extend_from_slice(&current_hash.0);
+                data.extend_from_slice(sibling_hash.as_bytes());
+                data.extend_from_slice(current_hash.as_bytes());
                 data
             };
 
@@ -263,13 +298,13 @@ impl MerkleProof {
 
                 let combined = if is_left {
                     let mut data = Vec::new();
-                    data.extend_from_slice(&current_hash.0);
-                    data.extend_from_slice(&sibling_hash.0);
+                    data.extend_from_slice(current_hash.as_bytes());
+                    data.extend_from_slice(sibling_hash.as_bytes());
                     data
                 } else {
                     let mut data = Vec::new();
-                    data.extend_from_slice(&sibling_hash.0);
-                    data.extend_from_slice(&current_hash.0);
+                    data.extend_from_slice(sibling_hash.as_bytes());
+                    data.extend_from_slice(current_hash.as_bytes());
                     data
                 };
 
@@ -302,7 +337,7 @@ impl MerkleTreeBuilder {
     }
 
     /// Build merkle tree from graph data
-    pub fn build_from_graph(&self, graph: &Graph) -> MerkleTree {
+    pub fn build_from_graph(&mut self, graph: &Graph) -> MerkleTree {
         let cache_key = self.compute_graph_cache_key(graph);
 
         if let Some(cached_tree) = self.tree_cache.get(&cache_key) {
@@ -359,10 +394,10 @@ impl MerkleTreeBuilder {
         let adj_out_hash = Hash::from_sha256(&serde_json::to_vec(&graph.adj_out).unwrap());
         let adj_in_hash = Hash::from_sha256(&serde_json::to_vec(&graph.adj_in).unwrap());
 
-        key_data.extend_from_slice(&vertex_hash.0);
-        key_data.extend_from_slice(&edge_hash.0);
-        key_data.extend_from_slice(&adj_out_hash.0);
-        key_data.extend_from_slice(&adj_in_hash.0);
+        key_data.extend_from_slice(vertex_hash.as_bytes());
+        key_data.extend_from_slice(edge_hash.as_bytes());
+        key_data.extend_from_slice(adj_out_hash.as_bytes());
+        key_data.extend_from_slice(adj_in_hash.as_bytes());
 
         hex::encode(key_data)
     }
@@ -469,14 +504,14 @@ impl MerklePath {
             let combined = match node.side {
                 PathSide::Left => {
                     let mut data = Vec::new();
-                    data.extend_from_slice(&current_hash.0);
-                    data.extend_from_slice(&node.sibling_hash.0);
+                    data.extend_from_slice(current_hash.as_bytes());
+                    data.extend_from_slice(node.sibling_hash.as_bytes());
                     data
                 },
                 PathSide::Right => {
                     let mut data = Vec::new();
-                    data.extend_from_slice(&node.sibling_hash.0);
-                    data.extend_from_slice(&current_hash.0);
+                    data.extend_from_slice(node.sibling_hash.as_bytes());
+                    data.extend_from_slice(current_hash.as_bytes());
                     data
                 },
             };
@@ -520,7 +555,7 @@ pub struct GraphMerkleTree {
 impl GraphMerkleTree {
     /// Create a new graph merkle tree
     pub fn new(graph: &Graph, canonicalization: &CanonicalizationResult) -> Self {
-        let builder = MerkleTreeBuilder::new(MerkleConfig::default());
+        let mut builder = MerkleTreeBuilder::new(MerkleConfig::default());
         let tree = builder.build_from_graph(graph);
 
         let graph_ref = GraphRef::new(
@@ -540,8 +575,8 @@ impl GraphMerkleTree {
 
     /// Verify graph integrity
     pub fn verify_integrity(&self, graph: &Graph) -> bool {
-        let current_tree = MerkleTreeBuilder::new(MerkleConfig::default())
-            .build_from_graph(graph);
+        let mut builder = MerkleTreeBuilder::new(MerkleConfig::default());
+        let current_tree = builder.build_from_graph(graph);
 
         self.tree.root_hash() == current_tree.root_hash()
     }

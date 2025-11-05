@@ -729,7 +729,8 @@ impl TsxGenerator {
         code.push_str(&format!("  const response = await fetch('{}', {{\n", api_route.path));
         code.push_str(&format!("    method: '{}',\n", api_route.method));
         code.push_str("    headers: {\n");
-        code.push_str("      'Content-Type': 'application/json',\n");
+        code.push_str("      'Content-Type': 'application/ld+json',\n");
+        code.push_str("      'Accept': 'application/ld+json',\n");
         code.push_str("    },\n");
         if api_route.method != "GET" {
             code.push_str("    body: JSON.stringify(params),\n");

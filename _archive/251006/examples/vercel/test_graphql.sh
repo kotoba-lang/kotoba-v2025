@@ -24,7 +24,7 @@ graphql_request() {
     echo "Query: $query"
 
     response=$(curl -s -X POST "$GRAPHQL_URL" \
-        -H "Content-Type: application/json" \
+        -H "Content-Type: application/ld+json" \
         -d "{\"query\": \"$query\"}")
 
     echo "Response: $response"

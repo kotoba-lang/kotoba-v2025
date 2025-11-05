@@ -155,7 +155,7 @@ REDIS_URL=redis://127.0.0.1:6379 cargo run --bin vercel-graphql
 
 # Test the API with curl
 curl -X POST http://localhost:3000/api/graphql \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/ld+json" \
   -d '{"query": "{ health }"}'
 ```
 

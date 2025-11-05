@@ -17,7 +17,9 @@
 //! - **Configurable**: Pluggable storage backends
 
 use kotoba_storage::*;
+use kotoba_jsonld::{JsonLdDocument, JsonLdContext, serialize_jsonld, parse_jsonld_to_value};
 use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::time::{Duration, Instant};
@@ -46,10 +48,10 @@ impl CacheKey {
     }
 }
 
-/// Pure cache entry with metadata
+/// Pure cache entry with metadata (JSON-LD format)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CacheEntry {
-    /// The cached value
+    /// The cached value (stored as JSON-LD)
     pub value: serde_json::Value,
     /// When this entry was created
     pub created_at: u64,
@@ -64,29 +66,85 @@ pub struct CacheEntry {
 }
 
 impl CacheEntry {
-    /// Create a new cache entry
+    /// Create a new cache entry from JSON-LD value
     pub fn new(value: serde_json::Value) -> Self {
+        let jsonld_value = Self::ensure_jsonld_format(value);
         let now = Self::current_timestamp();
         Self {
-            value,
+            value: jsonld_value.clone(),
             created_at: now,
             expires_at: None,
             access_count: 1,
             last_accessed: now,
-            size_bytes: Self::estimate_size(&value),
+            size_bytes: Self::estimate_size(&jsonld_value),
         }
     }
 
-    /// Create a cache entry with TTL
+    /// Create a cache entry with TTL from JSON-LD value
     pub fn with_ttl(value: serde_json::Value, ttl: Duration) -> Self {
+        let jsonld_value = Self::ensure_jsonld_format(value);
         let now = Self::current_timestamp();
         Self {
-            value,
+            value: jsonld_value.clone(),
             created_at: now,
             expires_at: Some(now + ttl.as_millis() as u64),
             access_count: 1,
             last_accessed: now,
-            size_bytes: Self::estimate_size(&value),
+            size_bytes: Self::estimate_size(&jsonld_value),
+        }
+    }
+
+    /// Create a cache entry from JSON-LD document
+    pub fn from_jsonld(jsonld_doc: &JsonLdDocument) -> Result<Self, anyhow::Error> {
+        let jsonld_str = serialize_jsonld(jsonld_doc)?;
+        let value = parse_jsonld_to_value(&jsonld_str)?;
+        Ok(Self::new(value))
+    }
+
+    /// Get value as JSON-LD document
+    pub fn to_jsonld(&self) -> Result<JsonLdDocument, anyhow::Error> {
+        parse_jsonld_to_value(&serde_json::to_string(&self.value)?)
+            .and_then(|v| {
+                // Try to parse as JsonLdDocument
+                serde_json::from_value(v.clone())
+                    .map_err(|_| anyhow::anyhow!("Failed to parse as JsonLdDocument"))
+            })
+            .or_else(|_| {
+                // Fallback: wrap in JSON-LD structure
+                let mut doc = JsonLdDocument {
+                    context: JsonLdContext::String("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld".to_string()),
+                    id: None,
+                    type_: Some("kotoba:CachedValue".to_string()),
+                    data: HashMap::new(),
+                };
+                if let Value::Object(obj) = &self.value {
+                    for (key, val) in obj {
+                        doc.data.insert(key.clone(), val.clone());
+                    }
+                } else {
+                    doc.data.insert("value".to_string(), self.value.clone());
+                }
+                Ok(doc)
+            })
+    }
+
+    /// Ensure value is in JSON-LD format (requires @context)
+    fn ensure_jsonld_format(value: Value) -> Value {
+        if let Value::Object(mut obj) = value {
+            // Require @context - fail if missing
+            if !obj.contains_key("@context") {
+                // This is an error - JSON-LD must have @context
+                // Add @context as required by JSON-LD spec
+                obj.insert("@context".to_string(), json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+            }
+            Value::Object(obj)
+        } else {
+            // Wrap primitive values in JSON-LD structure (required by JSON-LD spec)
+            let mut doc = HashMap::new();
+            doc.insert("@context".to_string(), json!("https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld"));
+            doc.insert("@type".to_string(), json!("kotoba:CachedValue"));
+            doc.insert("value".to_string(), value);
+            Value::Object(doc)
         }
     }
 

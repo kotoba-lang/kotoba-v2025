@@ -991,7 +991,7 @@ curl http://localhost:8080/debug/indexes
 
 # Add missing indexes
 curl -X POST http://localhost:8080/indexes \
-  -H "Content-Type: application/json" \
+  -H "Content-Type: application/ld+json" \
   -d '{"name": "user_email_idx", "target": {"node_property": {"node_type": "User", "property": "email"}}, "type": "btree"}'
 ```
 

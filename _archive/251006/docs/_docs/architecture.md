@@ -3,20 +3,42 @@ layout: default
 title: Architecture Overview
 ---
 
-# Kotoba Architecture: Process Network Graph Model
+# Kotoba Architecture: Phonosemantic Digital Computing System
 
-This document describes the comprehensive architecture of Kotoba, a unified graph processing system that integrates declarative programming, theoretical graph rewriting, and distributed execution through the novel **Process Network Graph Model**.
+This document describes the comprehensive architecture of Kotoba, a **phonosemantic digital computing system** that integrates semantic reasoning, OWL inference, and self-evolution mechanisms through JSON-LD and the **Process Network Graph Model**.
+
+## Layer Architecture
+
+Kotoba follows a layered architecture with clear separation of concerns:
+
+```
+Layer 090: Tools Layer          (Development tools, CLI, build tools)
+Layer 080: Deployment Layer     (Deployment, scaling, networking)
+Layer 070: Services Layer       (HTTP/GraphQL servers, external integrations)
+Layer 060: Application Layer    (Business logic, event sourcing, query processing)
+Layer 050: Workflow Layer       (Workflow orchestration)
+Layer 040: Runtime Layer        (OS + Storage + Reasoner integration)
+Layer 030: Storage Layer        (Persistence, MVCC+Merkle DAG)
+Layer 020: Language Layer       (Parser, Analyzer, Transpiler)
+Layer 015: OS Layer            (Process network orchestration)
+Layer 014: Reasoner Layer      (OWL reasoning engine)
+Layer 012: VM Layer            (Virtual Machine execution environment)
+Layer 010: Logic Layer         (IR, Rewrite Kernel, JSON-LD)
+Layer 005: Foundation Layer    (Types, CID, Schema, Auth, Graph Core)
+```
 
 ## Overview
 
-Kotoba represents a convergence of graph theory, programming languages, and distributed systems, offering a unified framework for complex system development through declarative graph processing. The system combines:
+Kotoba represents a convergence of phonosemantics, semantic web technologies, and distributed systems, offering a unified framework for semantically-driven computation. The system combines:
 
+- **Phonosemantic Vocabulary System**: Systematic mapping between phonemes and semantic meanings
+- **OWL Inference Engine**: Complete reasoning capabilities (RDFS + OWL Lite + OWL DL) powered by [fukurow](https://github.com/com-junkawasaki/fukurow)
+- **Semantic Execution Pattern**: Kernel + Actor + Mediator architecture inspired by [semanticos](https://github.com/com-junkawasaki/semanticos)
+- **JSON-LD Native**: All computing layers use JSON-LD for representation
+- **Self-Evolution**: Semantic Design Loop for continuous system improvement
 - **Process Network Graph Model**: Declarative configuration management with automatic dependency resolution
-- **Complete Jsonnet 0.21.0 Implementation**: 38/38 compatibility tests passing
-- **DPO Graph Rewriting**: Theoretical completeness with formal mathematical foundation
 - **MVCC + Merkle DAG Persistence**: Consistent distributed data management
 - **Content-Addressed Storage**: CID-based addressing for location independence
-- **95% Test Coverage**: Comprehensive testing across all components
 
 ## Theoretical Foundations
 
@@ -82,7 +104,187 @@ MVCC + Merkle DAG persistence with CID-based addressing ensures location-indepen
 - **Scalability**: Content-addressed storage enables efficient distribution
 - **Versioning**: Merkle DAG provides complete version history
 
-### 4. Embedded First
+### 4. Phonosemantic Vocabulary System
+
+Kotoba implements a systematic mapping between phonemes (sound units) and semantic meanings, enabling natural language understanding through structured vocabulary relationships.
+
+**Key Concepts:**
+- **Phoneme**: Basic sound unit with phonetic features
+- **Semantic Mapping**: Bidirectional conversion between phonemes and meanings
+- **Vocabulary System**: JSON-LD-based vocabulary management with OWL inference
+- **Natural Language Integration**: Structured relationships enable semantic understanding
+
+**Mathematical Formalization:**
+```math
+V = (P, S, M)
+```
+Where:
+- P: Set of phonemes
+- S: Set of semantic meanings
+- M: Mapping function M: P → 2^S (phoneme to set of meanings)
+
+**Bidirectional Mapping:**
+```math
+M⁻¹: S → 2^P (meaning to set of phonemes)
+```
+
+### 5. OWL Inference Integration
+
+Kotoba integrates complete OWL reasoning capabilities through the fukurow engine, enabling logical deduction and knowledge discovery.
+
+**Inference Layers:**
+
+1. **RDFS Inference**
+   - Transitive closure of `rdfs:subClassOf`
+   - Transitive closure of `rdfs:subPropertyOf`
+   - Domain and range inference
+   - Type inference through `rdf:type`
+
+2. **OWL Lite Inference**
+   - Tableau algorithm for consistency checking
+   - Subsumption reasoning (class hierarchy)
+   - Property chain inference
+   - Individual instance verification
+
+3. **OWL DL Inference**
+   - Extended tableau algorithm
+   - Complex class constructors (intersectionOf, unionOf, complementOf)
+   - Property constraints (someValuesFrom, allValuesFrom, cardinality)
+   - Complete logical reasoning
+
+**Integration Architecture:**
+```
+JSON-LD Input → fukurow RdfStore → OWL Reasoner → Inferred Triples → JSON-LD Output
+```
+
+### 6. JSON-LD Universal Intermediate Representation (IR)
+
+Kotoba uses JSON-LD as the universal format for all Intermediate Representations, enabling semantic interoperability across all IR types.
+
+**IR Types:**
+
+1. **Rule-IR (DPO Graph Rewriting)**
+   - Represented as JSON-LD with OWL class `kotoba:RuleIR`
+   - SHACL shape validation for rule structure
+   - Supports LHS, RHS, context, NACs, and guards
+
+2. **Query-IR (GQL Logical Plan Algebra)**
+   - Represented as JSON-LD with OWL class `kotoba:QueryIR`
+   - Logical operations (NodeScan, Filter, Expand, Join, Project, etc.)
+   - SHACL validation for query plan structure
+
+3. **Patch-IR (Differential Expressions)**
+   - Represented as JSON-LD with OWL class `kotoba:PatchIR`
+   - Add/Delete/Update operations for vertices and edges
+   - SHACL validation for patch structure
+
+4. **Strategy-IR (Minimal Strategy Expressions)**
+   - Represented as JSON-LD with OWL class `kotoba:StrategyIR`
+   - Strategy operations (once, exhaust, while, seq, choice, priority)
+   - SHACL validation for strategy structure
+
+**SHACL Validation:**
+- All IR operations automatically validate against SHACL shapes when `reasoning` feature is enabled
+- Validation occurs after every modification operation (set, add, delete, update)
+- Invalid IR structures are rejected with detailed error messages
+- SHACL shapes defined in `schemas/ir-shapes.jsonld` and `schemas/catalog-shapes.jsonld`
+
+**WASM Runtime Integration:**
+- JSON-LD IRs can be executed in WebAssembly runtime for high-performance execution
+- Enabled via `wasm` feature flag
+- Supports execution of Rule-IR, Query-IR, Patch-IR, and Strategy-IR in WASM
+- WASM modules can be loaded and cached for efficient execution
+- Integration with fukurow WASM engine for OWL reasoning support
+
+**Benefits:**
+- **Semantic Interoperability**: All IRs use the same JSON-LD format
+- **OWL Reasoning**: IR structures can be reasoned about using OWL inference
+- **SHACL Validation**: Structural integrity guaranteed through SHACL shapes (mandatory when `reasoning` feature enabled)
+- **WASM Execution**: High-performance execution in WebAssembly runtime
+- **Content-Addressable**: IR instances can be referenced by CID (Content ID)
+
+### 7. Capability-Based Actor Selection
+
+Kotoba implements an OWL-based capability system for matching actors to processes.
+
+**Capability System:**
+
+1. **Capability Ontology (OWL)**
+   - Base class: `kotoba:Capability`
+   - Subclasses: `kotoba:ComputeCapability`, `kotoba:StorageCapability`, `kotoba:NetworkCapability`
+   - Relationships: `kotoba:requiresCapability` (Process → Capability), `kotoba:providesCapability` (Actor → Capability)
+
+2. **Capability Matching**
+   - OWL reasoning for subsumption-based matching
+   - Process requirements matched against actor capabilities
+   - SHACL validation for capability constraints
+
+3. **Actor Selection**
+   - Mediator uses OWL reasoning to find matching actors
+   - Capability registry for efficient lookup
+   - Fallback to direct mapping if OWL reasoning unavailable
+
+**Execution Flow:**
+```
+Process (requiresCapability) → OWL Reasoning → Capability Matching → Actor Selection → Actor Execution
+```
+
+### 8. Semantic Execution Pattern (semanticos)
+
+Kotoba adopts the Kernel + Actor + Mediator pattern for executing process networks defined in JSON-LD.
+
+**Components:**
+
+1. **Kernel**
+   - Orchestrates process network graph execution
+   - Manages execution lifecycle (start, execute, end)
+   - Records provenance information
+   - Supports OWL reasoning for process execution
+
+2. **Mediator**
+   - Selects appropriate actors based on process requirements
+   - Uses OWL reasoning-based capability matching
+   - Supports multiple selection strategies (Direct, Capability, ShaclSemantic)
+
+3. **Actor**
+   - Performs actions based on capabilities
+   - OWL capability definitions for actor capabilities
+   - Resolves I/O from SHACL shapes
+   - Wraps output with provenance metadata
+
+4. **Provenance**
+   - Records all execution history in JSON-LD/PROV-O format
+   - Links processes, actors, and results
+   - Enables self-evolution through history analysis
+
+**Execution Flow:**
+```
+Process (JSON-LD) → Kernel → Mediator (OWL Capability Matching) → Actor Selection → Actor Execution → Result (JSON-LD) → Provenance Recording
+```
+
+### 7. Self-Evolution via Semantic Design Loop
+
+Kotoba implements a self-evolution mechanism that continuously improves the system by analyzing provenance and applying OWL inference.
+
+**Evolution Cycle:**
+1. **Shape Definition**: Define SHACL shapes for processes
+2. **Process Execution**: Execute processes via Kernel
+3. **Provenance Collection**: Record execution history
+4. **Pattern Discovery**: Use OWL inference to discover optimization patterns
+5. **Shape Refinement**: Automatically improve shape definitions
+6. **Iteration**: Repeat cycle for continuous improvement
+
+**Mathematical Model:**
+```math
+E(S, P, Prov) = S' where S' = refine(S, infer(Prov))
+```
+Where:
+- S: Current shape definition
+- P: Process execution
+- Prov: Provenance history
+- S': Refined shape definition
+
+### 8. Embedded First
 
 KotobaDB runs embedded in the application process.
 
@@ -95,27 +297,59 @@ KotobaDB runs embedded in the application process.
 ## Architecture Layers
 
 ```
-┌─────────────────────────────────────────┐
-│              Application                │
-├─────────────────────────────────────────┤
-│         KotobaDB High-Level API         │
-│    ┌─────────────────────────────────┐  │
-│    │    Transaction Manager         │  │
-│    │    Query Engine               │  │
-│    │    Version Control            │  │
-│    └─────────────────────────────────┘  │
-├─────────────────────────────────────────┤
-│         Storage Engine Layer            │
-│    ┌─────────────────────────────────┐  │
-│    │   Content-Addressed Storage    │  │
-│    │   (CAS) - Merkle DAG          │  │
-│    └─────────────────────────────────┘  │
-├─────────────────────────────────────────┤
-│          Storage Backends               │
-│    ┌─────────────┬─────────────┬─────┐  │
-│    │   Memory    │     LSM     │ ... │  │
-│    └─────────────┴─────────────┴─────┘  │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Self-Evolution Layer                      │
+│     (Semantic Design Loop: Shape → Process → Provenance)    │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │  Evolution Engine (OWL-based pattern discovery)         │ │
+│ └─────────────────────────────────────────────────────────┘ │
+└────────────────────────────┬────────────────────────────────┘
+                              │ JSON-LD Provenance
+┌─────────────────────────────┼────────────────────────────────┐
+│              Semantic Execution Layer (semanticos)           │
+│ ┌──────────────┐   ┌──────────────┐   ┌──────────────┐      │
+│ │   Kernel     │   │   Mediator   │   │    Actor    │      │
+│ │ (Orchestrate)│   │ (Select Actor)│   │ (Perform)   │      │
+│ └──────┬───────┘   └──────┬───────┘   └──────┬──────┘      │
+└────────┼───────────────────┼──────────────────┼─────────────┘
+         │ JSON-LD Process   │ SHACL Reason      │ JSON-LD Result
+         ▼                   ▼                   ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    OWL Inference Layer (fukurow)            │
+│ ┌──────────────┐   ┌──────────────┐   ┌──────────────┐      │
+│ │ RDFS Reasoner│   │ OWL Lite     │   │ OWL DL      │      │
+│ │ (Transitive) │   │ (Tableau)    │   │ (Extended)  │      │
+│ └──────┬───────┘   └──────┬───────┘   └──────┬───────┘      │
+│        └──────────────────┼──────────────────┘            │
+│                            │ JSON-LD Triples                │
+└────────────────────────────┼────────────────────────────────┘
+                             │
+┌────────────────────────────┼────────────────────────────────┐
+│                   JSON-LD Data Layer                         │
+│ ┌──────────────┐   ┌──────────────┐   ┌──────────────┐      │
+│ │ Phonosemantic│   │  Vocabulary │   │  Process    │      │
+│ │   Mapping    │   │   System    │   │  Network    │      │
+│ └──────────────┘   └──────────────┘   └──────────────┘      │
+└────────────────────────────┼────────────────────────────────┘
+                             │
+┌────────────────────────────┼────────────────────────────────┐
+│              Application Layer (KotobaDB API)                │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │    Transaction Manager                                 │ │
+│ │    Query Engine                                       │ │
+│ │    Version Control                                    │ │
+│ └─────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────┤
+│         Storage Engine Layer                                │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │   Content-Addressed Storage (CAS) - Merkle DAG        │ │
+│ └─────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────┤
+│          Storage Backends                                   │
+│ ┌─────────────┬─────────────┬─────────────────────────────┐ │
+│ │   Memory    │     LSM     │        ...                 │ │
+│ └─────────────┴─────────────┴─────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ## Data Model

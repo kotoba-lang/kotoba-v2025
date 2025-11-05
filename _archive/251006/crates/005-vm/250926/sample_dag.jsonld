@@ -1,0 +1,54 @@
+{
+  "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
+  "@type": "kotoba:ProcessNetwork",
+  "@id": "file://crates/005-vm/250926/sample_dag.jsonld",
+  "rdfs:comment": "VMタスクDAG定義",
+  "kotoba:tasks": [
+    {
+      "@type": "kotoba:Task",
+      "kotoba:id": 0,
+      "kotoba:name": "init_task",
+      "kotoba:operation": ["Load", "Add", "Halt"],
+      "kotoba:dependencies": [],
+      "kotoba:estimated_execution_time": 100,
+      "kotoba:characteristics": {
+        "@type": "kotoba:TaskCharacteristics",
+        "kotoba:computation_type": "GeneralPurpose",
+        "kotoba:data_size": 1024,
+        "kotoba:parallelism_factor": 1,
+        "kotoba:memory_intensity": 0.5
+      }
+    },
+    {
+      "@type": "kotoba:Task",
+      "kotoba:id": 1,
+      "kotoba:name": "compute_task",
+      "kotoba:operation": ["Load", "Add", "Store", "Halt"],
+      "kotoba:dependencies": [0],
+      "kotoba:estimated_execution_time": 200,
+      "kotoba:characteristics": {
+        "@type": "kotoba:TaskCharacteristics",
+        "kotoba:computation_type": "HighlyParallel",
+        "kotoba:data_size": 65536,
+        "kotoba:parallelism_factor": 64,
+        "kotoba:memory_intensity": 0.3
+      }
+    },
+    {
+      "@type": "kotoba:Task",
+      "kotoba:id": 2,
+      "kotoba:name": "memory_task",
+      "kotoba:operation": ["Load", "Store", "Halt"],
+      "kotoba:dependencies": [0],
+      "kotoba:estimated_execution_time": 50,
+      "kotoba:characteristics": {
+        "@type": "kotoba:TaskCharacteristics",
+        "kotoba:computation_type": "MemoryBound",
+        "kotoba:data_size": 1024,
+        "kotoba:parallelism_factor": 1,
+        "kotoba:memory_intensity": 0.9
+      }
+    }
+  ]
+}
+

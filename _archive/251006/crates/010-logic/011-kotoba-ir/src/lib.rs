@@ -7,25 +7,30 @@
 //! - patch-IR: differential expressions
 //! - strategy-IR: minimal strategy expressions
 //!
-//! This is a pure IR layer that depends only on basic types and provides
-//! the foundation for rewrite kernels and composition systems.
+//! All IR types are represented in JSON-LD format as the universal intermediate representation,
+//! with OWL ontology definitions and SHACL shape validation support.
 
-pub mod catalog;
-pub mod rule;
-pub mod query;
-pub mod patch;
-pub mod strategy;
+pub mod catalog_jsonld;
+pub mod rule_jsonld;
+pub mod query_jsonld;
+pub mod patch_jsonld;
+pub mod strategy_jsonld;
+pub mod shacl;
 
-// Re-export everything for convenience
-pub use catalog::*;
-pub use rule::*;
-pub use query::*;
-pub use patch::*;
-pub use strategy::*;
+#[cfg(feature = "wasm")]
+pub mod wasm;
 
-// Core IR types
-pub use crate::catalog::*;
-pub use crate::rule::*;
-pub use crate::query::*;
-pub use crate::patch::*;
-pub use crate::strategy::*;
+#[cfg(test)]
+#[path = "jsonld_tests.rs"]
+mod jsonld_tests;
+
+// Re-export JSON-LD direct manipulation APIs (primary API)
+pub use catalog_jsonld::*;
+pub use rule_jsonld::*;
+pub use query_jsonld::*;
+pub use patch_jsonld::*;
+pub use strategy_jsonld::*;
+pub use shacl::*;
+
+#[cfg(feature = "wasm")]
+pub use wasm::*;

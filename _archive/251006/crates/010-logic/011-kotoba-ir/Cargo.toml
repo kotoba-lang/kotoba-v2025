@@ -10,6 +10,16 @@ categories = ["data-structures", "algorithms"]
 
 [dependencies]
 kotoba-types = { path = "../010-kotoba-types" }
+kotoba-jsonld = { path = "../019-kotoba-jsonld" }
+kotoba-owl-reasoner = { path = "../022-kotoba-owl-reasoner", optional = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
+anyhow = "1.0"
+tokio = { workspace = true, optional = true }
+wasmtime = { workspace = true, optional = true }
+
+[features]
+default = []
+reasoning = ["kotoba-owl-reasoner", "tokio"]
+wasm = ["wasmtime"]

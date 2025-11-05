@@ -14,6 +14,8 @@ use std::path::PathBuf;
 use std::fs;
 use std::time::Instant;
 use anyhow::{Result, Context};
+use kotoba_jsonld::parse_jsonld_to_value;
+use serde_json::Value;
 
 /// DAG file format for task graph definitions
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -58,7 +60,7 @@ enum Commands {
         /// Enable verbose output
         #[arg(short, long)]
         verbose: bool,
-        /// Path to DAG file (JSON format)
+        /// Path to DAG file (JSON-LD format)
         #[arg(short, long)]
         dag_file: Option<PathBuf>,
         /// Output format (table, json, csv)
@@ -129,13 +131,102 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-/// Load DAG from JSON file
+/// Load DAG from JSON-LD file
 fn load_dag_from_file(path: &PathBuf) -> Result<Dag> {
     let content = fs::read_to_string(path)
         .with_context(|| format!("Failed to read DAG file: {}", path.display()))?;
 
-    let dag_file: DagFile = serde_json::from_str(&content)
-        .with_context(|| format!("Failed to parse DAG file as JSON: {}", path.display()))?;
+    // Parse JSON-LD directly as JSON (preserves kotoba: prefixed keys)
+    let expanded = parse_jsonld_to_value(&content)
+        .with_context(|| format!("Failed to parse DAG file as JSON-LD: {}", path.display()))?;
+
+    // Extract tasks from JSON-LD structure (kotoba: prefix required)
+    let tasks_value = expanded
+        .get("kotoba:tasks")
+        .ok_or_else(|| anyhow::anyhow!("Missing 'kotoba:tasks' field in JSON-LD"))?;
+
+    let tasks_array = tasks_value.as_array()
+        .ok_or_else(|| anyhow::anyhow!("'tasks' field must be an array"))?;
+
+    // Convert JSON-LD tasks to DagFile format
+    let mut dag_tasks = Vec::new();
+    for task_value in tasks_array {
+        let task_obj = task_value.as_object()
+            .ok_or_else(|| anyhow::anyhow!("Task must be an object"))?;
+
+        // Extract task fields from JSON-LD (kotoba: prefix required)
+        let id = task_obj
+            .get("kotoba:id")
+            .and_then(|v| v.as_u64())
+            .ok_or_else(|| anyhow::anyhow!("Task missing 'kotoba:id' field"))? as TaskId;
+
+        let name = task_obj
+            .get("kotoba:name")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+
+        let operation = task_obj
+            .get("kotoba:operation")
+            .and_then(|v| v.as_array())
+            .map(|arr| arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect())
+            .ok_or_else(|| anyhow::anyhow!("Task missing 'kotoba:operation' field"))?;
+
+        let dependencies = task_obj
+            .get("kotoba:dependencies")
+            .and_then(|v| v.as_array())
+            .map(|arr| arr.iter().filter_map(|v| v.as_u64().map(|n| n as TaskId)).collect())
+            .unwrap_or_default();
+
+        let estimated_execution_time = task_obj
+            .get("kotoba:estimated_execution_time")
+            .and_then(|v| v.as_u64())
+            .ok_or_else(|| anyhow::anyhow!("Task missing 'kotoba:estimated_execution_time' field"))?;
+
+        let characteristics_obj = task_obj
+            .get("kotoba:characteristics")
+            .and_then(|v| v.as_object())
+            .ok_or_else(|| anyhow::anyhow!("Task missing 'kotoba:characteristics' field"))?;
+
+        let computation_type = characteristics_obj
+            .get("kotoba:computation_type")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| anyhow::anyhow!("Characteristics missing 'kotoba:computation_type' field"))?
+            .to_string();
+
+        let data_size = characteristics_obj
+            .get("kotoba:data_size")
+            .and_then(|v| v.as_u64())
+            .map(|n| n as usize)
+            .ok_or_else(|| anyhow::anyhow!("Characteristics missing 'kotoba:data_size' field"))?;
+
+        let parallelism_factor = characteristics_obj
+            .get("kotoba:parallelism_factor")
+            .and_then(|v| v.as_u64())
+            .map(|n| n as u32)
+            .ok_or_else(|| anyhow::anyhow!("Characteristics missing 'kotoba:parallelism_factor' field"))?;
+
+        let memory_intensity = characteristics_obj
+            .get("kotoba:memory_intensity")
+            .and_then(|v| v.as_f64())
+            .map(|f| f as f32)
+            .ok_or_else(|| anyhow::anyhow!("Characteristics missing 'kotoba:memory_intensity' field"))?;
+
+        dag_tasks.push(TaskFile {
+            id,
+            name,
+            operation,
+            dependencies,
+            estimated_execution_time,
+            characteristics: TaskCharacteristicsFile {
+                computation_type,
+                data_size,
+                parallelism_factor,
+                memory_intensity,
+            },
+        });
+    }
+
+    let dag_file = DagFile { tasks: dag_tasks };
 
     let tasks = dag_file.tasks.into_iter()
         .map(|task_file| {

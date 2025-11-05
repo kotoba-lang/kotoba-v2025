@@ -9,9 +9,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::Arc;
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use crate::GraphStatistics;
 
 // Re-export types from kotoba-types
-pub use kotoba_types::{VertexId, EdgeId, Label, Properties, PropertyKey, Value, GraphInstance, GraphCore, Node, Edge, GraphKind, Typing, Boundary, Port, PortDirection, Attrs};
+// Note: Node, Edge, GraphKind, Typing, Boundary, Port, PortDirection, Attrs are not defined in kotoba-types
+// These may need to be defined locally or removed if not used
+pub use kotoba_types::{VertexId, EdgeId, Label, Properties, PropertyKey, Value, GraphInstance, GraphCore};
 
 /// Generate a deterministic CID from vertex data
 fn generate_vertex_cid(labels: &[Label], props: &Properties) -> VertexId {
@@ -165,7 +168,7 @@ impl Graph {
 
     /// Add a vertex to the graph
     pub fn add_vertex(&mut self, vertex: VertexData) -> VertexId {
-        let id = vertex.id;
+        let id = vertex.id.clone();
         for label in &vertex.labels {
             self.vertex_labels.entry(label.clone()).or_insert_with(HashSet::new).insert(id);
         }
@@ -175,18 +178,18 @@ impl Graph {
 
     /// Add an edge to the graph
     pub fn add_edge(&mut self, edge: EdgeData) -> EdgeId {
-        let id = edge.id;
-        let src = edge.src;
-        let dst = edge.dst;
+        let id = edge.id.clone();
+        let src = edge.src.clone();
+        let dst = edge.dst.clone();
 
         // Update adjacency lists
-        self.adj_out.entry(src).or_insert_with(HashSet::new).insert(dst);
+        self.adj_out.entry(src.clone()).or_insert_with(HashSet::new).insert(dst.clone());
         self.adj_in.entry(dst).or_insert_with(HashSet::new).insert(src);
 
         // Update label index
-        self.edge_labels.entry(edge.label.clone()).or_insert_with(HashSet::new).insert(id);
+        self.edge_labels.entry(edge.label.clone()).or_insert_with(HashSet::new).insert(id.clone());
 
-        self.edges.insert(id, edge);
+        self.edges.insert(id.clone(), edge);
         id
     }
 
@@ -382,6 +385,7 @@ impl Graph {
                     id: edge_id,
                     src: source_id.clone(),
                     dst: target_id.clone(),
+                    label: edge.label.clone(),
                     props: edge.properties.clone(),
                 },
             );
@@ -393,9 +397,40 @@ impl Graph {
         Ok(graph)
     }
 
+    /// Convert to GraphInstance
+    pub fn to_graph_instance(&self, cid: Cid) -> GraphInstance {
+        let vertices: Vec<kotoba_types::VertexData> = self.vertices.values()
+            .map(|v| kotoba_types::VertexData {
+                id: v.id.clone(),
+                label: v.labels.clone(),
+                properties: v.props.clone(),
+            })
+            .collect();
+
+        let edges: Vec<kotoba_types::EdgeData> = self.edges.values()
+            .map(|e| kotoba_types::EdgeData {
+                id: e.id.clone(),
+                source: e.src.clone(),
+                target: e.dst.clone(),
+                label: e.label.clone(),
+                properties: e.props.clone(),
+            })
+            .collect();
+
+        GraphInstance {
+            id: cid.as_str().to_string(),
+            core: GraphCore {
+                vertices,
+                edges,
+            },
+            metadata: HashMap::new(),
+        }
+    }
+
     /// Convert to GraphInstance with computed CID
     pub fn to_graph_instance_with_cid(&self) -> KotobaResult<GraphInstance> {
-        let graph_instance = self.to_graph_instance(generate_cid("temp"));
+        let temp_cid = Cid::from("temp");
+        let graph_instance = self.to_graph_instance(temp_cid);
         Ok(GraphInstance {
             id: "graph".to_string(),
             core: graph_instance.core,

@@ -1,0 +1,107 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-phonosemantic",
+  "name": "kotoba-phonosemantic",
+  "version": "0.1.22",
+  "path": "crates/010-logic/021-kotoba-phonosemantic",
+  "status": "active",
+  "description": "Phonosemantic vocabulary mapping system for Kotoba",
+  "keywords": [
+    "phonosemantic",
+    "phoneme",
+    "vocabulary",
+    "semantic-mapping",
+    "json-ld"
+  ],
+  "categories": [
+    "web-programming",
+    "algorithms",
+    "data-structures"
+  ],
+  "layer": "kotoba:layer/010-logic",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../019-kotoba-jsonld",
+        "name": "kotoba-jsonld"
+      },
+      {
+        "type": "workspace",
+        "path": "../022-kotoba-owl-reasoner",
+        "optional": true,
+        "name": "kotoba-owl-reasoner"
+      }
+    ],
+    "external": [
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      },
+      {
+        "name": "serde_json",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "name": "thiserror",
+        "type": "external",
+        "version": "2.0"
+      },
+      {
+        "name": "anyhow",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "full"
+        ],
+        "name": "tokio"
+      },
+      {
+        "name": "async-trait",
+        "type": "external",
+        "version": "0.1"
+      },
+      {
+        "name": "tracing",
+        "type": "external",
+        "version": "0.1"
+      },
+      {
+        "name": "indexmap",
+        "type": "external",
+        "version": "2.0"
+      }
+    ],
+    "optional": [],
+    "dev": [
+      {
+        "name": "tokio-test",
+        "type": "external",
+        "version": "0.4"
+      }
+    ]
+  },
+  "features": {
+    "default": [],
+    "optional": [
+      "reasoning"
+    ]
+  },
+  "sourceFiles": [
+    "src/analysis.rs",
+    "src/lib.rs",
+    "src/mapper.rs",
+    "src/phoneme.rs",
+    "src/vocabulary.rs"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Localization",
+  "@id": "file://examples/densha/locales/en.jsonld",
+  "rdfs:label": "English Localization",
+  "dc:language": "en",
+  "dc:title": "Densha TODO App",
+  "dc:description": "Manage your tasks efficiently with graph-based relationships",
+  "kotoba:translations": {
+    "@type": "rdfs:Container",
+    "@container": "@index"
+  }
+}
+

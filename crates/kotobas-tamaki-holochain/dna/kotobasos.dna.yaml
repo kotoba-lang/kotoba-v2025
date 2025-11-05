@@ -1,0 +1,86 @@
+---
+manifest_version: "1"
+name: kotobasos
+uuid: 00000000-0000-0000-0000-000000000000
+properties:
+  description: "Kotobasos Holochain implementation - Agent-centric distributed execution platform"
+  author: "Kotoba Project"
+  language: "en"
+zomes:
+  - name: kotobasos
+    bundled: "../target/wasm32-unknown-unknown/release/kotobas_tamaki_holochain.wasm"
+    dependencies:
+      - name: hdk
+        version: "0.4"
+    entry_types:
+      - id: story
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+          links_to: []
+      - id: process
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+          links_to:
+            - base_type: story
+              zome: kotobasos
+      - id: provenance
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+          links_to:
+            - base_type: process
+              zome: kotobasos
+      - id: evolution
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+          links_to:
+            - base_type: provenance
+              zome: kotobasos
+      - id: merkle_node
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+          links_to:
+            - base_type: merkle_node
+              zome: kotobasos
+      - id: actor
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+          links_to: []
+    link_types:
+      - id: story_to_process
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+      - id: process_to_provenance
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+      - id: provenance_to_evolution
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+      - id: merkle_parent
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+      - id: merkle_child
+        visibility: Public
+        required_validations: 1
+        validation:
+          strategy: Reject
+
