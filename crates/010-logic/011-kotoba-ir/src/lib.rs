@@ -11,6 +11,11 @@
 //! with OWL ontology definitions and SHACL shape validation support.
 
 pub mod catalog_jsonld;
+pub mod rule_jsonld;
+pub mod query_jsonld;
+pub mod patch_jsonld;
+pub mod strategy_jsonld;
+// Legacy Rust type modules (to be removed)
 pub mod rule;
 pub mod query;
 pub mod patch;
@@ -21,17 +26,15 @@ pub mod jsonld;
 #[path = "jsonld_tests.rs"]
 mod jsonld_tests;
 
-// Re-export everything for convenience
+// Re-export JSON-LD direct manipulation APIs (primary API)
 pub use catalog_jsonld::*;
+pub use rule_jsonld::*;
+pub use query_jsonld::*;
+pub use patch_jsonld::*;
+pub use strategy_jsonld::*;
+// Legacy re-exports (to be removed)
 pub use rule::*;
 pub use query::*;
 pub use patch::*;
 pub use strategy::*;
 pub use jsonld::*;
-
-// Core IR types
-pub use crate::rule::*;
-pub use crate::query::*;
-pub use crate::patch::*;
-pub use crate::strategy::*;
-pub use crate::jsonld::*;
