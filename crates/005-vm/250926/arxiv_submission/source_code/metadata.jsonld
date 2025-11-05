@@ -5,5 +5,5 @@
   "name": "source_code",
   "path": "crates/005-vm/250926/arxiv_submission/source_code",
   "status": "unimplemented",
-  "layer": "kotoba:layer/005-vm"
+  "layer": "kotoba:layer/012-vm"
 }

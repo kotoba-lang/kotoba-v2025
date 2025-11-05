@@ -74,6 +74,26 @@ This approach enables **semantic interoperability** across all computing layers,
 
 The entire system is built upon a **Semantic-Driven Architecture**, where all layers communicate via JSON-LD and reason using OWL inference.
 
+### Layer Architecture
+
+Kotoba follows a layered architecture with clear separation of concerns:
+
+```
+Layer 090: Tools Layer          (Development tools, CLI, build tools)
+Layer 080: Deployment Layer     (Deployment, scaling, networking)
+Layer 070: Services Layer       (HTTP/GraphQL servers, external integrations)
+Layer 060: Application Layer    (Business logic, event sourcing, query processing)
+Layer 050: Workflow Layer       (Workflow orchestration)
+Layer 040: Runtime Layer        (OS + Storage + Reasoner integration)
+Layer 030: Storage Layer        (Persistence, MVCC+Merkle DAG)
+Layer 020: Language Layer       (Parser, Analyzer, Transpiler)
+Layer 015: OS Layer            (Process network orchestration)
+Layer 014: Reasoner Layer      (OWL reasoning engine)
+Layer 012: VM Layer            (Virtual Machine execution environment)
+Layer 010: Logic Layer         (IR, Rewrite Kernel, JSON-LD)
+Layer 005: Foundation Layer    (Types, CID, Schema, Auth, Graph Core)
+```
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Self-Evolution Layer                      │

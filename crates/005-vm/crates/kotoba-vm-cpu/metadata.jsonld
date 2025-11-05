@@ -9,7 +9,7 @@
   "edition": "2021",
   "license": "Apache-2.0",
   "description": "Von Neumann CPU core implementation for the Digital Computing System VM",
-  "layer": "kotoba:layer/005-vm",
+  "layer": "kotoba:layer/012-vm",
   "dependencies": {
     "workspace": [
       {

@@ -7,7 +7,7 @@
   "path": "crates/005-vm/crates/kotoba-vm-benchmarks",
   "status": "active",
   "edition": "2021",
-  "layer": "kotoba:layer/005-vm",
+  "layer": "kotoba:layer/012-vm",
   "dependencies": {
     "workspace": [
       {

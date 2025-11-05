@@ -19,7 +19,7 @@
     "algorithms",
     "data-structures"
   ],
-  "layer": "kotoba:layer/010-logic",
+  "layer": "kotoba:layer/014-reasoner",
   "dependencies": {
     "workspace": [],
     "external": [

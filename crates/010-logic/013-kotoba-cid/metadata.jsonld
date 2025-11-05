@@ -19,7 +19,7 @@
     "data-structures",
     "algorithms"
   ],
-  "layer": "kotoba:layer/010-logic",
+  "layer": "kotoba:layer/005-foundation",
   "dependencies": {
     "workspace": [
       {

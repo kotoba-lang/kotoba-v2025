@@ -10,7 +10,7 @@
   // - Port/Adapter Pattern: Clean separation of business logic and infrastructure
   // - Event Sourcing: Complete event-driven architecture
   // - Graph Database: ISO GQL-compliant query processing
-  // - Layered Architecture: 010-core → 020-language → 030-storage → 040-application → 050-workflow → 060-services → 070-deployment → 090-tools
+  // - Layered Architecture: 005-foundation → 010-logic → 012-vm → 014-reasoner → 015-os → 020-language → 030-storage → 040-runtime → 050-workflow → 060-application → 070-services → 080-deployment → 090-tools
   // - Topological sort: Build order (lower numbers first)
   // - Reverse topological sort: Problem resolution order
 
@@ -19,52 +19,82 @@
   // ==========================================
 
   layers: {
-    '010-core': {
-      name: 'Core Layer',
-      description: 'Fundamental data structures, error handling, CID, schema, OCEL',
+    '005-foundation': {
+      name: 'Foundation Layer',
+      description: 'Fundamental data structures, types, CID, schema, auth, graph core',
       priority: 1,
-      crates: ['009-kotoba-logic', '010-kotoba-codebase', '010-kotoba-types', '011-kotoba-ir', '012-kotoba-rewrite-kernel', '013-kotoba-compose', '013-kotoba-cid', '014-kotoba-schema', '015-kotoba-auth', '016-kotoba-graph-core', '017-kotoba-txlog', '018-kotoba-api']
+      crates: ['010-kotoba-types', '013-kotoba-cid', '014-kotoba-schema', '015-kotoba-auth', '016-kotoba-graph-core', '009-kotoba-logic']
+    },
+    '010-logic': {
+      name: 'Logic Layer',
+      description: 'Intermediate Representations, rewrite kernel, JSON-LD processing',
+      priority: 2,
+      crates: ['011-kotoba-ir', '012-kotoba-rewrite-kernel', '019-kotoba-jsonld', '010-kotoba-codebase', '017-kotoba-txlog', '018-kotoba-api', '021-kotoba-phonosemantic']
+    },
+    '012-vm': {
+      name: 'VM Layer',
+      description: 'Virtual Machine execution environment (Von Neumann Core, Dataflow Runtime)',
+      priority: 3,
+      crates: ['kotoba-vm-core', 'kotoba-vm-memory', 'kotoba-vm-cpu', 'kotoba-vm-scheduler', 'kotoba-vm-gnn', 'kotoba-vm-hardware', 'kotoba-vm-types']
+    },
+    '014-reasoner': {
+      name: 'Reasoner Layer',
+      description: 'Semantic reasoning engine (OWL, SHACL, SPARQL)',
+      priority: 4,
+      crates: ['022-kotoba-owl-reasoner']
+    },
+    '015-os': {
+      name: 'OS Layer',
+      description: 'Process network orchestration (Kernel + Actor + Mediator)',
+      priority: 5,
+      crates: ['020-kotoba-os']
+    },
+    '020-language': {
+      name: 'Language Layer',
+      description: 'Language processing (Parser, Analyzer, Transpiler, Formatter, Linter)',
+      priority: 6,
+      crates: ['020-kotoba-syntax', '021-kotoba-parser', '022-kotoba-analyzer', '023-kotoba-jsonnet', '023-kotoba-kotobas', '024-kotoba-formatter', '025-kotoba-linter', '026-kotoba-lsp', '027-kotoba-repl', '028-kotoba2tsx', '029-kotobas-wasm', '030-kotoba-language']
     },
     '030-storage': {
       name: 'Storage Layer',
-      description: 'Storage adapters and persistence implementations (Port/Adapter pattern)',
-      priority: 2,
-      crates: ['031-kotoba-storage', '032-kotoba-cache', '033-kotoba-db-cluster', '034-kotoba-distributed', '035-kotoba-graphdb', '036-kotoba-memory', '037-kotoba-storage-redis', '038-kotoba-storage-rocksdb']
+      description: 'Persistence layer (Port/Adapter pattern), MVCC+Merkle DAG',
+      priority: 7,
+      crates: ['031-kotoba-storage', '032-kotoba-cache', '033-kotoba-db-cluster', '034-kotoba-distributed', '035-kotoba-graphdb', '036-kotoba-memory', '037-kotoba-storage-redis', '038-kotoba-storage-rocksdb', '039-kotoba-storage-fcdb']
     },
-    '040-application': {
-      name: 'Application Layer',
-      description: 'Business logic, event sourcing, query processing (Clean Architecture)',
-      priority: 3,
-      crates: ['041-kotoba-event-stream', '042-kotoba-projection-engine', '043-kotoba-rewrite', '044-kotoba-query-engine', '045-kotoba-execution', '046-kotoba-handler', '047-kotoba-routing', '048-kotoba-state-graph']
+    '040-runtime': {
+      name: 'Runtime Layer',
+      description: 'Application runtime integration (OS + Storage + Reasoner)',
+      priority: 8,
+      crates: []
     },
     '050-workflow': {
       name: 'Workflow Layer',
       description: 'Workflow orchestration and process management',
-      priority: 4,
+      priority: 9,
       crates: ['051-kotoba-workflow-core', '052-kotoba-workflow', '053-kotoba-workflow-activities', '054-kotoba-workflow-operator']
     },
-    '020-language': {
-      name: 'Language Layer',
-      description: 'Programming language support (Jsonnet, KotobaScript, TSX) with pure functional static analysis',
-      priority: 2,
-      crates: ['020-kotoba-syntax', '021-kotoba-parser', '022-kotoba-analyzer', '023-kotoba-jsonnet', '023-kotoba-kotobas', '024-kotoba-formatter']
+    '060-application': {
+      name: 'Application Layer',
+      description: 'Business logic, event sourcing, query processing',
+      priority: 10,
+      crates: ['041-kotoba-event-stream', '042-kotoba-projection-engine', '043-kotoba-rewrite', '044-kotoba-query-engine', '045-kotoba-execution', '046-kotoba-handler', '047-kotoba-routing', '048-kotoba-state-graph']
     },
-    '060-services': {
+    '070-services': {
       name: 'Services Layer',
       description: 'HTTP servers, GraphQL APIs, REST APIs, external integrations',
-      priority: 5,
+      priority: 11,
       crates: ['061-kotoba-security', '062-kotoba-network', '063-kotoba-schema-registry', '064-kotoba-server-core', '065-kotoba-graph-api', '066-kotoba-server-workflow', '067-kotoba-server', '068-kotoba-monitoring', '069-kotoba-profiler', '070-kotoba-cloud-integrations']
     },
-    '070-deployment': {
+    '080-deployment': {
       name: 'Deployment Layer',
       description: 'Deployment orchestration, scaling, networking',
-      priority: 6,
+      priority: 12,
       crates: ['071-kotoba-deploy-core', '072-kotoba-deploy', '073-kotoba-deploy-scaling', '074-kotoba-deploy-network', '075-kotoba-deploy-git', '076-kotoba-deploy-controller', '077-kotoba-deploy-cli', '078-kotoba-deploy-runtime', '079-kotoba-deploy-hosting']
     },
     '090-tools': {
       name: 'Tools Layer',
       description: 'Development tools, CLI utilities, testing frameworks',
-      priority: 7,
+      priority: 13,
       crates: ['091-kotoba-config', '092-kotoba-build', '093-kotoba-package-manager', '094-kotoba-runtime', '095-kotoba-docs', '096-kotoba-ssg', '097-kotoba-tester', '098-kotoba-bench', '099-kotoba-backup', '100-kotoba-cli']
     }
   },

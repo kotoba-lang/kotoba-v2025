@@ -7,6 +7,26 @@ title: Architecture Overview
 
 This document describes the comprehensive architecture of Kotoba, a **phonosemantic digital computing system** that integrates semantic reasoning, OWL inference, and self-evolution mechanisms through JSON-LD and the **Process Network Graph Model**.
 
+## Layer Architecture
+
+Kotoba follows a layered architecture with clear separation of concerns:
+
+```
+Layer 090: Tools Layer          (Development tools, CLI, build tools)
+Layer 080: Deployment Layer     (Deployment, scaling, networking)
+Layer 070: Services Layer       (HTTP/GraphQL servers, external integrations)
+Layer 060: Application Layer    (Business logic, event sourcing, query processing)
+Layer 050: Workflow Layer       (Workflow orchestration)
+Layer 040: Runtime Layer        (OS + Storage + Reasoner integration)
+Layer 030: Storage Layer        (Persistence, MVCC+Merkle DAG)
+Layer 020: Language Layer       (Parser, Analyzer, Transpiler)
+Layer 015: OS Layer            (Process network orchestration)
+Layer 014: Reasoner Layer      (OWL reasoning engine)
+Layer 012: VM Layer            (Virtual Machine execution environment)
+Layer 010: Logic Layer         (IR, Rewrite Kernel, JSON-LD)
+Layer 005: Foundation Layer    (Types, CID, Schema, Auth, Graph Core)
+```
+
 ## Overview
 
 Kotoba represents a convergence of phonosemantics, semantic web technologies, and distributed systems, offering a unified framework for semantically-driven computation. The system combines:
