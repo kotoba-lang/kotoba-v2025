@@ -1,0 +1,25 @@
+{
+  "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
+  "@type": "kotoba:CodegenDocument",
+  "@id": "file://graph_converted.jsonld",
+  "rdfs:comment": "Kotobaグラフ構造定義 - Jsonnet DSL表現",
+  "kotoba:dsl_metadata": {
+    "@type": "kotoba:DSLMetadata",
+    "kotoba:version": "0.1.0",
+    "rdfs:comment": "Kotobaグラフ構造定義 - Jsonnet DSL表現",
+    "kotoba:source": "src/graph/graph.rs",
+    "kotoba:generated": false,
+    "kotoba:generator": "jsonnet_dsl"
+  },
+  "kotoba:types": {
+    "@type": "rdfs:Container",
+    "@container": "@index"
+  },
+  "kotoba:dependencies": {
+    "@type": "kotoba:Dependencies"
+  },
+  "kotoba:codegen": {
+    "@type": "kotoba:CodegenConfig"
+  }
+}
+

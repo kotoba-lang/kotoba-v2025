@@ -57,27 +57,43 @@
 //! - **600-deployment**: Deployment and scaling
 //! - **900-tools**: Development tools and CLI
 
-// Re-export main components for convenience (when available)
-// Note: These re-exports are optional and will only work if the corresponding crates are available
-// and properly implemented in the current build configuration.
+pub mod validator;
+pub mod runtime;
+pub mod dsl;
+pub mod ui;
+pub mod server;
+pub mod wasm_transpiler;
+pub mod gql;
+pub mod realtime;
 
-// Core error type
-pub use kotoba_errors::KotobaError;
+// Re-export types from the new crates
+pub use kotoba_types::*;
+pub use engidb;
 
-// pub use kotoba_core as core; // Temporarily disabled - may not be available
-// pub use kotoba_storage as storage; // Temporarily disabled - may not be available
-// pub use kotoba_event_stream as event_stream; // Temporarily disabled - may not be available
-// pub use kotoba_query_engine as query_engine; // Temporarily disabled - may not be available
-// pub use kotoba_execution as execution; // Temporarily disabled - may not be available
-// pub use kotoba_rewrite as rewrite; // Temporarily disabled - may not be available
-// pub use kotoba_routing as routing; // Temporarily disabled - may not be available
-// pub use kotoba_state_graph as state_graph; // Temporarily disabled - may not be available
-// pub use kotoba_jsonnet as jsonnet; // Temporarily disabled - may not be available
-// pub use kotoba_kotobas as kotobas; // Temporarily disabled - may not be available
+/// Result type for EAF-IPG operations
+pub type Result<T> = std::result::Result<T, Error>;
 
-// Version information
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const NAME: &str = "Kotoba";
-pub const DESCRIPTION: &str = "Core Graph Processing System (GP2 + Event Sourcing + ISO GQL) - Port/Adapter Architecture";
+/// Error types for EAF-IPG operations
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("JSON parsing error: {0}")]
+    JsonParse(#[from] serde_json::Error),
 
-// Public modules
+    #[error("Jsonnet evaluation error: {0}")]
+    JsonnetEval(String),
+
+    #[error("Validation error: {0}")]
+    Validation(String),
+
+    #[error("Runtime error: {0}")]
+    Runtime(String),
+
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("Database error: {0}")]
+    Db(#[from] engidb::Error),
+
+    #[error("Storage error: {0}")]
+    Storage(String),
+}

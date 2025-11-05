@@ -49,11 +49,6 @@ members = [
     # "tests/integration", # No Cargo.toml
     # "examples/vercel", # No Cargo.toml
 ]
-exclude = [
-    "crates/020-language/022-kotoba-sem",
-    "examples/densha",
-]
-resolver = "2"
 
 [workspace.package]
 version = "0.1.22"
@@ -137,10 +132,10 @@ digest = "0.10.7"
 
 # Root crate configuration
 [package]
-name = "kotoba-main"
-version = "0.1.22"
+name = "eaf-ipg-runtime"
+version = "0.2.0"
 edition = "2021"
-description = "GP2-based Graph Rewriting Language - ISO GQL-compliant queries, MVCC+Merkle persistence, and distributed execution"
+description = "Kotoba - Language Graph Database - Unified IR execution engine"
 license = "Apache-2.0"
 repository = "https://github.com/com-junkawasaki/kotoba"
 keywords = ["graph", "database", "gql", "rewrite", "distributed"]
@@ -169,99 +164,81 @@ codegen-units = 1
 panic = "abort"
 
 [dependencies]
-# Core crates - workspace versions
-# kotoba-core = { path = "crates/kotoba-core" } # Temporarily disabled to avoid confusion
-# kotoba-graph moved to optional dependencies
-# kotoba-storage = { path = "crates/kotoba-storage" }
-# kotoba-schema = { path = "crates/kotoba-schema" }
-# kotoba-execution moved to optional dependencies
-# kotoba-rewrite = { path = "crates/kotoba-rewrite" }
-# kotoba-security.workspace = true
-# kotoba-server = { path = "crates/kotoba-server" }
 
-# Core crates only (published versions)
-# Optional crates are disabled for stable core focus
-# kotoba-package-manager = { path = "crates/kotoba-package-manager" }
-# kotoba-execution temporarily disabled
-# kotoba-execution = { path = "crates/kotoba-execution" }
-# kotoba-graph temporarily disabled
-# kotoba-graph = { path = "crates/kotoba-graph" }
-# kotoba-kotobas temporarily disabled
-# kotoba-kotobas = { path = "crates/kotoba-kotobas" }
-# kotoba-repl = { path = "crates/kotoba-repl" }
-# kotoba-formatter temporarily disabled
-# kotoba-formatter = { path = "crates/kotoba-formatter" }
-# kotoba-linter = { path = "crates/kotoba-linter" } # CLIバイナリとして独立実行
-# kotoba-tester = { path = "crates/kotoba-tester" } # CLIバイナリとして独立実行
-# kotoba-build = { path = "crates/kotoba-build" } # CLIバイナリとして独立実行
-# kotoba-deploy-cli = { path = "crates/kotoba-deploy-cli" }  # 依存関係の問題があるため一時的に無効化
-# kotoba-backup = { path = "crates/kotoba-backup" }  # 動作確認のため一時的に無効化
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
-# Schema and CID dependencies
-schemars.workspace = true
-jsonschema.workspace = true
-blake3.workspace = true
-serde.workspace = true
-serde_json.workspace = true
-sha2.workspace = true
-hex.workspace = true
-hmac = "0.12"
-regex.workspace = true
-thiserror.workspace = true
-tempfile.workspace = true
+# Graph algorithms and data structures
+petgraph = { version = "0.6", features = ["serde-1"] }
 
-# Core crates
-kotoba-repl = { path = "crates/020-language/027-kotoba-repl", version = "0.1.22" }
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
 
-# For binary
+rayon = "1.8"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# Pure Rust embedded database
+sled = "0.34"
+
+
+# CLI
 clap = { version = "4.0", features = ["derive"] }
-rustc_version = "0.4"
-chrono = { version = "0.4", features = ["serde"] }
-# colored = "2.0" # サブプロセス経由で実行するため不要
-# indicatif = "0.17" # サブプロセス経由で実行するため不要
-# serde_yaml = "0.9" # サブプロセス経由で実行するため不要
 
-# Optional crates for different use cases
-tokio = { version = "1.0", features = ["full"] }
-log = "0.4"
-env_logger = "0.11"
-uuid = { version = "1.0", features = ["v4"] }
+# HTTP Server (Pure Rust - Axum/Hyper)
+axum = { version = "0.7", features = ["ws", "json", "form"] }
+axum-extra = { version = "0.9", features = ["typed-header"] }
+tower-http = { version = "0.5", features = ["cors", "trace", "fs", "request-id"] }
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "signal"] }
+futures = "0.3"
 
-# Vercel deployment
-vercel_runtime = { version = "1.0", optional = true }
-reqwest = { version = "0.11", features = ["json"], optional = true }
+# Collections and utilities
+indexmap = { version = "2.0", features = ["serde"] }
+itertools = "0.12"
+regex = "1.10"
+
+# Time handling (minimize default features to avoid native libs)
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+
+# Force rustls-only websocket stack to avoid native-tls linkage
+tokio-tungstenite = { version = "0.24", default-features = false, features = ["rustls-tls-webpki-roots"] }
+tungstenite = { version = "0.23", default-features = false }
+
+# WebAssembly support
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = [
+    "console",
+    "Window",
+    "Document",
+    "Element",
+    "HtmlElement",
+    "Node",
+    "Event",
+    "EventTarget",
+] }
+js-sys = "0.3"
+serde-wasm-bindgen = "0.6"
+
+engidb = { path = "crates/engidb" }
+kotoba-types = { path = "crates/kotoba-types" }
+
+# FCDB test dependencies
+fcdb-core = "0.1"
+fcdb-cas = "0.1"
+fcdb-graph = "0.1"
+
+[[bin]]
+name = "test_fcdb"
+path = "test_fcdb_api.rs"
 
 [features]
 default = []
-# full = ["tokio", "log", "env_logger", "examples", "binary", "server", "package-manager", "execution", "graph", "kotobas", "repl", "formatter"]
-# binary = ["clap"]
-examples = []
-types = []
-ir = []
-# graph moved to line 183
-storage = []
-# execution moved to line 182
-planner = []
-rewrite = []
-http = []
-frontend = []
-wasm = []
-deploy = []
-# server = ["kotoba-server"]
-# package-manager = ["kotoba-package-manager"]
-# execution = ["kotoba-execution"]
-# graph = ["kotoba-graph"]
-# kotobas = ["kotoba-kotobas"]
-# repl = ["kotoba-repl"]
-# formatter = ["kotoba-formatter"]
-vercel = ["vercel_runtime", "reqwest"]
-lsm = []
-
-# Platform-specific features
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-wasm-bindgen = "0.2"
-web-sys = "0.3"
-js-sys = "0.3"
+fcdb = ["engidb/fcdb"]
 
 [dev-dependencies]
 # Coverage and testing tools

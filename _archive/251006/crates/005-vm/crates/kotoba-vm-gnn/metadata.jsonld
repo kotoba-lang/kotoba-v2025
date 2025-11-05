@@ -1,0 +1,81 @@
+{
+  "@context": "../../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-vm-gnn",
+  "name": "kotoba-vm-gnn",
+  "version": "0.1.0",
+  "path": "crates/005-vm/crates/kotoba-vm-gnn",
+  "status": "active",
+  "edition": "2021",
+  "layer": "kotoba:layer/012-vm",
+  "dependencies": {
+    "workspace": [],
+    "external": [
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      },
+      {
+        "name": "serde_json",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "name": "blake3",
+        "type": "external",
+        "version": "1.5"
+      },
+      {
+        "name": "base64",
+        "type": "external",
+        "version": "0.21"
+      },
+      {
+        "name": "bs58",
+        "type": "external",
+        "version": "0.5"
+      },
+      {
+        "name": "base32",
+        "type": "external",
+        "version": "0.4"
+      },
+      {
+        "name": "hex",
+        "type": "external",
+        "version": "0.4"
+      },
+      {
+        "name": "sha2",
+        "type": "external",
+        "version": "0.10"
+      },
+      {
+        "name": "sha3",
+        "type": "external",
+        "version": "0.10"
+      }
+    ],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/cid.rs",
+    "src/core.rs",
+    "src/dpo.rs",
+    "src/gnn.rs",
+    "src/hardware.rs",
+    "src/lib.rs",
+    "src/main.rs",
+    "src/synthesis.rs",
+    "src/training.rs"
+  ]
+}

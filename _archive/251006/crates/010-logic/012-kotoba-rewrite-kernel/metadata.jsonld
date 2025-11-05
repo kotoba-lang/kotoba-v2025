@@ -1,0 +1,80 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-rewrite-kernel",
+  "name": "kotoba-rewrite-kernel",
+  "version": "0.1.22",
+  "path": "crates/010-logic/012-kotoba-rewrite-kernel",
+  "status": "active",
+  "description": "Rule/Strategy/Scheduler + independence analysis for graph rewriting",
+  "layer": "kotoba:layer/010-logic",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "path": "../011-kotoba-ir",
+        "name": "kotoba-ir"
+      },
+      {
+        "type": "workspace",
+        "path": "../010-kotoba-codebase",
+        "name": "kotoba-codebase"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "features": [
+          "derive"
+        ],
+        "name": "serde"
+      }
+    ],
+    "external": [
+      {
+        "type": "unknown",
+        "name": "serde_json.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "thiserror.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "sha2.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "hex.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "blake3.workspace"
+      },
+      {
+        "type": "unknown",
+        "name": "regex.workspace"
+      }
+    ],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/independence.rs",
+    "src/kernel.rs",
+    "src/lib.rs",
+    "src/rule.rs",
+    "src/rule_def.rs",
+    "src/scheduler.rs",
+    "src/strategy.rs",
+    "src/strategy_def.rs"
+  ]
+}

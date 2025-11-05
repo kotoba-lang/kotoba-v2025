@@ -1,0 +1,158 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-linter",
+  "name": "kotoba-linter",
+  "version": "",
+  "path": "crates/020-language/025-kotoba-linter",
+  "status": "active",
+  "description": "Kotoba Code Linter - Static analysis tool for .kotoba files",
+  "keywords": [
+    "linter",
+    "static-analysis",
+    "code-quality",
+    "kotoba",
+    "diagnostics"
+  ],
+  "categories": [
+    "development-tools",
+    "command-line-utilities"
+  ],
+  "layer": "kotoba:layer/020-language",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../../010-logic/009-kotoba-logic",
+        "name": "kotoba-logic"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/011-kotoba-ir",
+        "name": "kotoba-ir"
+      },
+      {
+        "type": "workspace",
+        "path": "../020-kotoba-syntax",
+        "name": "kotoba-syntax"
+      },
+      {
+        "type": "workspace",
+        "path": "../021-kotoba-parser",
+        "name": "kotoba-parser"
+      },
+      {
+        "type": "workspace",
+        "path": "../022-kotoba-analyzer",
+        "name": "kotoba-analyzer"
+      },
+      {
+        "type": "workspace",
+        "path": "../024-kotoba-formatter",
+        "name": "kotoba-formatter"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "thiserror"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "serde"
+      }
+    ],
+    "external": [
+      {
+        "name": "anyhow",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "name": "serde_json",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "name": "regex",
+        "type": "external",
+        "version": "1.0"
+      },
+      {
+        "name": "tracing",
+        "type": "external",
+        "version": "0.1"
+      },
+      {
+        "name": "futures",
+        "type": "external",
+        "version": "0.3"
+      },
+      {
+        "type": "external",
+        "version": "1.0",
+        "features": [
+          "full"
+        ],
+        "name": "tokio"
+      },
+      {
+        "name": "tower",
+        "type": "external",
+        "version": "0.4"
+      },
+      {
+        "name": "tower-lsp",
+        "type": "external",
+        "version": "0.20"
+      },
+      {
+        "name": "dashmap",
+        "type": "external",
+        "version": "5.5"
+      },
+      {
+        "name": "url",
+        "type": "external",
+        "version": "2.5"
+      },
+      {
+        "name": "ropey",
+        "type": "external",
+        "version": "1.6"
+      },
+      {
+        "name": "glob",
+        "type": "external",
+        "version": "0.3"
+      }
+    ],
+    "optional": [],
+    "dev": [
+      {
+        "name": "tokio-test",
+        "type": "external",
+        "version": "0.4"
+      }
+    ]
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/analyzer.rs",
+    "src/config.rs",
+    "src/diagnostics.rs",
+    "src/lib.rs",
+    "src/main.rs",
+    "src/pure_linter.rs",
+    "src/reporter.rs",
+    "src/rules.rs"
+  ]
+}

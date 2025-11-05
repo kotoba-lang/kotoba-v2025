@@ -1,0 +1,45 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-distributed",
+  "name": "kotoba-distributed",
+  "version": "0.1.22",
+  "path": "crates/030-storage/034-kotoba-distributed",
+  "status": "active",
+  "description": "Placeholder for kotoba-distributed",
+  "layer": "kotoba:layer/030-storage",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../../010-core/012-kotoba-core",
+        "name": "kotoba-core"
+      },
+      {
+        "type": "workspace",
+        "path": "../031-kotoba-storage",
+        "name": "kotoba-storage"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "serde"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "anyhow"
+      }
+    ],
+    "external": [],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/lib.rs"
+  ]
+}

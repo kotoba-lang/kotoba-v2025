@@ -1,0 +1,264 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "kotoba": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld#vocab",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "sh": "http://www.w3.org/ns/shacl#"
+  },
+  "@id": "https://kotoba.ai/ontology/catalog",
+  "@type": "owl:Ontology",
+  "rdfs:comment": "Catalog Intermediate Representation (IR) ontology for Kotoba. Defines schema, index, and invariant definitions using OWL classes.",
+  
+  "@graph": [
+    {
+      "@id": "kotoba:CatalogIR",
+      "@type": "owl:Class",
+      "rdfs:label": "Catalog Intermediate Representation",
+      "rdfs:comment": "Catalog containing label definitions, index definitions, and invariants",
+      "rdfs:subClassOf": {
+        "@id": "kotoba:IR"
+      }
+    },
+    {
+      "@id": "kotoba:LabelDef",
+      "@type": "owl:Class",
+      "rdfs:label": "Label Definition",
+      "rdfs:comment": "Definition of a label (vertex/edge type) with properties and inheritance",
+      "rdfs:subClassOf": {
+        "@id": "rdfs:Resource"
+      }
+    },
+    {
+      "@id": "kotoba:PropertyDef",
+      "@type": "owl:Class",
+      "rdfs:label": "Property Definition",
+      "rdfs:comment": "Definition of a property with type, nullability, and default value",
+      "rdfs:subClassOf": {
+        "@id": "rdfs:Resource"
+      }
+    },
+    {
+      "@id": "kotoba:IndexDef",
+      "@type": "owl:Class",
+      "rdfs:label": "Index Definition",
+      "rdfs:comment": "Definition of an index on a label with properties",
+      "rdfs:subClassOf": {
+        "@id": "rdfs:Resource"
+      }
+    },
+    {
+      "@id": "kotoba:Invariant",
+      "@type": "owl:Class",
+      "rdfs:label": "Invariant",
+      "rdfs:comment": "Invariant constraint expression",
+      "rdfs:subClassOf": {
+        "@id": "rdfs:Resource"
+      }
+    },
+    {
+      "@id": "kotoba:hasLabels",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "has labels",
+      "rdfs:comment": "Relationship from Catalog to LabelDef instances",
+      "rdfs:domain": {
+        "@id": "kotoba:CatalogIR"
+      },
+      "rdfs:range": {
+        "@id": "kotoba:LabelDef"
+      }
+    },
+    {
+      "@id": "kotoba:hasIndexes",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "has indexes",
+      "rdfs:comment": "Relationship from Catalog to IndexDef instances",
+      "rdfs:domain": {
+        "@id": "kotoba:CatalogIR"
+      },
+      "rdfs:range": {
+        "@id": "kotoba:IndexDef"
+      }
+    },
+    {
+      "@id": "kotoba:hasInvariants",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "has invariants",
+      "rdfs:comment": "Relationship from Catalog to Invariant instances",
+      "rdfs:domain": {
+        "@id": "kotoba:CatalogIR"
+      },
+      "rdfs:range": {
+        "@id": "kotoba:Invariant"
+      }
+    },
+    {
+      "@id": "kotoba:hasProperties",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "has properties",
+      "rdfs:comment": "Relationship from LabelDef to PropertyDef instances",
+      "rdfs:domain": {
+        "@id": "kotoba:LabelDef"
+      },
+      "rdfs:range": {
+        "@id": "kotoba:PropertyDef"
+      }
+    },
+    {
+      "@id": "kotoba:hasSuperLabels",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "has super labels",
+      "rdfs:comment": "Relationship from LabelDef to super labels (inheritance)",
+      "rdfs:domain": {
+        "@id": "kotoba:LabelDef"
+      },
+      "rdfs:range": {
+        "@id": "rdfs:Resource"
+      }
+    },
+    {
+      "@id": "kotoba:labelName",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "label name",
+      "rdfs:comment": "Name identifier for a label definition",
+      "rdfs:domain": {
+        "@id": "kotoba:LabelDef"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "kotoba:propertyName",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "property name",
+      "rdfs:comment": "Name identifier for a property definition",
+      "rdfs:domain": {
+        "@id": "kotoba:PropertyDef"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "kotoba:propertyType",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "property type",
+      "rdfs:comment": "Type of a property (null, bool, int, float, string, list, map)",
+      "rdfs:domain": {
+        "@id": "kotoba:PropertyDef"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "kotoba:isNullable",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "is nullable",
+      "rdfs:comment": "Whether a property can be null",
+      "rdfs:domain": {
+        "@id": "kotoba:PropertyDef"
+      },
+      "rdfs:range": {
+        "@id": "xsd:boolean"
+      }
+    },
+    {
+      "@id": "kotoba:defaultValue",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "default value",
+      "rdfs:comment": "Default value for a property",
+      "rdfs:domain": {
+        "@id": "kotoba:PropertyDef"
+      }
+    },
+    {
+      "@id": "kotoba:indexName",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "index name",
+      "rdfs:comment": "Name identifier for an index definition",
+      "rdfs:domain": {
+        "@id": "kotoba:IndexDef"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "kotoba:indexLabel",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "index label",
+      "rdfs:comment": "Label that the index is defined on",
+      "rdfs:domain": {
+        "@id": "kotoba:IndexDef"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "kotoba:indexProperties",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "index properties",
+      "rdfs:comment": "Properties included in the index",
+      "rdfs:domain": {
+        "@id": "kotoba:IndexDef"
+      },
+      "rdfs:range": {
+        "@id": "rdfs:List"
+      }
+    },
+    {
+      "@id": "kotoba:isUnique",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "is unique",
+      "rdfs:comment": "Whether an index is unique",
+      "rdfs:domain": {
+        "@id": "kotoba:IndexDef"
+      },
+      "rdfs:range": {
+        "@id": "xsd:boolean"
+      }
+    },
+    {
+      "@id": "kotoba:invariantName",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "invariant name",
+      "rdfs:comment": "Name identifier for an invariant",
+      "rdfs:domain": {
+        "@id": "kotoba:Invariant"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "kotoba:invariantExpr",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "invariant expression",
+      "rdfs:comment": "Expression defining the invariant constraint",
+      "rdfs:domain": {
+        "@id": "kotoba:Invariant"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "kotoba:invariantMessage",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "invariant message",
+      "rdfs:comment": "Error message when invariant is violated",
+      "rdfs:domain": {
+        "@id": "kotoba:Invariant"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    }
+  ]
+}
+

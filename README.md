@@ -1,12 +1,6 @@
 # Kotoba: A Phonosemantic Digital Computing System
 
-<div align="center">
-  <img src="public/hiragana_01_a.png.png" alt="Logo 01" width="80" height="80" />
-  <img src="public/hiragana_02_i.png.png" alt="Logo 02" width="80" height="80" />
-  <img src="public/hiragana_03_u.png.png" alt="Logo 03" width="80" height="80" />
-  <img src="public/hiragana_04_e.png.png" alt="Logo 04" width="80" height="80" />
-  <img src="public/hiragana_05_o.png.png" alt="Logo 05" width="80" height="80" />
-</div>
+Ἐν ἀρχῇ ἦν ὁ λόγος
 
 **Kotoba is a phonosemantic digital computing system where all computing, operating system, datastore, and self-evolution mechanisms are represented, reasoned, and executed using JSON-LD with OWL inference.**
 

@@ -1,0 +1,56 @@
+{
+  "@context": "../../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-vm-benchmarks",
+  "name": "kotoba-vm-benchmarks",
+  "version": "0.1.0",
+  "path": "crates/005-vm/crates/kotoba-vm-benchmarks",
+  "status": "active",
+  "edition": "2021",
+  "layer": "kotoba:layer/012-vm",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../kotoba-vm-types",
+        "name": "kotoba-vm-types"
+      },
+      {
+        "type": "workspace",
+        "path": "../kotoba-vm-scheduler",
+        "name": "kotoba-vm-scheduler"
+      },
+      {
+        "type": "workspace",
+        "path": "../kotoba-vm-memory",
+        "name": "kotoba-vm-memory"
+      },
+      {
+        "type": "workspace",
+        "path": "../kotoba-vm-cpu",
+        "name": "kotoba-vm-cpu"
+      }
+    ],
+    "external": [
+      {
+        "type": "external",
+        "version": "0.5",
+        "features": [
+          "html_reports"
+        ],
+        "name": "criterion"
+      },
+      {
+        "name": "rand",
+        "type": "external",
+        "version": "0.8"
+      }
+    ],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  }
+}
