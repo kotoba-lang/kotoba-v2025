@@ -1,0 +1,129 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "kotoba": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld#vocab",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "sh": "http://www.w3.org/ns/shacl#"
+  },
+  "@id": "https://kotoba.ai/ontology/capability",
+  "@type": "owl:Ontology",
+  "rdfs:comment": "Capability ontology for Kotoba. Defines capability classes and their relationships using OWL.",
+  
+  "@graph": [
+    {
+      "@id": "kotoba:Capability",
+      "@type": "owl:Class",
+      "rdfs:label": "Capability",
+      "rdfs:comment": "Abstract base class for all capabilities that Actors can provide and Processes can require",
+      "rdfs:subClassOf": {
+        "@id": "rdfs:Resource"
+      }
+    },
+    {
+      "@id": "kotoba:ComputeCapability",
+      "@type": "owl:Class",
+      "rdfs:label": "Compute Capability",
+      "rdfs:comment": "Capability for performing computational tasks",
+      "rdfs:subClassOf": {
+        "@id": "kotoba:Capability"
+      }
+    },
+    {
+      "@id": "kotoba:StorageCapability",
+      "@type": "owl:Class",
+      "rdfs:label": "Storage Capability",
+      "rdfs:comment": "Capability for storing and retrieving data",
+      "rdfs:subClassOf": {
+        "@id": "kotoba:Capability"
+      }
+    },
+    {
+      "@id": "kotoba:NetworkCapability",
+      "@type": "owl:Class",
+      "rdfs:label": "Network Capability",
+      "rdfs:comment": "Capability for network communication",
+      "rdfs:subClassOf": {
+        "@id": "kotoba:Capability"
+      }
+    },
+    {
+      "@id": "kotoba:GraphRewriteCapability",
+      "@type": "owl:Class",
+      "rdfs:label": "Graph Rewrite Capability",
+      "rdfs:comment": "Capability for graph rewriting operations",
+      "rdfs:subClassOf": {
+        "@id": "kotoba:ComputeCapability"
+      }
+    },
+    {
+      "@id": "kotoba:QueryExecutionCapability",
+      "@type": "owl:Class",
+      "rdfs:label": "Query Execution Capability",
+      "rdfs:comment": "Capability for executing graph queries",
+      "rdfs:subClassOf": {
+        "@id": "kotoba:ComputeCapability"
+      }
+    },
+    {
+      "@id": "kotoba:requiresCapability",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "requires capability",
+      "rdfs:comment": "Relationship indicating that a Process requires a specific Capability",
+      "rdfs:domain": {
+        "@id": "kotoba:Process"
+      },
+      "rdfs:range": {
+        "@id": "kotoba:Capability"
+      }
+    },
+    {
+      "@id": "kotoba:providesCapability",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "provides capability",
+      "rdfs:comment": "Relationship indicating that an Actor provides a specific Capability",
+      "rdfs:domain": {
+        "@id": "kotoba:Actor"
+      },
+      "rdfs:range": {
+        "@id": "kotoba:Capability"
+      }
+    },
+    {
+      "@id": "kotoba:capabilityId",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "capability identifier",
+      "rdfs:comment": "Unique identifier for a capability instance",
+      "rdfs:domain": {
+        "@id": "kotoba:Capability"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "kotoba:capabilityConstraints",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "capability constraints",
+      "rdfs:comment": "SHACL shape constraints for a capability",
+      "rdfs:domain": {
+        "@id": "kotoba:Capability"
+      }
+    },
+    {
+      "@id": "kotoba:hasCapabilityLevel",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "has capability level",
+      "rdfs:comment": "Level or version of a capability (e.g., 'basic', 'advanced', 'v1.0')",
+      "rdfs:domain": {
+        "@id": "kotoba:Capability"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    }
+  ]
+}
+

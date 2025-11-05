@@ -635,6 +635,296 @@
     
     "subsumptionResult": {
       "@id": "kotoba:subsumptionResult"
+    },
+    
+    "IR": {
+      "@id": "kotoba:IR",
+      "@type": "@vocab"
+    },
+    
+    "RuleIR": {
+      "@id": "kotoba:RuleIR",
+      "@type": "@vocab"
+    },
+    
+    "QueryIR": {
+      "@id": "kotoba:QueryIR",
+      "@type": "@vocab"
+    },
+    
+    "PatchIR": {
+      "@id": "kotoba:PatchIR",
+      "@type": "@vocab"
+    },
+    
+    "StrategyIR": {
+      "@id": "kotoba:StrategyIR",
+      "@type": "@vocab"
+    },
+    
+    "CatalogIR": {
+      "@id": "kotoba:CatalogIR",
+      "@type": "@vocab"
+    },
+    
+    "lhs": {
+      "@id": "kotoba:lhs"
+    },
+    
+    "rhs": {
+      "@id": "kotoba:rhs"
+    },
+    
+    "context": {
+      "@id": "kotoba:context"
+    },
+    
+    "nacs": {
+      "@id": "kotoba:nacs",
+      "@container": "@set"
+    },
+    
+    "guards": {
+      "@id": "kotoba:guards",
+      "@container": "@set"
+    },
+    
+    "plan": {
+      "@id": "kotoba:plan"
+    },
+    
+    "adds": {
+      "@id": "kotoba:adds"
+    },
+    
+    "dels": {
+      "@id": "kotoba:dels"
+    },
+    
+    "updates": {
+      "@id": "kotoba:updates"
+    },
+    
+    "vertices": {
+      "@id": "kotoba:vertices",
+      "@container": "@set"
+    },
+    
+    "props": {
+      "@id": "kotoba:props",
+      "@container": "@set"
+    },
+    
+    "relinks": {
+      "@id": "kotoba:relinks",
+      "@container": "@set"
+    },
+    
+    "hasCID": {
+      "@id": "kotoba:hasCID",
+      "@type": "xsd:string"
+    },
+    
+    "hasName": {
+      "@id": "kotoba:hasName",
+      "@type": "xsd:string"
+    },
+    
+    "hasMetadata": {
+      "@id": "kotoba:hasMetadata"
+    },
+    
+    "Capability": {
+      "@id": "kotoba:Capability",
+      "@type": "@vocab"
+    },
+    
+    "ComputeCapability": {
+      "@id": "kotoba:ComputeCapability",
+      "@type": "@vocab"
+    },
+    
+    "StorageCapability": {
+      "@id": "kotoba:StorageCapability",
+      "@type": "@vocab"
+    },
+    
+    "NetworkCapability": {
+      "@id": "kotoba:NetworkCapability",
+      "@type": "@vocab"
+    },
+    
+    "GraphRewriteCapability": {
+      "@id": "kotoba:GraphRewriteCapability",
+      "@type": "@vocab"
+    },
+    
+    "QueryExecutionCapability": {
+      "@id": "kotoba:QueryExecutionCapability",
+      "@type": "@vocab"
+    },
+    
+    "requiresCapability": {
+      "@id": "kotoba:requiresCapability",
+      "@type": "@id"
+    },
+    
+    "providesCapability": {
+      "@id": "kotoba:providesCapability",
+      "@type": "@id"
+    },
+    
+    "capabilityId": {
+      "@id": "kotoba:capabilityId",
+      "@type": "xsd:string"
+    },
+    
+    "capabilityConstraints": {
+      "@id": "kotoba:capabilityConstraints"
+    },
+    
+    "hasCapabilityLevel": {
+      "@id": "kotoba:hasCapabilityLevel",
+      "@type": "xsd:string"
+    },
+    
+    "hasComputePower": {
+      "@id": "kotoba:hasComputePower",
+      "@type": "xsd:double"
+    },
+    
+    "supportsParallelism": {
+      "@id": "kotoba:supportsParallelism",
+      "@type": "xsd:boolean"
+    },
+    
+    "hasStorageCapacity": {
+      "@id": "kotoba:hasStorageCapacity",
+      "@type": "xsd:double"
+    },
+    
+    "supportsTransactions": {
+      "@id": "kotoba:supportsTransactions",
+      "@type": "xsd:boolean"
+    },
+    
+    "hasBandwidth": {
+      "@id": "kotoba:hasBandwidth",
+      "@type": "xsd:double"
+    },
+    
+    "supportsEncryption": {
+      "@id": "kotoba:supportsEncryption",
+      "@type": "xsd:boolean"
+    },
+    
+    "CatalogIR": {
+      "@id": "kotoba:CatalogIR",
+      "@type": "@vocab"
+    },
+    
+    "LabelDef": {
+      "@id": "kotoba:LabelDef",
+      "@type": "@vocab"
+    },
+    
+    "PropertyDef": {
+      "@id": "kotoba:PropertyDef",
+      "@type": "@vocab"
+    },
+    
+    "IndexDef": {
+      "@id": "kotoba:IndexDef",
+      "@type": "@vocab"
+    },
+    
+    "Invariant": {
+      "@id": "kotoba:Invariant",
+      "@type": "@vocab"
+    },
+    
+    "hasLabels": {
+      "@id": "kotoba:hasLabels",
+      "@container": "@set"
+    },
+    
+    "hasIndexes": {
+      "@id": "kotoba:hasIndexes",
+      "@container": "@set"
+    },
+    
+    "hasInvariants": {
+      "@id": "kotoba:hasInvariants",
+      "@container": "@set"
+    },
+    
+    "hasProperties": {
+      "@id": "kotoba:hasProperties",
+      "@container": "@set"
+    },
+    
+    "hasSuperLabels": {
+      "@id": "kotoba:hasSuperLabels",
+      "@container": "@set"
+    },
+    
+    "labelName": {
+      "@id": "kotoba:labelName",
+      "@type": "xsd:string"
+    },
+    
+    "propertyName": {
+      "@id": "kotoba:propertyName",
+      "@type": "xsd:string"
+    },
+    
+    "propertyType": {
+      "@id": "kotoba:propertyType",
+      "@type": "xsd:string"
+    },
+    
+    "isNullable": {
+      "@id": "kotoba:isNullable",
+      "@type": "xsd:boolean"
+    },
+    
+    "defaultValue": {
+      "@id": "kotoba:defaultValue"
+    },
+    
+    "indexName": {
+      "@id": "kotoba:indexName",
+      "@type": "xsd:string"
+    },
+    
+    "indexLabel": {
+      "@id": "kotoba:indexLabel",
+      "@type": "xsd:string"
+    },
+    
+    "indexProperties": {
+      "@id": "kotoba:indexProperties",
+      "@container": "@set"
+    },
+    
+    "isUnique": {
+      "@id": "kotoba:isUnique",
+      "@type": "xsd:boolean"
+    },
+    
+    "invariantName": {
+      "@id": "kotoba:invariantName",
+      "@type": "xsd:string"
+    },
+    
+    "invariantExpr": {
+      "@id": "kotoba:invariantExpr",
+      "@type": "xsd:string"
+    },
+    
+    "invariantMessage": {
+      "@id": "kotoba:invariantMessage",
+      "@type": "xsd:string"
     }
   }
 }

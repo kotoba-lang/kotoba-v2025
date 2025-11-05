@@ -4,11 +4,12 @@
 //! SHACL-based capability matching and semantic similarity.
 
 use crate::actor::ActorTrait;
+use crate::capability::{CapabilityMatcher, CapabilityRegistry, extract_required_capabilities, extract_provided_capabilities};
 use crate::types::Process;
 use crate::Result;
 use std::collections::HashMap;
 use std::sync::Arc;
-use tracing::{info, warn};
+use tracing::{info, warn, debug};
 
 /// Actor selection strategy
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -32,6 +33,14 @@ pub struct Mediator {
 
     /// Selection strategy
     strategy: SelectionStrategy,
+
+    /// Capability registry for OWL-based matching
+    #[cfg(feature = "reasoning")]
+    capability_registry: Option<CapabilityRegistry>,
+
+    /// Capability matcher for OWL reasoning
+    #[cfg(feature = "reasoning")]
+    capability_matcher: Option<CapabilityMatcher>,
 }
 
 impl Mediator {
@@ -41,6 +50,10 @@ impl Mediator {
             actors: HashMap::new(),
             actors_by_capability: HashMap::new(),
             strategy: SelectionStrategy::Direct,
+            #[cfg(feature = "reasoning")]
+            capability_registry: None,
+            #[cfg(feature = "reasoning")]
+            capability_matcher: None,
         }
     }
 
@@ -50,7 +63,29 @@ impl Mediator {
             actors: HashMap::new(),
             actors_by_capability: HashMap::new(),
             strategy,
+            #[cfg(feature = "reasoning")]
+            capability_registry: None,
+            #[cfg(feature = "reasoning")]
+            capability_matcher: None,
         }
+    }
+
+    /// Create a mediator with OWL reasoning enabled
+    #[cfg(feature = "reasoning")]
+    pub async fn with_owl_reasoning(strategy: SelectionStrategy) -> Result<Self> {
+        use crate::capability::CapabilityRegistry;
+        use kotoba_owl_reasoner::ReasoningLevel;
+
+        let registry = CapabilityRegistry::with_reasoning(ReasoningLevel::OwlDl).await?;
+        let matcher = CapabilityMatcher::new(registry);
+
+        Ok(Self {
+            actors: HashMap::new(),
+            actors_by_capability: HashMap::new(),
+            strategy,
+            capability_registry: Some(registry),
+            capability_matcher: Some(matcher),
+        })
     }
 
     /// Set selection strategy
@@ -83,6 +118,7 @@ impl Mediator {
     /// - Direct: Simple mapping by performedBy IRI
     /// - Capability: Match by capability IRI
     /// - ShaclSemantic: SHACL-based semantic matching (requires reasoning feature)
+    /// - OWL: OWL reasoning-based capability matching (requires reasoning feature)
     pub async fn select_actor(&self, process: &Process) -> Result<Arc<dyn ActorTrait>> {
         match self.strategy {
             SelectionStrategy::Direct => {
@@ -95,6 +131,76 @@ impl Mediator {
             SelectionStrategy::ShaclSemantic => {
                 self.select_by_shacl_semantic(process).await
             }
+        }
+    }
+
+    /// Select actor using OWL reasoning-based capability matching
+    #[cfg(feature = "reasoning")]
+    pub async fn select_actor_by_owl(&self, process: &Process) -> Result<Arc<dyn ActorTrait>> {
+        use serde_json::to_value;
+
+        if let Some(ref matcher) = self.capability_matcher {
+            // Extract required capabilities from process
+            let process_jsonld = to_value(process)
+                .map_err(|e| crate::KotobaOsError::Other(anyhow::anyhow!("Failed to serialize process: {}", e)))?;
+            
+            let required_capabilities = extract_required_capabilities(&process_jsonld)?;
+            
+            if required_capabilities.is_empty() {
+                // Fallback to direct matching if no capabilities specified
+                return self.select_by_direct(process).await;
+            }
+
+            debug!("[Mediator] Process requires {} capabilities", required_capabilities.len());
+
+            // Find matching actors for each required capability
+            let mut candidate_actors: Vec<(f64, Arc<dyn ActorTrait>)> = Vec::new();
+
+            for required_cap in &required_capabilities {
+                // Get all actors that provide matching capabilities
+                let mut matching_actors = Vec::new();
+                
+                for actor in self.actors.values() {
+                    // Create actor JSON-LD representation
+                    let mut actor_jsonld = json!({
+                        "@id": actor.id(),
+                        "@type": "kotoba:Actor",
+                        "kotoba:capability": actor.capability(),
+                    });
+                    
+                    let provided_capabilities = extract_provided_capabilities(&actor_jsonld)?;
+                    
+                    // Use OWL reasoning to match capabilities
+                    let matches = matcher.match_capabilities(required_cap, &provided_capabilities).await?;
+                    
+                    if !matches.is_empty() {
+                        matching_actors.push(Arc::clone(actor));
+                    }
+                }
+
+                // Score actors based on capability match quality
+                for actor in matching_actors {
+                    let score = actor.compatibility_score(process).await;
+                    candidate_actors.push((score, actor));
+                }
+            }
+
+            // Sort by score (highest first)
+            candidate_actors.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+
+            if let Some((score, actor)) = candidate_actors.first() {
+                if *score > 0.0 {
+                    info!("[Mediator] Selected actor \"{}\" with OWL capability match score {:.2} for process \"{}\"",
+                          actor.id(),
+                          score,
+                          process.label.as_deref().unwrap_or(&process.id));
+                    return Ok(Arc::clone(actor));
+                }
+            }
+            self.select_by_capability(process).await
+        } else {
+            // Fallback to capability matching if OWL reasoning not available
+            self.select_by_capability(process).await
         }
     }
 

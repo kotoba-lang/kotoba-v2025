@@ -60,10 +60,6 @@ impl Kernel {
             graph_stream: None,
             #[cfg(feature = "reasoning")]
             reasoning_engine: None,
-            #[cfg(feature = "reasoning")]
-            shacl_validator: None,
-            #[cfg(feature = "reasoning")]
-            evolution_engine: None,
         })
     }
 
@@ -90,8 +86,6 @@ impl Kernel {
             error_escalator: ErrorEscalator::default(),
             graph_stream: None,
             reasoning_engine: Some(reasoning_engine),
-            shacl_validator: Some(crate::ShaclValidator::new()),
-            evolution_engine: Some(crate::evolution::EvolutionEngine::new()),
         })
     }
 

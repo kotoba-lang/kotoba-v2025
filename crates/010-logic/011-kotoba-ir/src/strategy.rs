@@ -80,6 +80,16 @@ impl StrategyIR {
     pub fn new(strategy: StrategyOp) -> Self {
         Self { strategy }
     }
+
+    /// Convert to JSON-LD format
+    pub fn to_jsonld(&self, id: Option<&str>) -> serde_json::Value {
+        crate::jsonld::strategy_ir_to_jsonld(self, id)
+    }
+
+    /// Create from JSON-LD format
+    pub fn from_jsonld(jsonld: &serde_json::Value) -> Result<Self, anyhow::Error> {
+        crate::jsonld::strategy_ir_from_jsonld(jsonld)
+    }
 }
 
 /// Strategy execution result

@@ -54,6 +54,7 @@
 //! ```
 
 pub mod actor;
+pub mod capability;
 pub mod error;
 pub mod evolution;
 pub mod graph_stream;
@@ -65,6 +66,7 @@ pub mod shacl_validator;
 pub mod types;
 
 pub use actor::{Actor, ActorTrait, DefaultActor};
+pub use capability::{Capability, CapabilityRegistry, CapabilityMatcher, extract_required_capabilities, extract_provided_capabilities};
 pub use error::{ErrorCategory, ErrorContext, ErrorEscalator, RetryConfig, RetryExecutor};
 pub use evolution::{EvolutionEngine, EvolutionStrategy, ProcessMetrics};
 pub use graph_stream::{GraphStream, PatternDetector, StreamSubscription};
@@ -95,6 +97,9 @@ pub enum KotobaOsError {
 
     #[error("Provenance recording error: {0}")]
     ProvenanceError(String),
+
+    #[error("Invalid capability: {0}")]
+    InvalidCapability(String),
 
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),

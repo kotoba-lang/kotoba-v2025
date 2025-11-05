@@ -137,7 +137,65 @@ Kotoba integrates complete OWL reasoning capabilities through the fukurow engine
 JSON-LD Input → fukurow RdfStore → OWL Reasoner → Inferred Triples → JSON-LD Output
 ```
 
-### 6. Semantic Execution Pattern (semanticos)
+### 6. JSON-LD Universal Intermediate Representation (IR)
+
+Kotoba uses JSON-LD as the universal format for all Intermediate Representations, enabling semantic interoperability across all IR types.
+
+**IR Types:**
+
+1. **Rule-IR (DPO Graph Rewriting)**
+   - Represented as JSON-LD with OWL class `kotoba:RuleIR`
+   - SHACL shape validation for rule structure
+   - Supports LHS, RHS, context, NACs, and guards
+
+2. **Query-IR (GQL Logical Plan Algebra)**
+   - Represented as JSON-LD with OWL class `kotoba:QueryIR`
+   - Logical operations (NodeScan, Filter, Expand, Join, Project, etc.)
+   - SHACL validation for query plan structure
+
+3. **Patch-IR (Differential Expressions)**
+   - Represented as JSON-LD with OWL class `kotoba:PatchIR`
+   - Add/Delete/Update operations for vertices and edges
+   - SHACL validation for patch structure
+
+4. **Strategy-IR (Minimal Strategy Expressions)**
+   - Represented as JSON-LD with OWL class `kotoba:StrategyIR`
+   - Strategy operations (once, exhaust, while, seq, choice, priority)
+   - SHACL validation for strategy structure
+
+**Benefits:**
+- **Semantic Interoperability**: All IRs use the same JSON-LD format
+- **OWL Reasoning**: IR structures can be reasoned about using OWL inference
+- **SHACL Validation**: Structural integrity guaranteed through SHACL shapes
+- **Content-Addressable**: IR instances can be referenced by CID (Content ID)
+
+### 7. Capability-Based Actor Selection
+
+Kotoba implements an OWL-based capability system for matching actors to processes.
+
+**Capability System:**
+
+1. **Capability Ontology (OWL)**
+   - Base class: `kotoba:Capability`
+   - Subclasses: `kotoba:ComputeCapability`, `kotoba:StorageCapability`, `kotoba:NetworkCapability`
+   - Relationships: `kotoba:requiresCapability` (Process → Capability), `kotoba:providesCapability` (Actor → Capability)
+
+2. **Capability Matching**
+   - OWL reasoning for subsumption-based matching
+   - Process requirements matched against actor capabilities
+   - SHACL validation for capability constraints
+
+3. **Actor Selection**
+   - Mediator uses OWL reasoning to find matching actors
+   - Capability registry for efficient lookup
+   - Fallback to direct mapping if OWL reasoning unavailable
+
+**Execution Flow:**
+```
+Process (requiresCapability) → OWL Reasoning → Capability Matching → Actor Selection → Actor Execution
+```
+
+### 8. Semantic Execution Pattern (semanticos)
 
 Kotoba adopts the Kernel + Actor + Mediator pattern for executing process networks defined in JSON-LD.
 
@@ -147,14 +205,16 @@ Kotoba adopts the Kernel + Actor + Mediator pattern for executing process networ
    - Orchestrates process network graph execution
    - Manages execution lifecycle (start, execute, end)
    - Records provenance information
+   - Supports OWL reasoning for process execution
 
 2. **Mediator**
    - Selects appropriate actors based on process requirements
-   - Uses SHACL-based capability matching
-   - Semantic similarity scoring for actor selection
+   - Uses OWL reasoning-based capability matching
+   - Supports multiple selection strategies (Direct, Capability, ShaclSemantic)
 
 3. **Actor**
    - Performs actions based on capabilities
+   - OWL capability definitions for actor capabilities
    - Resolves I/O from SHACL shapes
    - Wraps output with provenance metadata
 
@@ -165,7 +225,7 @@ Kotoba adopts the Kernel + Actor + Mediator pattern for executing process networ
 
 **Execution Flow:**
 ```
-Process (JSON-LD) → Kernel → Mediator → Actor Selection → Actor Execution → Result (JSON-LD) → Provenance Recording
+Process (JSON-LD) → Kernel → Mediator (OWL Capability Matching) → Actor Selection → Actor Execution → Result (JSON-LD) → Provenance Recording
 ```
 
 ### 7. Self-Evolution via Semantic Design Loop

@@ -99,6 +99,16 @@ impl Patch {
         }
     }
 
+    /// Convert to JSON-LD format
+    pub fn to_jsonld(&self, id: Option<&str>) -> serde_json::Value {
+        crate::jsonld::patch_ir_to_jsonld(self, id)
+    }
+
+    /// Create from JSON-LD format
+    pub fn from_jsonld(jsonld: &serde_json::Value) -> Result<Self, anyhow::Error> {
+        crate::jsonld::patch_ir_from_jsonld(jsonld)
+    }
+
     /// Check if patch is empty
     pub fn is_empty(&self) -> bool {
         self.adds.vertices.is_empty()

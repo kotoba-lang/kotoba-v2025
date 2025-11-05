@@ -3,6 +3,7 @@
 //! Actors are components that perform actions based on their capabilities.
 //! They resolve I/O from SHACL shapes and execute processes.
 
+use crate::capability::Capability;
 use crate::types::{Process, Resource};
 use crate::Result;
 use async_trait::async_trait;
@@ -16,8 +17,12 @@ pub struct Actor {
     /// Unique identifier for the actor
     pub id: String,
 
-    /// Capability IRI describing what the actor can do
+    /// Capability IRI describing what the actor can do (legacy field)
     pub capability: String,
+
+    /// OWL Capability instances (new field)
+    #[cfg(feature = "reasoning")]
+    pub capabilities: Vec<Capability>,
 
     /// Optional SHACL shape describing the actor's capability constraints
     #[cfg(feature = "reasoning")]
@@ -31,6 +36,26 @@ impl Actor {
             id: id.into(),
             capability: capability.into(),
             #[cfg(feature = "reasoning")]
+            capabilities: Vec::new(),
+            #[cfg(feature = "reasoning")]
+            shacl_shape: None,
+        }
+    }
+
+    /// Create an actor with OWL capabilities
+    #[cfg(feature = "reasoning")]
+    pub fn with_capabilities(
+        id: impl Into<String>,
+        capabilities: Vec<Capability>,
+    ) -> Self {
+        let capability_iri = capabilities.first()
+            .map(|c| c.id.clone())
+            .unwrap_or_else(|| "kotoba:Capability".to_string());
+        
+        Self {
+            id: id.into(),
+            capability: capability_iri,
+            capabilities,
             shacl_shape: None,
         }
     }
@@ -45,8 +70,21 @@ impl Actor {
         Self {
             id: id.into(),
             capability: capability.into(),
+            capabilities: Vec::new(),
             shacl_shape: Some(shape),
         }
+    }
+
+    /// Add an OWL capability
+    #[cfg(feature = "reasoning")]
+    pub fn add_capability(&mut self, capability: Capability) {
+        self.capabilities.push(capability);
+    }
+
+    /// Get OWL capabilities
+    #[cfg(feature = "reasoning")]
+    pub fn get_capabilities(&self) -> &[Capability] {
+        &self.capabilities
     }
 
     /// Resolve I/O from a process JSON-LD structure
@@ -138,6 +176,12 @@ impl DefaultActor {
         Self {
             actor: Actor::new(id, capability),
         }
+    }
+
+    /// Get capabilities (if reasoning feature enabled)
+    #[cfg(feature = "reasoning")]
+    pub fn get_capabilities(&self) -> &[Capability] {
+        self.actor.get_capabilities()
     }
 
     /// Create with SHACL shape

@@ -49,13 +49,16 @@ Kotoba reimagines computing through the lens of **phonosemantics** (音素意味
 
 3. **JSON-LD as Universal Representation**
    - All computing layers use JSON-LD: hardware operations, OS services, datastore operations, and self-evolution mechanisms
+   - **JSON-LD Universal IR**: All Intermediate Representations (Rule-IR, Query-IR, Patch-IR, Strategy-IR) are represented in JSON-LD format
+   - OWL ontology definitions and SHACL shape validation for IR structures
    - Unified semantic representation eliminates syntactic barriers between layers
    - Automatic context resolution and vocabulary expansion
 
 4. **Semantic Execution Pattern (semanticos)**
    - **Kernel**: Orchestrates process network execution
    - **Actor**: Performs actions based on capabilities
-   - **Mediator**: Selects appropriate actors using SHACL-based reasoning
+   - **Mediator**: Selects appropriate actors using OWL reasoning-based capability matching
+   - **Capability System**: OWL-based capability definitions with SHACL validation for actor-process matching
    - **Provenance**: Records all execution history in JSON-LD format
 
 5. **Self-Evolution via Semantic Design Loop**

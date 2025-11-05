@@ -115,6 +115,16 @@ impl RuleIR {
         self.nacs.push(nac);
         self
     }
+
+    /// Convert to JSON-LD format
+    pub fn to_jsonld(&self, id: Option<&str>) -> serde_json::Value {
+        crate::jsonld::rule_ir_to_jsonld(self, id)
+    }
+
+    /// Create from JSON-LD format
+    pub fn from_jsonld(jsonld: &serde_json::Value) -> Result<Self, anyhow::Error> {
+        crate::jsonld::rule_ir_from_jsonld(jsonld)
+    }
 }
 
 /// Rule match result

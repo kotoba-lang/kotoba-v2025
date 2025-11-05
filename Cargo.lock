@@ -3050,6 +3050,9 @@ dependencies = [
 name = "kotoba-ir"
 version = "0.1.22"
 dependencies = [
+ "anyhow",
+ "kotoba-jsonld",
+ "kotoba-owl-reasoner",
  "kotoba-types",
  "serde",
  "serde_json",

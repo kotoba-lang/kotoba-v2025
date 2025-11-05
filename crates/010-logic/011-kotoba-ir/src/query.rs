@@ -222,6 +222,24 @@ impl PlanIR {
         self.limit = Some(limit);
         self
     }
+
+    /// Convert to JSON-LD format
+    pub fn to_jsonld(&self, id: Option<&str>) -> serde_json::Value {
+        let mut jsonld = crate::jsonld::query_ir_to_jsonld(&self.plan, id);
+        if let Some(limit) = self.limit {
+            jsonld["kotoba:limit"] = serde_json::json!(limit);
+        }
+        jsonld
+    }
+
+    /// Create from JSON-LD format
+    pub fn from_jsonld(jsonld: &serde_json::Value) -> Result<Self, anyhow::Error> {
+        let plan = crate::jsonld::query_ir_from_jsonld(jsonld)?;
+        let limit = jsonld.get("kotoba:limit")
+            .and_then(|v| v.as_u64())
+            .map(|v| v as usize);
+        Ok(Self { plan, limit })
+    }
 }
 
 /// Row in query result
