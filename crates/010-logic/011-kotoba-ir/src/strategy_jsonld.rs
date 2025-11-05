@@ -8,6 +8,38 @@ use anyhow::{Context, Result as AnyhowResult};
 
 const KOTOBA_CONTEXT: &str = "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld";
 
+/// Validate Strategy-IR JSON-LD against SHACL shapes (synchronous wrapper)
+#[cfg(feature = "reasoning")]
+fn validate_strategy_jsonld(strategy_jsonld: &Value) -> AnyhowResult<()> {
+    use crate::shacl::validate_ir_jsonld;
+    
+    if let Ok(handle) = tokio::runtime::Handle::try_current() {
+        handle.block_on(async {
+            let result = validate_ir_jsonld(strategy_jsonld, "StrategyIR").await?;
+            if !result.valid {
+                return Err(anyhow::anyhow!(
+                    "SHACL validation failed for Strategy-IR: {:?}",
+                    result.errors
+                ));
+            }
+            Ok(())
+        })
+    } else {
+        let rt = tokio::runtime::Runtime::new()
+            .context("Failed to create Tokio runtime for SHACL validation")?;
+        rt.block_on(async {
+            let result = validate_ir_jsonld(strategy_jsonld, "StrategyIR").await?;
+            if !result.valid {
+                return Err(anyhow::anyhow!(
+                    "SHACL validation failed for Strategy-IR: {:?}",
+                    result.errors
+                ));
+            }
+            Ok(())
+        })
+    }
+}
+
 /// Create an empty Strategy-IR as JSON-LD
 pub fn create_empty_strategy_jsonld(id: Option<&str>) -> Value {
     let mut strategy = json!({
@@ -31,6 +63,10 @@ pub fn get_strategy(strategy_jsonld: &Value) -> Option<Value> {
 /// Set strategy operator in Strategy-IR JSON-LD
 pub fn set_strategy(strategy_jsonld: &mut Value, strategy: Value) -> AnyhowResult<()> {
     strategy_jsonld["kotoba:strategy"] = strategy;
+    #[cfg(feature = "reasoning")]
+    {
+        validate_strategy_jsonld(strategy_jsonld)?;
+    }
     Ok(())
 }
 

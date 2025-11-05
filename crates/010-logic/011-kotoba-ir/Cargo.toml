@@ -16,7 +16,10 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 anyhow = "1.0"
+tokio = { workspace = true, optional = true }
+wasmtime = { workspace = true, optional = true }
 
 [features]
 default = []
-reasoning = ["kotoba-owl-reasoner"]
+reasoning = ["kotoba-owl-reasoner", "tokio"]
+wasm = ["wasmtime"]

@@ -8,6 +8,41 @@ use anyhow::{Context, Result as AnyhowResult};
 
 const KOTOBA_CONTEXT: &str = "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld";
 
+/// Validate Rule-IR JSON-LD against SHACL shapes (synchronous wrapper)
+#[cfg(feature = "reasoning")]
+fn validate_rule_jsonld(rule_jsonld: &Value) -> AnyhowResult<()> {
+    use crate::shacl::validate_ir_jsonld;
+    
+    // Try to get a handle to the current Tokio runtime
+    if let Ok(handle) = tokio::runtime::Handle::try_current() {
+        // We're in an async context, use block_in_place
+        handle.block_on(async {
+            let result = validate_ir_jsonld(rule_jsonld, "RuleIR").await?;
+            if !result.valid {
+                return Err(anyhow::anyhow!(
+                    "SHACL validation failed for Rule-IR: {:?}",
+                    result.errors
+                ));
+            }
+            Ok(())
+        })
+    } else {
+        // No runtime available, create a new one
+        let rt = tokio::runtime::Runtime::new()
+            .context("Failed to create Tokio runtime for SHACL validation")?;
+        rt.block_on(async {
+            let result = validate_ir_jsonld(rule_jsonld, "RuleIR").await?;
+            if !result.valid {
+                return Err(anyhow::anyhow!(
+                    "SHACL validation failed for Rule-IR: {:?}",
+                    result.errors
+                ));
+            }
+            Ok(())
+        })
+    }
+}
+
 /// Create an empty Rule-IR as JSON-LD
 pub fn create_empty_rule_jsonld(id: Option<&str>, name: &str) -> Value {
     let mut rule = json!({
@@ -48,6 +83,10 @@ pub fn get_rule_name(rule_jsonld: &Value) -> Option<String> {
 /// Set rule name in Rule-IR JSON-LD
 pub fn set_rule_name(rule_jsonld: &mut Value, name: &str) -> AnyhowResult<()> {
     rule_jsonld["kotoba:name"] = json!(name);
+    #[cfg(feature = "reasoning")]
+    {
+        validate_rule_jsonld(rule_jsonld)?;
+    }
     Ok(())
 }
 
@@ -59,6 +98,10 @@ pub fn get_lhs(rule_jsonld: &Value) -> Option<Value> {
 /// Set LHS graph pattern in Rule-IR JSON-LD
 pub fn set_lhs(rule_jsonld: &mut Value, lhs: Value) -> AnyhowResult<()> {
     rule_jsonld["kotoba:lhs"] = lhs;
+    #[cfg(feature = "reasoning")]
+    {
+        validate_rule_jsonld(rule_jsonld)?;
+    }
     Ok(())
 }
 
@@ -70,6 +113,10 @@ pub fn get_rhs(rule_jsonld: &Value) -> Option<Value> {
 /// Set RHS graph pattern in Rule-IR JSON-LD
 pub fn set_rhs(rule_jsonld: &mut Value, rhs: Value) -> AnyhowResult<()> {
     rule_jsonld["kotoba:rhs"] = rhs;
+    #[cfg(feature = "reasoning")]
+    {
+        validate_rule_jsonld(rule_jsonld)?;
+    }
     Ok(())
 }
 
@@ -81,6 +128,10 @@ pub fn get_context(rule_jsonld: &Value) -> Option<Value> {
 /// Set context graph pattern in Rule-IR JSON-LD
 pub fn set_context(rule_jsonld: &mut Value, context: Value) -> AnyhowResult<()> {
     rule_jsonld["kotoba:context"] = context;
+    #[cfg(feature = "reasoning")]
+    {
+        validate_rule_jsonld(rule_jsonld)?;
+    }
     Ok(())
 }
 
@@ -133,6 +184,10 @@ pub fn add_type_def(rule_jsonld: &mut Value, type_name: &str, labels: Vec<&str>)
         .context("kotoba:types must be an object")?;
 
     types.insert(type_name.to_string(), json!(labels));
+    #[cfg(feature = "reasoning")]
+    {
+        validate_rule_jsonld(rule_jsonld)?;
+    }
     Ok(())
 }
 
@@ -148,6 +203,10 @@ pub fn add_nac(rule_jsonld: &mut Value, nac: Value) -> AnyhowResult<()> {
         .context("kotoba:nacs must be an array")?;
 
     nacs.push(nac);
+    #[cfg(feature = "reasoning")]
+    {
+        validate_rule_jsonld(rule_jsonld)?;
+    }
     Ok(())
 }
 
@@ -175,6 +234,10 @@ pub fn add_guard(rule_jsonld: &mut Value, guard_ref: &str, args: Value) -> Anyho
         "kotoba:args": args,
     }));
 
+    #[cfg(feature = "reasoning")]
+    {
+        validate_rule_jsonld(rule_jsonld)?;
+    }
     Ok(())
 }
 

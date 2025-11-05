@@ -17,6 +17,9 @@ pub mod patch_jsonld;
 pub mod strategy_jsonld;
 pub mod shacl;
 
+#[cfg(feature = "wasm")]
+pub mod wasm;
+
 #[cfg(test)]
 #[path = "jsonld_tests.rs"]
 mod jsonld_tests;
@@ -28,3 +31,6 @@ pub use query_jsonld::*;
 pub use patch_jsonld::*;
 pub use strategy_jsonld::*;
 pub use shacl::*;
+
+#[cfg(feature = "wasm")]
+pub use wasm::*;

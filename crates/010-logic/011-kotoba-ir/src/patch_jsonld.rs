@@ -8,6 +8,38 @@ use anyhow::{Context, Result as AnyhowResult};
 
 const KOTOBA_CONTEXT: &str = "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld";
 
+/// Validate Patch-IR JSON-LD against SHACL shapes (synchronous wrapper)
+#[cfg(feature = "reasoning")]
+fn validate_patch_jsonld(patch_jsonld: &Value) -> AnyhowResult<()> {
+    use crate::shacl::validate_ir_jsonld;
+    
+    if let Ok(handle) = tokio::runtime::Handle::try_current() {
+        handle.block_on(async {
+            let result = validate_ir_jsonld(patch_jsonld, "PatchIR").await?;
+            if !result.valid {
+                return Err(anyhow::anyhow!(
+                    "SHACL validation failed for Patch-IR: {:?}",
+                    result.errors
+                ));
+            }
+            Ok(())
+        })
+    } else {
+        let rt = tokio::runtime::Runtime::new()
+            .context("Failed to create Tokio runtime for SHACL validation")?;
+        rt.block_on(async {
+            let result = validate_ir_jsonld(patch_jsonld, "PatchIR").await?;
+            if !result.valid {
+                return Err(anyhow::anyhow!(
+                    "SHACL validation failed for Patch-IR: {:?}",
+                    result.errors
+                ));
+            }
+            Ok(())
+        })
+    }
+}
+
 /// Create an empty Patch-IR as JSON-LD
 pub fn create_empty_patch_jsonld(id: Option<&str>) -> Value {
     let mut patch = json!({
@@ -52,6 +84,10 @@ pub fn add_vertex(patch_jsonld: &mut Value, vertex_id: &str, labels: Vec<&str>, 
     }
 
     vertices.push(vertex);
+    #[cfg(feature = "reasoning")]
+    {
+        validate_patch_jsonld(patch_jsonld)?;
+    }
     Ok(())
 }
 
@@ -75,6 +111,10 @@ pub fn add_edge(patch_jsonld: &mut Value, edge_id: &str, src: &str, dst: &str, l
     }
 
     edges.push(edge);
+    #[cfg(feature = "reasoning")]
+    {
+        validate_patch_jsonld(patch_jsonld)?;
+    }
     Ok(())
 }
 
@@ -87,6 +127,10 @@ pub fn delete_vertex(patch_jsonld: &mut Value, vertex_id: &str) -> AnyhowResult<
         .context("kotoba:dels.kotoba:vertices must be an array")?;
 
     vertices.push(json!(vertex_id));
+    #[cfg(feature = "reasoning")]
+    {
+        validate_patch_jsonld(patch_jsonld)?;
+    }
     Ok(())
 }
 
@@ -99,6 +143,10 @@ pub fn delete_edge(patch_jsonld: &mut Value, edge_id: &str) -> AnyhowResult<()> 
         .context("kotoba:dels.kotoba:edges must be an array")?;
 
     edges.push(json!(edge_id));
+    #[cfg(feature = "reasoning")]
+    {
+        validate_patch_jsonld(patch_jsonld)?;
+    }
     Ok(())
 }
 
@@ -116,6 +164,10 @@ pub fn update_property(patch_jsonld: &mut Value, element_id: &str, key: &str, va
         "kotoba:value": value,
     }));
 
+    #[cfg(feature = "reasoning")]
+    {
+        validate_patch_jsonld(patch_jsonld)?;
+    }
     Ok(())
 }
 
@@ -140,6 +192,10 @@ pub fn relink_edge(patch_jsonld: &mut Value, edge_id: &str, new_src: Option<&str
     }
 
     relinks.push(relink);
+    #[cfg(feature = "reasoning")]
+    {
+        validate_patch_jsonld(patch_jsonld)?;
+    }
     Ok(())
 }
 

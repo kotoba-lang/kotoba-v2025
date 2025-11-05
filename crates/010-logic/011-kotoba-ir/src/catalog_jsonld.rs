@@ -8,6 +8,38 @@ use anyhow::{Context, Result as AnyhowResult};
 
 const KOTOBA_CONTEXT: &str = "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld";
 
+/// Validate Catalog-IR JSON-LD against SHACL shapes (synchronous wrapper)
+#[cfg(feature = "reasoning")]
+fn validate_catalog_jsonld_internal(catalog_jsonld: &Value) -> AnyhowResult<()> {
+    use crate::shacl::validate_ir_jsonld;
+    
+    if let Ok(handle) = tokio::runtime::Handle::try_current() {
+        handle.block_on(async {
+            let result = validate_ir_jsonld(catalog_jsonld, "CatalogIR").await?;
+            if !result.valid {
+                return Err(anyhow::anyhow!(
+                    "SHACL validation failed for Catalog-IR: {:?}",
+                    result.errors
+                ));
+            }
+            Ok(())
+        })
+    } else {
+        let rt = tokio::runtime::Runtime::new()
+            .context("Failed to create Tokio runtime for SHACL validation")?;
+        rt.block_on(async {
+            let result = validate_ir_jsonld(catalog_jsonld, "CatalogIR").await?;
+            if !result.valid {
+                return Err(anyhow::anyhow!(
+                    "SHACL validation failed for Catalog-IR: {:?}",
+                    result.errors
+                ));
+            }
+            Ok(())
+        })
+    }
+}
+
 /// Create an empty Catalog-IR as JSON-LD
 pub fn create_empty_catalog_jsonld(id: Option<&str>) -> Value {
     let mut jsonld = json!({
@@ -47,6 +79,10 @@ pub fn add_label_def(catalog_jsonld: &mut Value, label_def: Value) -> AnyhowResu
         .context("kotoba:hasLabels must be an array")?;
 
     labels.push(label_def);
+    #[cfg(feature = "reasoning")]
+    {
+        validate_catalog_jsonld_internal(catalog_jsonld)?;
+    }
     Ok(())
 }
 
@@ -72,6 +108,8 @@ pub fn add_property_def(label_def_jsonld: &mut Value, property_def: Value) -> An
         .context("kotoba:hasProperties must be an array")?;
 
     properties.push(property_def);
+    // Note: Property definition changes affect the parent catalog, but we validate
+    // at the catalog level when add_label_def is called
     Ok(())
 }
 
@@ -97,6 +135,10 @@ pub fn add_index_def(catalog_jsonld: &mut Value, index_def: Value) -> AnyhowResu
         .context("kotoba:hasIndexes must be an array")?;
 
     indexes.push(index_def);
+    #[cfg(feature = "reasoning")]
+    {
+        validate_catalog_jsonld_internal(catalog_jsonld)?;
+    }
     Ok(())
 }
 
@@ -122,6 +164,10 @@ pub fn add_invariant(catalog_jsonld: &mut Value, invariant: Value) -> AnyhowResu
         .context("kotoba:hasInvariants must be an array")?;
 
     invariants.push(invariant);
+    #[cfg(feature = "reasoning")]
+    {
+        validate_catalog_jsonld_internal(catalog_jsonld)?;
+    }
     Ok(())
 }
 
