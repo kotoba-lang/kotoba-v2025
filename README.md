@@ -42,10 +42,13 @@ Kotoba reimagines computing through the lens of **phonosemantics** (音素意味
    - Bidirectional conversion: phoneme → meaning and meaning → phoneme
 
 2. **OWL Inference-Based Reasoning**
+   - **Reasoner Layer (014)**: Uses [fukurow](https://github.com/com-junkawasaki/fukurow) as the core OWL reasoning engine
    - **RDFS Inference**: Transitive closure of subClassOf and subPropertyOf
    - **OWL Lite Inference**: Tableau algorithm for consistency checking and subsumption reasoning
    - **OWL DL Inference**: Extended tableau algorithm for complete reasoning
-   - Powered by [fukurow](https://github.com/com-junkawasaki/fukurow), a WebAssembly-native OWL reasoning engine
+   - **SHACL Validation**: Shape constraint validation for RDF graphs
+   - **SPARQL Queries**: SPARQL 1.1 query execution
+   - Powered by fukurow, a WebAssembly-native OWL reasoning engine providing complete RDFS, OWL Lite, and OWL DL reasoning capabilities
 
 3. **JSON-LD as Universal Representation**
    - All computing layers use JSON-LD: hardware operations, OS services, datastore operations, and self-evolution mechanisms
@@ -68,6 +71,13 @@ Kotoba reimagines computing through the lens of **phonosemantics** (音素意味
    - OWL inference discovers optimization patterns
    - Automatic shape refinement and process optimization
 
+6. **Storage Adapter Architecture**
+   - **Storage Layer (030)**: Implements Port/Adapter pattern for storage abstraction
+   - **Primary Adapter**: [fcdb](https://github.com/com-junkawasaki/fcdb) (Functorial-Categorical Database) for content-addressable storage with graph capabilities
+   - **MVCC + Merkle DAG**: Consistent distributed data management with CID-based addressing
+   - **Multiple Adapters**: Redis, RocksDB, Memory, GraphDB implementations available
+   - All storage adapters implement the `StorageEngine` trait for seamless switching
+
 This approach enables **semantic interoperability** across all computing layers, where meaning is preserved and reasoned about automatically.
 
 ## 🏗️ Architecture: Phonosemantic Computing Stack
@@ -85,10 +95,10 @@ Layer 070: Services Layer       (HTTP/GraphQL servers, external integrations)
 Layer 060: Application Layer    (Business logic, event sourcing, query processing)
 Layer 050: Workflow Layer       (Workflow orchestration)
 Layer 040: Runtime Layer        (OS + Storage + Reasoner integration)
-Layer 030: Storage Layer        (Persistence, MVCC+Merkle DAG)
+Layer 030: Storage Layer        (Persistence, MVCC+Merkle DAG: fcdb adapter)
 Layer 020: Language Layer       (Parser, Analyzer, Transpiler)
 Layer 015: OS Layer            (Process network orchestration)
-Layer 014: Reasoner Layer      (OWL reasoning engine)
+Layer 014: Reasoner Layer      (OWL reasoning engine: fukurow)
 Layer 012: VM Layer            (Virtual Machine execution environment)
 Layer 010: Logic Layer         (IR, Rewrite Kernel, JSON-LD)
 Layer 005: Foundation Layer    (Types, CID, Schema, Auth, Graph Core)
@@ -140,18 +150,27 @@ The project is a modular multi-crate workspace, separating the low-level computi
 
 ```
 ├── crates/
-│   ├── 001-core/                 # Core types, functional primitives
-│   ├── 002-language/             # Kotoba Language (Jsonnet) and compiler
-│   ├── 003-graph/                # High-level graph data structures and GQL engine
-│   ├── 004-storage/              # Pluggable storage adapters (RocksDB, Redis)
-│   └── 005-vm/                   # The Kotoba VM - Tamaki Architecture
-│       ├── vm-types/             # Core types for the VM
-│       ├── vm-memory/            # VM memory management
-│       ├── vm-cpu/               # Von Neumann CPU core
-│       ├── vm-scheduler/         # DAG scheduling and execution runtime
-│       ├── vm-hardware/          # Heterogeneous hardware tile abstractions
-│       ├── vm-gnn/               # GNN Optimization Engine (PIH, DPO, CID)
-│       └── vm-core/              # VM integration and orchestration
+│   ├── 005-foundation/           # Foundation Layer: Types, CID, Schema, Auth, Graph Core
+│   ├── 010-logic/                # Logic Layer: IR, Rewrite Kernel, JSON-LD
+│   │   ├── 011-kotoba-ir/        # JSON-LD Universal IR (Rule, Query, Patch, Strategy, Catalog)
+│   │   ├── 012-kotoba-rewrite-kernel/  # DPO graph rewriting kernel
+│   │   ├── 019-kotoba-jsonld/   # JSON-LD processing utilities
+│   │   └── 022-kotoba-owl-reasoner/  # OWL reasoning engine (fukurow integration)
+│   ├── 012-vm/                   # VM Layer: Virtual Machine execution environment
+│   ├── 014-reasoner/             # Reasoner Layer: OWL reasoning (fukurow)
+│   ├── 015-os/                   # OS Layer: Process network orchestration
+│   ├── 020-language/             # Language Layer: Parser, Analyzer, Transpiler
+│   ├── 030-storage/              # Storage Layer: Persistence adapters
+│   │   ├── 031-kotoba-storage/   # Storage interface (Port/Adapter pattern)
+│   │   ├── 039-kotoba-storage-fcdb/  # FCDB adapter (primary: content-addressable graph storage)
+│   │   ├── 037-kotoba-storage-redis/  # Redis adapter
+│   │   └── 038-kotoba-storage-rocksdb/  # RocksDB adapter
+│   ├── 040-runtime/              # Runtime Layer: OS + Storage + Reasoner integration
+│   ├── 050-workflow/             # Workflow Layer: Workflow orchestration
+│   ├── 060-application/          # Application Layer: Business logic, event sourcing
+│   ├── 070-services/             # Services Layer: HTTP/GraphQL servers
+│   ├── 080-deployment/           # Deployment Layer: Deployment, scaling, networking
+│   └── 090-tools/                # Tools Layer: Development tools, CLI, build tools
 ├── kotoba-cli/                   # Main CLI for the Kotoba ecosystem
 └── kotoba-server/                # Effects Shell implementation for the HTTP server
 ```
@@ -186,21 +205,35 @@ The systematic mapping system that connects phonemes to semantic meanings.
 
 ### 3. OWL Inference Engine (fukurow)
 
-Complete OWL reasoning capabilities integrated into Kotoba.
+Complete OWL reasoning capabilities integrated into Kotoba, powered by [fukurow](https://github.com/com-junkawasaki/fukurow).
 
+-   **Reasoner Layer (014)**: Core reasoning engine using fukurow
 -   **RDFS Inference**: Transitive closure computation for class and property hierarchies
 -   **OWL Lite Reasoning**: Tableau algorithm for consistency checking and subsumption
 -   **OWL DL Reasoning**: Extended tableau algorithm for complete logical reasoning
+-   **SHACL Validation**: Shape constraint validation for RDF graphs
+-   **SPARQL Queries**: SPARQL 1.1 query execution
 -   **JSON-LD Integration**: Native support for JSON-LD input/output
 -   **WebAssembly Support**: Browser-ready inference engine
 
-### 4. Semantic Execution Pattern (semanticos)
+### 4. Storage Adapter Architecture (fcdb)
+
+Port/Adapter pattern implementation for storage abstraction, with [fcdb](https://github.com/com-junkawasaki/fcdb) as the primary adapter.
+
+-   **Storage Layer (030)**: Implements `StorageEngine` trait for pluggable storage backends
+-   **Primary Adapter**: FCDB (Functorial-Categorical Database) for content-addressable storage with graph capabilities
+-   **MVCC + Merkle DAG**: Consistent distributed data management with CID-based addressing
+-   **Graph Database**: Built-in graph operations with RID (Resource ID) and LabelId support
+-   **Additional Adapters**: Redis, RocksDB, Memory, GraphDB implementations available
+-   **Seamless Switching**: All adapters implement the same interface for runtime selection
+
+### 5. Semantic Execution Pattern (semanticos)
 
 Process network execution with automatic actor selection and provenance tracking.
 
 -   **Kernel**: Orchestrates process network graph execution
--   **Mediator**: Selects actors using SHACL-based capability matching
--   **Actor**: Performs actions based on process requirements
+-   **Mediator**: Selects actors using OWL reasoning-based capability matching
+-   **Actor**: Performs actions based on process requirements and capabilities
 -   **Provenance**: Records all execution history in JSON-LD/PROV-O format
 
 ## 🚀 Quick Start
