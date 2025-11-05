@@ -15,12 +15,7 @@ pub mod rule_jsonld;
 pub mod query_jsonld;
 pub mod patch_jsonld;
 pub mod strategy_jsonld;
-// Legacy Rust type modules (to be removed)
-pub mod rule;
-pub mod query;
-pub mod patch;
-pub mod strategy;
-pub mod jsonld;
+pub mod shacl;
 
 #[cfg(test)]
 #[path = "jsonld_tests.rs"]
@@ -32,9 +27,4 @@ pub use rule_jsonld::*;
 pub use query_jsonld::*;
 pub use patch_jsonld::*;
 pub use strategy_jsonld::*;
-// Legacy re-exports (to be removed)
-pub use rule::*;
-pub use query::*;
-pub use patch::*;
-pub use strategy::*;
-pub use jsonld::*;
+pub use shacl::*;

@@ -1,70 +1,130 @@
-//! Tests for JSON-LD conversion functionality
+//! Tests for JSON-LD direct manipulation API
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{rule::*, query::*, patch::*, strategy::*, catalog_jsonld::*};
+    use crate::{rule_jsonld::*, query_jsonld::*, patch_jsonld::*, strategy_jsonld::*, catalog_jsonld::*};
     use serde_json::json;
 
     #[test]
-    fn test_rule_ir_to_jsonld() {
-        let rule = RuleIR::new("test_rule".to_string())
-            .with_type("node1".to_string(), vec!["Label1".to_string()]);
-
-        let jsonld = rule_ir_to_jsonld(&rule, Some("rule:test"));
+    fn test_rule_jsonld_api() {
+        let mut rule = create_empty_rule_jsonld(Some("rule:test"), "test_rule");
         
-        assert_eq!(jsonld["@type"], "kotoba:RuleIR");
-        assert_eq!(jsonld["kotoba:name"], "test_rule");
-        assert!(jsonld.get("kotoba:lhs").is_some());
-        assert!(jsonld.get("kotoba:rhs").is_some());
+        // Set rule name
+        set_rule_name(&mut rule, "updated_rule").unwrap();
+        assert_eq!(get_rule_name(&rule), Some("updated_rule".to_string()));
+        
+        // Add type definition
+        add_type_def(&mut rule, "node1", vec!["Label1"]).unwrap();
+        let types = get_type_defs(&rule);
+        assert!(types.is_some());
+        
+        // Add node to LHS pattern
+        let mut lhs = get_lhs(&rule).unwrap();
+        add_node_to_pattern(&mut lhs, "u", Some("V"), None).unwrap();
+        set_lhs(&mut rule, lhs).unwrap();
+        
+        // Add edge to LHS pattern
+        let mut lhs = get_lhs(&rule).unwrap();
+        add_edge_to_pattern(&mut lhs, "e1", "u", "v", Some("E")).unwrap();
+        set_lhs(&mut rule, lhs).unwrap();
+        
+        // Add guard
+        add_guard(&mut rule, "deg_ge", json!({"var": "u", "k": 2})).unwrap();
+        let guards = get_guards(&rule);
+        assert!(guards.is_some());
+        
+        // Add NAC
+        let nac = create_empty_nac();
+        add_nac(&mut rule, nac).unwrap();
+        let nacs = get_nacs(&rule);
+        assert!(nacs.is_some());
+        
+        assert_eq!(rule["@type"], "kotoba:RuleIR");
     }
 
     #[test]
-    fn test_rule_ir_from_jsonld() {
-        let jsonld = json!({
-            "@context": "https://github.com/com-junkawasaki/kotoba/blob/22712d997449ec6229800adf42698936aa24b386/schemas/kotoba-context.jsonld",
-            "@type": "kotoba:RuleIR",
-            "kotoba:name": "test_rule",
-            "kotoba:lhs": {
-                "kotoba:nodes": [],
-                "kotoba:edges": []
-            },
-            "kotoba:rhs": {
-                "kotoba:nodes": [],
-                "kotoba:edges": []
-            }
-        });
-
-        let rule = rule_ir_from_jsonld(&jsonld).unwrap();
-        assert_eq!(rule.name, "test_rule");
+    fn test_query_jsonld_api() {
+        let mut query = create_empty_query_jsonld(Some("query:test"));
+        
+        // Create a NodeScan operator
+        let node_scan = create_node_scan("Person", "n", None);
+        set_plan(&mut query, node_scan).unwrap();
+        
+        let plan = get_plan(&query);
+        assert!(plan.is_some());
+        assert_eq!(get_operator_type(&plan.unwrap()), Some("NodeScan".to_string()));
+        
+        // Create a Filter operator
+        let filter = create_filter(
+            json!({"ge": [{"fn": "degree", "args": ["n"]}, 50]}),
+            plan.unwrap()
+        );
+        set_plan(&mut query, filter).unwrap();
+        
+        let plan = get_plan(&query);
+        assert_eq!(get_operator_type(&plan.unwrap()), Some("Filter".to_string()));
     }
 
     #[test]
-    fn test_patch_ir_to_jsonld() {
-        use crate::patch::*;
-        let patch = Patch::empty()
-            .add_vertex(AddVertex {
-                id: "v1".to_string(),
-                labels: vec!["Label1".to_string()],
-                props: std::collections::HashMap::new(),
-            });
-
-        let jsonld = patch_ir_to_jsonld(&patch, Some("patch:test"));
+    fn test_patch_jsonld_api() {
+        let mut patch = create_empty_patch_jsonld(Some("patch:test"));
         
-        assert_eq!(jsonld["@type"], "kotoba:PatchIR");
-        assert!(jsonld.get("kotoba:adds").is_some());
+        // Add a vertex
+        add_vertex(&mut patch, "v1", vec!["Label1"], None).unwrap();
+        
+        // Add an edge
+        add_edge(&mut patch, "e1", "v1", "v2", "RELATED_TO", None).unwrap();
+        
+        // Delete a vertex
+        delete_vertex(&mut patch, "v3").unwrap();
+        
+        // Update a property
+        update_property(&mut patch, "v1", "name", json!("Alice")).unwrap();
+        
+        // Relink an edge
+        relink_edge(&mut patch, "e1", Some("v2"), Some("v3")).unwrap();
+        
+        assert_eq!(patch["@type"], "kotoba:PatchIR");
+        assert!(!is_empty(&patch));
+        
+        // Verify adds
+        let adds = get_adds(&patch);
+        assert!(adds.is_some());
+        
+        // Verify dels
+        let dels = get_dels(&patch);
+        assert!(dels.is_some());
+        
+        // Verify updates
+        let updates = get_updates(&patch);
+        assert!(updates.is_some());
     }
 
     #[test]
-    fn test_strategy_ir_to_jsonld() {
-        let strategy = StrategyIR::new(StrategyOp::Once {
-            rule: "rule1".to_string(),
-        });
-
-        let jsonld = strategy_ir_to_jsonld(&strategy, Some("strategy:test"));
+    fn test_strategy_jsonld_api() {
+        let mut strategy = create_empty_strategy_jsonld(Some("strategy:test"));
         
-        assert_eq!(jsonld["@type"], "kotoba:StrategyIR");
-        assert!(jsonld.get("kotoba:strategy").is_some());
+        // Create a Once strategy
+        let once_op = create_once("rule1");
+        set_strategy(&mut strategy, once_op).unwrap();
+        
+        let strategy_op = get_strategy(&strategy);
+        assert!(strategy_op.is_some());
+        assert_eq!(get_operator_type(&strategy_op.unwrap()), Some("Once".to_string()));
+        
+        // Create an Exhaust strategy
+        let exhaust_op = create_exhaust("rule2", "topdown", Some("edge_count_nonincreasing"));
+        set_strategy(&mut strategy, exhaust_op).unwrap();
+        
+        let strategy_op = get_strategy(&strategy);
+        assert_eq!(get_operator_type(&strategy_op.unwrap()), Some("Exhaust".to_string()));
+        
+        // Create a Seq strategy
+        let seq_op = create_seq(vec![create_once("rule1"), create_once("rule2")]);
+        set_strategy(&mut strategy, seq_op).unwrap();
+        
+        let strategy_op = get_strategy(&strategy);
+        assert_eq!(get_operator_type(&strategy_op.unwrap()), Some("Seq".to_string()));
     }
 
     #[test]
