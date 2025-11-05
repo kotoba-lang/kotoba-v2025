@@ -1,0 +1,32 @@
+{
+  "@context": "../../../../../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/vm_memory",
+  "name": "vm_memory",
+  "version": "0.1.0",
+  "path": "crates/005-vm/250926/arxiv_submission/source_code/crates/vm-memory",
+  "status": "active",
+  "edition": "2021",
+  "license": "Apache-2.0",
+  "description": "Memory management system for the Digital Computing System VM",
+  "layer": "kotoba:layer/005-vm",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../vm-types",
+        "name": "vm_types"
+      }
+    ],
+    "external": [],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/lib.rs"
+  ]
+}

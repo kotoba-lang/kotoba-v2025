@@ -1,0 +1,141 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-formatter",
+  "name": "kotoba-formatter",
+  "version": "",
+  "path": "crates/020-language/024-kotoba-formatter",
+  "status": "active",
+  "description": "Kotoba Code Formatter - Formats .kotoba files with consistent style",
+  "keywords": [
+    "formatter",
+    "code",
+    "style",
+    "kotoba",
+    "dsl"
+  ],
+  "categories": [
+    "development-tools",
+    "text-processing"
+  ],
+  "layer": "kotoba:layer/020-language",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "serde"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "serde_json"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "thiserror"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "anyhow"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "regex"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "tokio"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "dirs"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/009-kotoba-logic",
+        "name": "kotoba-logic"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/011-kotoba-ir",
+        "name": "kotoba-ir"
+      },
+      {
+        "type": "workspace",
+        "path": "../020-kotoba-syntax",
+        "name": "kotoba-syntax"
+      },
+      {
+        "type": "workspace",
+        "path": "../021-kotoba-parser",
+        "name": "kotoba-parser"
+      },
+      {
+        "type": "workspace",
+        "path": "../022-kotoba-analyzer",
+        "name": "kotoba-analyzer"
+      },
+      {
+        "type": "workspace",
+        "path": "../023-kotoba-jsonnet",
+        "name": "kotoba-jsonnet"
+      },
+      {
+        "type": "workspace",
+        "path": "../023-kotoba-kotobas",
+        "name": "kotoba-kotobas"
+      }
+    ],
+    "external": [
+      {
+        "name": "futures",
+        "type": "external",
+        "version": "0.3"
+      },
+      {
+        "name": "async-trait",
+        "type": "external",
+        "version": "0.1"
+      },
+      {
+        "name": "parking_lot",
+        "type": "external",
+        "version": "0.12"
+      },
+      {
+        "name": "toml",
+        "type": "external",
+        "version": "0.8"
+      }
+    ],
+    "optional": [],
+    "dev": [
+      {
+        "name": "tokio-test",
+        "type": "external",
+        "version": "0.4"
+      }
+    ]
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/config.rs",
+    "src/formatter.rs",
+    "src/lib.rs",
+    "src/pure_formatter.rs"
+  ]
+}

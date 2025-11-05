@@ -1,0 +1,45 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-parser",
+  "name": "kotoba-parser",
+  "version": "",
+  "path": "crates/020-language/021-kotoba-parser",
+  "status": "active",
+  "layer": "kotoba:layer/020-language",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../../010-logic/009-kotoba-logic",
+        "name": "kotoba-logic"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "path": "../../010-logic/011-kotoba-ir",
+        "name": "kotoba-ir"
+      },
+      {
+        "type": "workspace",
+        "path": "../020-kotoba-syntax",
+        "name": "kotoba-syntax"
+      }
+    ],
+    "external": [],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/lexer.rs",
+    "src/lib.rs"
+  ]
+}

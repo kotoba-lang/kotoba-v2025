@@ -1,0 +1,9 @@
+{
+  "@context": "../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/005-vm",
+  "name": "005-vm",
+  "path": "crates/005-vm",
+  "status": "unimplemented",
+  "layer": "kotoba:layer/005-vm"
+}

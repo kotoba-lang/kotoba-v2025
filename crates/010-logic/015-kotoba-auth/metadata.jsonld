@@ -1,0 +1,77 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-auth",
+  "name": "kotoba-auth",
+  "version": "0.1.0",
+  "path": "crates/010-logic/015-kotoba-auth",
+  "status": "active",
+  "edition": "2021",
+  "license": "Apache-2.0",
+  "description": "Authentication and Authorization engine for the Kotoba ecosystem (ReBAC + ABAC).",
+  "layer": "kotoba:layer/010-logic",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../009-kotoba-logic",
+        "name": "kotoba-logic"
+      },
+      {
+        "type": "workspace",
+        "path": "../010-kotoba-types",
+        "name": "kotoba-types"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "serde"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "serde_json"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "thiserror"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "sha2"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "hex"
+      }
+    ],
+    "external": [
+      {
+        "name": "anyhow",
+        "type": "external",
+        "version": "1.0"
+      }
+    ],
+    "optional": [],
+    "dev": [
+      {
+        "type": "workspace",
+        "workspace": true,
+        "features": [
+          "full"
+        ],
+        "name": "tokio"
+      }
+    ]
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/lib.rs"
+  ]
+}

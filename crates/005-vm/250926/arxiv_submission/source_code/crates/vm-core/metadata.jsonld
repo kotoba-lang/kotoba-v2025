@@ -1,0 +1,57 @@
+{
+  "@context": "../../../../../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/vm_core",
+  "name": "vm_core",
+  "version": "0.1.0",
+  "path": "crates/005-vm/250926/arxiv_submission/source_code/crates/vm-core",
+  "status": "active",
+  "edition": "2021",
+  "license": "Apache-2.0",
+  "description": "Core VM integration layer for the Digital Computing System VM",
+  "layer": "kotoba:layer/005-vm",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../vm-types",
+        "name": "vm_types"
+      },
+      {
+        "type": "workspace",
+        "path": "../vm-memory",
+        "name": "vm_memory"
+      },
+      {
+        "type": "workspace",
+        "path": "../vm-cpu",
+        "name": "vm_cpu"
+      },
+      {
+        "type": "workspace",
+        "path": "../vm-scheduler",
+        "name": "vm_scheduler"
+      },
+      {
+        "type": "workspace",
+        "path": "../vm-hardware",
+        "name": "vm_hardware"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "tokio"
+      }
+    ],
+    "external": [],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/lib.rs"
+  ]
+}

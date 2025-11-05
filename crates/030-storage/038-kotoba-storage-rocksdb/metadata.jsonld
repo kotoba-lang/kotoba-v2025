@@ -1,0 +1,58 @@
+{
+  "@context": "../../schemas/kotoba-context.jsonld",
+  "@type": "kotoba:Crate",
+  "@id": "kotoba:crate/kotoba-storage-rocksdb",
+  "name": "kotoba-storage-rocksdb",
+  "version": "0.1.22",
+  "path": "crates/030-storage/038-kotoba-storage-rocksdb",
+  "status": "active",
+  "description": "RocksDB implementation for Kotoba storage interface",
+  "keywords": [
+    "storage",
+    "database",
+    "rocksdb"
+  ],
+  "categories": [
+    "database"
+  ],
+  "layer": "kotoba:layer/030-storage",
+  "dependencies": {
+    "workspace": [
+      {
+        "type": "workspace",
+        "path": "../../010-core/012-kotoba-core",
+        "name": "kotoba-core"
+      },
+      {
+        "type": "workspace",
+        "path": "../031-kotoba-storage",
+        "name": "kotoba-storage"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "rocksdb"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "serde"
+      },
+      {
+        "type": "workspace",
+        "workspace": true,
+        "name": "anyhow"
+      }
+    ],
+    "external": [],
+    "optional": [],
+    "dev": []
+  },
+  "features": {
+    "default": [],
+    "optional": []
+  },
+  "sourceFiles": [
+    "src/lib.rs"
+  ]
+}
