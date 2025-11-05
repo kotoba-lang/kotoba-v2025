@@ -163,10 +163,24 @@ Kotoba uses JSON-LD as the universal format for all Intermediate Representations
    - Strategy operations (once, exhaust, while, seq, choice, priority)
    - SHACL validation for strategy structure
 
+**SHACL Validation:**
+- All IR operations automatically validate against SHACL shapes when `reasoning` feature is enabled
+- Validation occurs after every modification operation (set, add, delete, update)
+- Invalid IR structures are rejected with detailed error messages
+- SHACL shapes defined in `schemas/ir-shapes.jsonld` and `schemas/catalog-shapes.jsonld`
+
+**WASM Runtime Integration:**
+- JSON-LD IRs can be executed in WebAssembly runtime for high-performance execution
+- Enabled via `wasm` feature flag
+- Supports execution of Rule-IR, Query-IR, Patch-IR, and Strategy-IR in WASM
+- WASM modules can be loaded and cached for efficient execution
+- Integration with fukurow WASM engine for OWL reasoning support
+
 **Benefits:**
 - **Semantic Interoperability**: All IRs use the same JSON-LD format
 - **OWL Reasoning**: IR structures can be reasoned about using OWL inference
-- **SHACL Validation**: Structural integrity guaranteed through SHACL shapes
+- **SHACL Validation**: Structural integrity guaranteed through SHACL shapes (mandatory when `reasoning` feature enabled)
+- **WASM Execution**: High-performance execution in WebAssembly runtime
 - **Content-Addressable**: IR instances can be referenced by CID (Content ID)
 
 ### 7. Capability-Based Actor Selection

@@ -49,8 +49,10 @@ Kotoba reimagines computing through the lens of **phonosemantics** (音素意味
 
 3. **JSON-LD as Universal Representation**
    - All computing layers use JSON-LD: hardware operations, OS services, datastore operations, and self-evolution mechanisms
-   - **JSON-LD Universal IR**: All Intermediate Representations (Rule-IR, Query-IR, Patch-IR, Strategy-IR) are represented in JSON-LD format
-   - OWL ontology definitions and SHACL shape validation for IR structures
+   - **JSON-LD Universal IR**: All Intermediate Representations (Rule-IR, Query-IR, Patch-IR, Strategy-IR, Catalog-IR) are represented in JSON-LD format
+   - **OWL Ontology Definitions**: IR type hierarchy defined using OWL classes (`kotoba:IR`, `kotoba:RuleIR`, etc.)
+   - **SHACL Shape Validation**: All IR operations automatically validate against SHACL shapes (enabled via `reasoning` feature)
+   - **WASM Runtime Integration**: JSON-LD IRs can be executed in WebAssembly runtime for high-performance execution (enabled via `wasm` feature)
    - Unified semantic representation eliminates syntactic barriers between layers
    - Automatic context resolution and vocabulary expansion
 
