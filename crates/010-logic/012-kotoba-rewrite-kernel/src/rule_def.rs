@@ -80,7 +80,7 @@ impl RuleMatcher {
         Self { rule }
     }
 
-    pub fn find_matches(&self, _graph: &crate::rule::GraphKind) -> Result<Vec<RuleMatch<kotoba_ir::GraphElement>>, MatcherError> {
+    pub fn find_matches(&self, _graph: &crate::rule::GraphKind) -> Result<Vec<RuleMatch<String>>, MatcherError> {
         // Placeholder implementation
         Ok(Vec::new())
     }
@@ -136,7 +136,7 @@ impl RuleOptimizer {
 
 /// Rule match result
 #[derive(Debug, Clone)]
-pub struct RuleMatch<GraphElementId = kotoba_ir::GraphElement> {
+pub struct RuleMatch<GraphElementId = String> {
     pub rule: RuleDPO,
     pub variable_mapping: HashMap<String, GraphElementId>,
 }
