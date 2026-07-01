@@ -1,5 +1,15 @@
 # Kotoba: A Phonosemantic Digital Computing System
 
+## Legacy Reference
+
+`kotoba-v2025` is intentionally preserved as a historical Rust design/reference
+workspace. It is not part of the active Kotoba/CLJC migration path, and its
+Cargo workspace is expected to remain here for archaeology and comparison.
+
+Active language, CLI, db, git/rad, deploy, and contract authority should live in
+current Kotoba/CLJC/EDN repositories such as `kotoba-lang/kotoba`,
+`kotoba-lang/kotoba-lang`, and focused domain contract repos.
+
 Ἐν ἀρχῇ ἦν ὁ λόγος
 
 **Kotoba is a phonosemantic digital computing system where all computing, operating system, datastore, and self-evolution mechanisms are represented, reasoned, and executed using JSON-LD with OWL inference.**
