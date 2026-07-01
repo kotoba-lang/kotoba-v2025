@@ -1,0 +1,18 @@
+name: Legacy Reference
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  legacy:
+    name: legacy Rust reference marker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: document legacy status
+        run: |
+          test -f Cargo.toml
+          grep -q "Legacy Reference" README.md
+          echo "kotoba-v2025 is intentionally kept as a legacy Rust reference."
